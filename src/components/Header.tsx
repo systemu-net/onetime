@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Logo from '../assets/logo.svg';
+import Logo from '../assets/thinly.svg';
 
 const Header = () => {
   const [click, setClick] = useState(false);
@@ -15,7 +15,7 @@ const Header = () => {
         <nav className="nav">
           <div className="nav__inner">
             <a href="#" className="logo">
-              <img src="{Logo}" alt="Logo" />
+              <img src={Logo} alt="Logo" />
             </a>
 
             { /* Nav links */ }
