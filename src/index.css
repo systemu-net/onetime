@@ -131,15 +131,15 @@ h2 {
 /* Navbar */
 .mobile-nav {
   position: absolute;
-  top: 4rem;
+  top: 5rem;
   left: 50%;
   transform: translateX(-50%);
   width: 350px;
   background-color: var(--clr-primary-500);
   text-align: center;
   border-radius: 0.5rem;
-  padding-block: 2rem;
-  padding-inline: 1rem;
+  padding-block: 1.5rem;
+  padding-inline: 2rem;
   display: none;
   z-index: 10;
 }
@@ -179,7 +179,7 @@ h2 {
 }
 
 .hero__image img {
-  transform: translateX(2.5rem);
+  transform: translateX(0rem);
 }
 
 .hero__content {
