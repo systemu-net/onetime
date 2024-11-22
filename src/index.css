@@ -462,7 +462,8 @@ input.error-input::placeholder {
 
   .nav__links {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 3rem;
   }
 
   .nav__link {
@@ -501,7 +502,7 @@ input.error-input::placeholder {
   }
 
   .hero__image img {
-    transform: translateX(5rem);
+    transform: translateX(0rem);
   }
 
   /* Shorten section */
