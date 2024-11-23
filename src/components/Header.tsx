@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Logo from '../assets/thinly.svg';
+import { PRICING_ROUTE } from '../routes';
 
 const Header = () => {
   const [click, setClick] = useState(false);
@@ -14,14 +16,18 @@ const Header = () => {
         { /* Desktop Navbar */ }
         <nav className="nav">
           <div className="nav__inner">
-            <a href="#" className="logo">
+            <Link to='/' className="logo">
               <img src={Logo} alt="Logo" />
-            </a>
+            </Link>
 
             { /* Nav links */ }
             <ul className="nav__links | hide">
               <li><a className="nav__link" href="">Features</a></li>
-              <li><a className="nav__link" href="">Pricing</a></li>
+              <li>
+                <Link to={PRICING_ROUTE} className="nav__link">
+                  Pricing
+                </Link>
+              </li>
               <li><a className="nav__link" href="">Resources</a></li>
             </ul>
           </div>
