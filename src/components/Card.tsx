@@ -6,7 +6,7 @@ interface CardProps {
   className?: string
 }
 
-const Card = ({image,alt,title,description,className}: CardProps) => {
+const Card = ({image, alt, title, description, className}: CardProps) => {
   return (
     <div className={`statistics__card | ${className}`}>
       <div className="img">

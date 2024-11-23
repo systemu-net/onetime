@@ -1,26 +1,17 @@
-import Boost from './components/Boost';
-import Footer from './components/Footer';
-import Header from './components/Header'
-import Hero from './components/Hero';
-import Shorten from './components/Shorten';
-import Statistic from './components/Statistic';
+import {Route, BrowserRouter as Router, Routes} from 'react-router-dom'
+import HomePage from './components/pages/Home'
+import PricingPage from './components/pages/Pricing'
+import {PRICING_ROUTE} from './routes'
 
 export const App = () => {
   return (
-    <>
-      <Header />
-
-      <Hero />
-
-      <Shorten />
-
-      <Statistic />
-
-      <Boost />
-
-      <Footer />
-    </>
+    <Router>
+      <Routes>
+        <Route path={PRICING_ROUTE} element={<PricingPage />}></Route>
+        <Route path="*" element={<HomePage />}></Route>
+      </Routes>
+    </Router>
   )
 }
 
-export default App;
+export default App
