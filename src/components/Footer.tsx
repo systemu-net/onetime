@@ -1,4 +1,5 @@
 import Logo from '../assets/thinly.svg';
+import Github from '../assets/github.svg';
 
 const Footer = () => {
   return (
@@ -51,8 +52,13 @@ const Footer = () => {
               <a href="#">
                 <i className="fa-brands fa-instagram"></i>
               </a>
+              <a href="#">
+                <i className="fa-brands fa-github"></i>
+              </a>
             </div>
           </div>
+          {/* Copy Right */}
+          <p className="mt-4 font-medium text-sm text-gray-600">&copy; 2024 Thinly. All rights reserved.</p>
         </div>
       </div>
     </footer>
