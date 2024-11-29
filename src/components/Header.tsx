@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../assets/thinly.svg';
-import { PRICING_ROUTE } from '../routes';
+import { LOGIN_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
 
 const Header = () => {
   const [click, setClick] = useState(false);
@@ -33,8 +33,8 @@ const Header = () => {
           </div>
 
           <div className="buttons | hide">
-            <a className="nav__link" href="#">Login</a>
-            <a className="nav__link | btn" datatype="narrow" href="#">Sign Up</a>
+            <Link to={LOGIN_ROUTE} className="nav__link">Login</Link>
+            <Link to={REGISTER_ROUTE} className="nav__link | btn" datatype="narrow">Sign Up</Link>
           </div>
         </nav>
 
@@ -47,7 +47,7 @@ const Header = () => {
           </ul>
 
           <ul className="nav__links | secondary">
-            <li><a href="" className="nav__link | btn" datatype="wide">Login</a></li>
+            <li><a href="/" className="nav__link | btn" datatype="wide">Login</a></li>
             <li><a href="" className="nav__link | btn" datatype="wide">Sign Up</a></li>
           </ul>
         </nav>
