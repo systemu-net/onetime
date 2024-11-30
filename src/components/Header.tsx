@@ -1,10 +1,27 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../assets/thinly.svg';
-import { LOGIN_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
+import { LOGIN_ROUTE, LOGOUT_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
+import { useCookies } from 'react-cookie';
+import { logoutApi } from '../apis/authentication';
 
 const Header = () => {
   const [click, setClick] = useState(false);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+
+  const handleLogout = async (e) => {
+    const [result, error] = await logoutApi(cookies.token);
+    handleLogoutResponse(result, error);
+  }
+
+  const handleLogoutResponse = (result, error) => {
+    if (error) {
+      console.error(error);
+      removeCookie('token');
+    } else {
+      removeCookie('token');
+    }
+  }
 
   const toggleNavClick = () => {
     setClick(!click);
@@ -23,18 +40,20 @@ const Header = () => {
             { /* Nav links */ }
             <ul className="nav__links | hide">
               <li><a className="nav__link" href="">Features</a></li>
-              <li>
-                <Link to={PRICING_ROUTE} className="nav__link">
-                  Pricing
-                </Link>
-              </li>
+              <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
               <li><a className="nav__link" href="">Resources</a></li>
             </ul>
           </div>
 
           <div className="buttons | hide">
-            <Link to={LOGIN_ROUTE} className="nav__link">Login</Link>
-            <Link to={REGISTER_ROUTE} className="nav__link | btn" datatype="narrow">Sign Up</Link>
+            {cookies.token ? (
+              <Link to={LOGOUT_ROUTE} className="nav__link | btn" datatype="narrow">Logout</Link>
+            ) : (
+              <>
+                <Link to={LOGIN_ROUTE} className="nav__link">Login</Link>
+                <Link to={REGISTER_ROUTE} className="nav__link | btn" datatype="narrow">Sign Up</Link>
+              </>
+            )}
           </div>
         </nav>
 
@@ -42,14 +61,20 @@ const Header = () => {
         <nav className={`mobile-nav ${click ? 'show' : ''}`}>
           <ul className="nav__links | primary">
             <li><a className="nav__link" href="">Features</a></li>
-            <li><a className="nav__link" href="">Pricing</a></li>
+            <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
             <li><a className="nav__link" href="">Resources</a></li>
           </ul>
 
-          <ul className="nav__links | secondary">
-            <li><a href="/" className="nav__link | btn" datatype="wide">Login</a></li>
-            <li><a href="" className="nav__link | btn" datatype="wide">Sign Up</a></li>
-          </ul>
+          {cookies.token ? (
+            <ul className="nav__links | secondary">
+              <li><Link to={LOGOUT_ROUTE} className="nav__link | btn" datatype="wide">Logout</Link></li>
+            </ul>
+          ) : (
+            <ul className="nav__links | secondary">
+              <li><Link to={LOGIN_ROUTE} className="nav__link | btn" datatype="wide">Login</Link></li>
+              <li><Link to={REGISTER_ROUTE} className="nav__link | btn" datatype="wide">Sign Up</Link></li>
+            </ul>
+          )}
         </nav>
 
         { /* Menu Icons */ }
