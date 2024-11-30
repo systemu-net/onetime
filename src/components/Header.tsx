@@ -47,7 +47,7 @@ const Header = () => {
 
           <div className="buttons | hide">
             {cookies.token ? (
-              <Link to={LOGOUT_ROUTE} className="nav__link | btn" datatype="narrow">Logout</Link>
+              <button onClick={handleLogout} className="nav__link | btn" datatype="narrow">Logout</button>
             ) : (
               <>
                 <Link to={LOGIN_ROUTE} className="nav__link">Login</Link>
@@ -67,7 +67,7 @@ const Header = () => {
 
           {cookies.token ? (
             <ul className="nav__links | secondary">
-              <li><Link to={LOGOUT_ROUTE} className="nav__link | btn" datatype="wide">Logout</Link></li>
+              <li><button onClick={handleLogout} className="nav__link | btn" datatype="wide">Logout</button></li>
             </ul>
           ) : (
             <ul className="nav__links | secondary">
