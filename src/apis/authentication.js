@@ -10,14 +10,16 @@ export const registerApi = async (bodyObject) => {
   try {
     const response = await fetch(`${API_URL}/users`, requestOptions);
     if (response.ok) {
-      const data = await response.json();
-      return [data, ''];
+      return [response, ''];
     }
 
-    const errorMessage = await response.text();
-    return ['', `Server side error: ${errorMessage}`];
+    if (response.status === 422) {
+      return ['', 'User already exists.'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
-    console.error('There has been a problem with your fetch operation:', error);
     return ['', `Server down: ${error}`];
   }  
 }
@@ -32,14 +34,42 @@ export const loginApi = async (bodyObject) => {
   try {
     const response = await fetch(`${API_URL}/users/sign_in`, requestOptions);
     if (response.ok) {
-      const data = await response.json();
-      return [data, ''];
+      return [response, ''];
     }
 
-    const errorMessage = await response.text();
-    return ['', `Server side error: ${errorMessage}`];
+    if (response.status === 401) {
+      return ['', 'Invalid email or password'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
-    console.error('There has been a problem with your fetch operation:', error);
+    return ['', `Server down: ${error}`];
+  }  
+}
+
+export const logoutApi = async (jwtToken) => {
+  const requestOptions = {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+  
+  try {
+    const response = await fetch(`${API_URL}/users/sign_out`, requestOptions);
+    if (response.ok) {
+      return [response, ''];
+    }
+
+    if (response.status === 401) {
+      return ['', 'Invalid email or password'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
+  } catch (error) {
     return ['', `Server down: ${error}`];
   }  
 }

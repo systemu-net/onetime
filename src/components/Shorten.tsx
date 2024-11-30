@@ -18,10 +18,7 @@ const Shorten = () => {
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  console.log(url);
-
   // save the data when changes are made
-
   useEffect(() => {
     localStorage.setItem('shortenUrls', JSON.stringify(shortenedUrls));
   }, [shortenedUrls]);

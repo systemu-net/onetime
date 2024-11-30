@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { validateEmail, validatePassword } from '../utils/validations';
 import { Link } from 'react-router-dom';
 import { REGISTER_ROUTE, LOGIN_ROUTE, HOME_ROUTE } from '../routes';
 import { registerApi, loginApi } from '../apis/authentication';
+import { useCookies } from 'react-cookie';
 
 const initialErrorsState = {
   email: '',
@@ -13,7 +14,15 @@ const initialErrorsState = {
 }
 
 const Authentication = ({pageType = PageType.LOGIN}) => {
+  const [cookies, setCookie] = useCookies(['token']);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cookies.token) {
+      navigate(HOME_ROUTE);
+    }
+  }, []);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState(initialErrorsState);
@@ -47,35 +56,37 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
 
     setErrors(newErrors);
 
-    const hasErrors = Object.values(errors).some(error => error !== '');
-    if (hasErrors) {
-      return;
-    }
+    // const hasErrors = Object.values(errors).some(error => error !== '');
+    // if (hasErrors) {
+    //   return;
+    // }
 
     // Make API call
-    if (pageType === PageType.LOGIN) {
-      const [result, error] = await loginApi({
+    if (pageType === PageType.LOGIN) {      
+      const [response, error] = await loginApi({
         user: {
           email: email,
           password: password
         }
       })
-      handleResponse([result, error]);
+      handleResponse([response, error]);
     } else {
-      const [result, error] = await registerApi({
+      const [response, error] = await registerApi({
         user: {
           email: email,
           password: password
         }
       })
-      handleResponse([result, error]);
+      handleResponse([response, error]);
     }
   }
 
-  const handleResponse = ([result, error]) => {
+  const handleResponse = async ([response, error]) => {
     if (error) {
-      setErrors({ ...errors, api: error.message})
+      setErrors({ ...errors, api: error});
     } else {
+      const jwt = response.headers.get('Authorization');
+      setCookie('token', jwt, { path: '/' });
       navigate(HOME_ROUTE);
     }
   }
@@ -206,6 +217,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
                     >
                       {(pageType === PageType.LOGIN) ? 'Sign in' : 'Create an account' }
                     </button>
+                    {errors.api && <p className="text-sm text-medium text-red-500 mt-1">{errors.api}</p>}
                   </div>
                 </form>
               </div>
