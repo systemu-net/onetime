@@ -1,4 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { shortenApi } from '../apis/shorten';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { LOGIN_ROUTE } from '../routes';
 
 interface ShortenUrl {
   originalUrl: string;
@@ -6,6 +10,8 @@ interface ShortenUrl {
 }
 
 const Shorten = () => {
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [shortenedUrls, setShortenedUrls] = useState<ShortenUrl[]>(() => {
@@ -25,7 +31,10 @@ const Shorten = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    console.log('Submitted');
+
+    if (!cookies.token) {
+      return navigate(LOGIN_ROUTE);
+    }
 
     if (!url) {
       setErrorMessage('Please add a link');
@@ -35,30 +44,35 @@ const Shorten = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/shortenUrl/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({url})
+
+      debugger;
+      const [response, error] = await shortenApi(cookies.token, {
+        link: {
+          original_url: url
+        }
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setShortenedUrls([
-          ...shortenedUrls, {
-            originalUrl: url,
-            shortUrl: data.shortUrl
-          }
-        ]);
-        setErrorMessage('');
-        setUrl('');
+      if (error) {
+        setErrorMessage(error);
       } else {
-        console.log(data.error);
+        const data = await response.json();
+
+        if (response.ok) {
+          setShortenedUrls([
+            ...shortenedUrls, {
+              originalUrl: url,
+              shortUrl: data.lookup_code
+            }
+          ]);
+          setErrorMessage('');
+          setUrl('');
+        } else {
+          setErrorMessage(error);
+        }
       }
     } catch (error) {
       console.error(error);
+      setErrorMessage('');
     } finally {
       setLoading(false);
     }

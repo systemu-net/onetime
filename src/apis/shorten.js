@@ -1,0 +1,28 @@
+import { API_URL } from './config';
+
+export const shortenApi = async (jwtToken, bodyObject) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    },
+    body: JSON.stringify(bodyObject)
+  };
+  
+  try {
+    const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+    if (response.ok) {
+      return [response, ''];
+    }
+
+    if (response.status === 422) {
+      return ['', 'Invalid URL.'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
+  } catch (error) {
+    return ['', `Server down: ${error}`];
+  }  
+}
