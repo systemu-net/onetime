@@ -3,6 +3,7 @@ import { shortenApi } from '../apis/shorten';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_ROUTE } from '../routes';
+import Button from '../elements/Button';
 
 interface ShortenUrl {
   originalUrl: string;
@@ -45,7 +46,6 @@ const Shorten = () => {
     try {
       setLoading(true);
 
-      debugger;
       const [response, error] = await shortenApi(cookies.token, {
         link: {
           original_url: url
@@ -108,6 +108,8 @@ const Shorten = () => {
             <button className="btn" datatype="wide" disabled={loading}>
               {loading ? 'Shortening...' : 'Shorten It!'}
             </button>
+
+            {/* <Button loading={loading}/> */}
           </form>
         </div>
 

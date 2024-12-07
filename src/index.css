@@ -250,7 +250,7 @@ h2 {
 
 .shorten .shorten__card {
   background-color: var(--clr-neutral-100);
-  padding-block: 1.5rem;
+  padding-block: 1rem;
   padding-inline: 1rem;
   border-radius: 0.5rem;
   display: flex;
@@ -536,7 +536,7 @@ input.error-input::placeholder {
 
   .shorten__content .form .input-control {
     margin-bottom: 0;
-    flex-basis: 500px;
+    flex-basis: 700px;
   }
 
   .shorten__content .form .btn {
