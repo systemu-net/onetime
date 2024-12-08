@@ -5,7 +5,16 @@ export default {
     extend: {
       colors: {
         'primary': '#3b3154',
-        'accent': '#2acfcf'
+        'accent': '#2acfcf',
+        'primary': `var(--clr-primary-400: hsl(180, 66%, 49%))`,
+        'primaryDark': `var(--clr-primary-500: hsl(257, 27%, 26%))`,
+        secondary: `var(--clr-secondary-400: hsl(0, 87%, 67%))`,
+        neutral100: `var(--clr-neutral-100: hsl(0, 0%, 100%))`,
+        neutral200: `var(--clr-neutral-200: hsl(0, 0%, 75%))`,
+        neutral300: `var(--clr-neutral-300: hsl(257, 7%, 63%))`,
+        neutral400: `var(--clr-neutral-400: hsl(255, 11%, 22%))`,
+        neutral500: `var(--clr-neutral-500: hsl(260, 8%, 14%))`,
+        neutral900: `var(--clr-neutral-900: hsl(0, 0%, 0%))`
       }
     },
   },

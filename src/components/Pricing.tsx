@@ -88,13 +88,14 @@ export default function Pricing() {
             <RadioGroup
               value={frequency}
               onChange={setFrequency}
-              className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6 font-semibold ring-1 ring-inset ring-gray-200"
+              className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
+                         font-semibold ring-1 ring-inset ring-gray-200"
             >
               {frequencies.map((option) => (
                 <Radio
                   key={option.value}
                   value={option}
-                  className="cursor-pointer rounded-full px-3 py-2 text-primary data-[checked]:bg-accent data-[checked]:text-primary"
+                  className="duration-500 cursor-pointer rounded-full px-3 py-2 text-primary data-[checked]:bg-accent data-[checked]:text-primary"
                 >
                   {option.label}
                 </Radio>

@@ -4,22 +4,25 @@ import Header from '../components/Header'
 import Hero from '../components/Hero'
 import Shorten from '../components/Shorten'
 import Statistic from '../components/Statistic'
+import Sidebar from '../components/Sidebar'
 
 const HomePage = () => {
   return (
-    <>
-      <Header />
+    <div className=''>
+      <Sidebar />
+      <div className='m-auto'>
+        <Header />
+        <Hero />
 
-      <Hero />
+        <Shorten />
 
-      <Shorten />
+        <Statistic />
 
-      <Statistic />
+        <Boost />
 
-      <Boost />
-
-      <Footer />
-    </>
+        <Footer />
+      </div>
+    </div>
   )
 }
 
