@@ -53,7 +53,7 @@ export default function Sidebar() {
             menuItems.map((item, index) => (
               <li key={index} className='px-3 py-2 my-2 hover:bg-indigo-200 rounded-md cursor-pointer flex gap-2 relative group'>
                 <div>{item.icons}</div>
-                <p className={`${!isOpen && 'w-0 translate-x-24'} duration-500 overflow-hidden`}>{item.label}</p>
+                <p className={`${!isOpen && 'w-0 translate-x-24'} hover:bg-indigo-200 overflow-hidden`}>{item.label}</p>
                 {!isOpen && (
                   <div className={`
                     absolute left-full rounded-md px-2 py-1 ml-6
