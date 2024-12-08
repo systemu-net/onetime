@@ -18,8 +18,6 @@ const HomePage = () => {
 
         <Statistic />
 
-        <Boost />
-
         <Footer />
       </div>
     </div>

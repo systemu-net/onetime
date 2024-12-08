@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import logo from '../assets/thinly.svg'
 import { MdMenuOpen } from "react-icons/md";
 import { IoHomeOutline } from 'react-icons/io5';
 import { LiaLinkSolid } from "react-icons/lia";
@@ -8,6 +7,8 @@ import { RiQrCodeLine } from "react-icons/ri";
 import { MdArticle } from "react-icons/md";
 import { TbBrandGoogleAnalytics } from "react-icons/tb";
 import { RiSettings4Fill } from "react-icons/ri";
+import { SiThingiverse } from "react-icons/si";
+
 
 const menuItems = [
   {
@@ -40,11 +41,11 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <aside className='flex flex-column justify-center absolute h-screen'>
+    <aside className='z-index-31 flex flex-column justify-center h-screen fixed top-0 left-0'>
       <nav className={`shadow-md h-screen mr-2 duration-500 bg-white text-indigo-700 ${isOpen ? 'w-60' : 'w-16'}`}>
-        <div className='border-b px-3 py-2 h-20 flex items-center'>
-          <img src={logo} alt='thinly' className={`rounded-md ${isOpen ? 'w-24' : 'w-0'}`} />
-          <MdMenuOpen size={34} className={`cursor-pointer duration-500 ${!isOpen && 'rotate-180'}`} onClick={() => setIsOpen(!isOpen)}/>
+        <div className={`border-b px-3 py-2 h-20 ${isOpen && 'justify-between'} flex items-center`}>
+          <SiThingiverse size={30} className={`rounded-md ${isOpen ? 'h-24' : 'w-0'}`}/>
+          <MdMenuOpen size={30} className={`cursor-pointer duration-500 ${!isOpen && 'rotate-180'}`} onClick={() => setIsOpen(!isOpen)}/>
         </div>
 
         {/* Body */}
