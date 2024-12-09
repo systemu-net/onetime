@@ -24,5 +24,31 @@ export const shortenApi = async (jwtToken, bodyObject) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
+}
+
+export const getLinks = async (jwtToken) => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+    if (response.ok) {
+      return [response, ''];
+    }
+
+    if (response.status === 401) {
+      return ['', 'Invalid email or password'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
+  } catch (error) {
+    return ['', `Server down: ${error}`];
+  }
 }

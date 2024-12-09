@@ -1,13 +1,16 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { shortenApi } from '../apis/shorten';
+import { shortenApi, getLinks } from '../apis/shorten';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { LOGIN_ROUTE } from '../routes';
-import Button from '../elements/Button';
+import { API_URL } from '../apis/config';
 
 interface ShortenUrl {
-  originalUrl: string;
-  shortUrl: string;
+  id: number;
+  lookup_code: string;
+  original_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const Shorten = () => {
@@ -15,20 +18,39 @@ const Shorten = () => {
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [shortenedUrls, setShortenedUrls] = useState<ShortenUrl[]>(() => {
-    const savedShortenedUrls = localStorage.getItem('shortenUrls');
-    if (savedShortenedUrls) {
-      return JSON.parse(savedShortenedUrls);
-    }
-    return [];
-  });
+  const [shortenedUrls, setShortenedUrls] = useState<ShortenUrl[]>([]);
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   // save the data when changes are made
   useEffect(() => {
-    localStorage.setItem('shortenUrls', JSON.stringify(shortenedUrls));
-  }, [shortenedUrls]);
+    fetchLinks();
+  }, []);
+
+  const fetchLinks = async () => {
+    try {
+      const [response, error] = await getLinks(cookies.token);
+
+      if (error) {
+        setErrorMessage(error);
+      } else {
+        const data = await response.json();
+
+        // TODO: investigate why this is called 2 times
+        // debugger;
+
+
+        if (response.ok) {
+          setShortenedUrls(data.links);
+        } else {
+          setErrorMessage(data.message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('');
+    }
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -58,12 +80,7 @@ const Shorten = () => {
         const data = await response.json();
 
         if (response.ok) {
-          setShortenedUrls([
-            ...shortenedUrls, {
-              originalUrl: url,
-              shortUrl: data.lookup_code
-            }
-          ]);
+          fetchLinks();
           setErrorMessage('');
           setUrl('');
         } else {
@@ -118,20 +135,20 @@ const Shorten = () => {
           <div className="shorten__cards">
             {/* Shorten Card */}
             {shortenedUrls.map((shortenedUrl, index) => (
-              <div key={index} className="shorten__card">
-              <div className="actual__link">
-                <span>{shortenedUrl.originalUrl}</span>
-              </div>
+              <div key={index} className="shorten__card border rounded-md">
+                <div className="actual__link">
+                  <span>{shortenedUrl.original_url}</span>
+                </div>
 
-              <hr className="line" />
+                <hr className="line" />
 
-              <div className="shorten__link">
-                <a href={`shortenedUrl.shortUrl`} target="_blank">{shortenedUrl.shortUrl}</a>
-                <button className="btn" datatype="wide" onClick={() => handleCopy(shortenedUrl.shortUrl, index)}>
-                  {copiedIndex === index ? 'Copied!' : 'Copy'}
-                </button>
+                <div className="shorten__link">
+                  <a href={`${API_URL}/${shortenedUrl.lookup_code}`} target="_blank">{`${API_URL}/${shortenedUrl.lookup_code}`}</a>
+                  <button className="btn" datatype="wide" onClick={() => handleCopy(`${API_URL}/${shortenedUrl.lookup_code}`, index)}>
+                    {copiedIndex === index ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
               </div>
-            </div>
             ))}
           </div>
         )}
