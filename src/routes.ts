@@ -4,3 +4,5 @@ export const LOGIN_ROUTE = '/login';
 export const DASHBOARD_ROUTE = '/';
 export const LOGOUT_ROUTE = '/logout';
 export const HOME_ROUTE = '/';
+export const LINKS_ROUTE = '/links';
+export const QR_ROUTE = '/qr';
