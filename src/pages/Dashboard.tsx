@@ -4,7 +4,7 @@ import {LINKS_ROUTE, QR_ROUTE} from '../routes';
 
 const tools = [
   {path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link'},
-  {path: QR_ROUTE, label: 'Make it scannable!!', descr: 'Go to QR codes'},
+  {path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes'},
 ];
 
 const DashboardPage = () => {

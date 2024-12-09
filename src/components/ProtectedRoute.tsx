@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const [cookies] = useCookies(['token']);
   const userRole = 'admin';
-  if (cookies.token) {
+  if (!cookies.token) {
     return <Navigate to={LOGIN_ROUTE} />;
   } else if (!allowedRoles.includes(userRole!)) {
     return (
