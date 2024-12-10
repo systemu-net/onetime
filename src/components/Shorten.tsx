@@ -1,9 +1,9 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { shortenApi, getLinks } from '../apis/shorten';
-import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
-import { LOGIN_ROUTE } from '../routes';
-import { API_URL } from '../apis/config';
+import {FormEvent, useEffect, useState} from 'react';
+import {useCookies} from 'react-cookie';
+import {useNavigate} from 'react-router-dom';
+import {API_URL} from '../apis/config.ts';
+import {getLinks, shortenApi} from '../apis/shorten';
+import {LOGIN_ROUTE} from '../routes';
 
 interface ShortenUrl {
   id: number;
@@ -36,9 +36,8 @@ const Shorten = () => {
       } else {
         const data = await response.json();
 
-        // TODO: investigate why this is called 2 times
+        // TODO: investigate why this is called 2 times - MS: because of StrictMode
         // debugger;
-
 
         if (response.ok) {
           setShortenedUrls(data.links);
@@ -50,7 +49,7 @@ const Shorten = () => {
       console.error(error);
       setErrorMessage('');
     }
-  }
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -70,8 +69,8 @@ const Shorten = () => {
 
       const [response, error] = await shortenApi(cookies.token, {
         link: {
-          original_url: url
-        }
+          original_url: url,
+        },
       });
 
       if (error) {
@@ -93,7 +92,7 @@ const Shorten = () => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleCopy = (shortUrl: string, index: number) => {
     navigator.clipboard.writeText(shortUrl);
@@ -101,7 +100,7 @@ const Shorten = () => {
     setTimeout(() => {
       setCopiedIndex(null);
     }, 2000);
-  }
+  };
 
   return (
     <section className="shorten">
@@ -115,11 +114,9 @@ const Shorten = () => {
                 onChange={(e) => setUrl(e.target.value)}
                 className={`${errorMessage ? 'error-input' : ''}`}
                 type="text"
-                placeholder='Shorten a link'
+                placeholder="Shorten a link"
               />
-              {errorMessage && (
-                <p className="error-text">{errorMessage}</p>
-              )}
+              {errorMessage && <p className="error-text">{errorMessage}</p>}
             </div>
 
             <button className="btn" datatype="wide" disabled={loading}>
@@ -143,8 +140,20 @@ const Shorten = () => {
                 <hr className="line" />
 
                 <div className="shorten__link">
-                  <a href={`${API_URL}/${shortenedUrl.lookup_code}`} target="_blank">{`${API_URL}/${shortenedUrl.lookup_code}`}</a>
-                  <button className="btn" datatype="wide" onClick={() => handleCopy(`${API_URL}/${shortenedUrl.lookup_code}`, index)}>
+                  <a
+                    href={`${API_URL}/${shortenedUrl.lookup_code}`}
+                    target="_blank"
+                  >{`${API_URL}/${shortenedUrl.lookup_code}`}</a>
+                  <button
+                    className="btn"
+                    datatype="wide"
+                    onClick={() =>
+                      handleCopy(
+                        `${API_URL}/${shortenedUrl.lookup_code}`,
+                        index
+                      )
+                    }
+                  >
                     {copiedIndex === index ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
@@ -154,7 +163,7 @@ const Shorten = () => {
         )}
       </div>
     </section>
-  )
-}
+  );
+};
 
 export default Shorten;

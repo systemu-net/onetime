@@ -1,4 +1,4 @@
-import { API_URL } from './config';
+import { API_URL } from './config.ts';
 
 export const registerApi = async (bodyObject) => {
   const requestOptions = {
@@ -6,7 +6,7 @@ export const registerApi = async (bodyObject) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bodyObject)
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/users`, requestOptions);
     if (response.ok) {
@@ -21,7 +21,7 @@ export const registerApi = async (bodyObject) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
 }
 
 export const loginApi = async (bodyObject) => {
@@ -30,9 +30,10 @@ export const loginApi = async (bodyObject) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bodyObject)
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/users/sign_in`, requestOptions);
+    // const response = { ok: true }
     if (response.ok) {
       return [response, ''];
     }
@@ -45,7 +46,7 @@ export const loginApi = async (bodyObject) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
 }
 
 export const logoutApi = async (jwtToken) => {
@@ -56,7 +57,7 @@ export const logoutApi = async (jwtToken) => {
       'Authorization': jwtToken
     }
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/users/sign_out`, requestOptions);
     if (response.ok) {
@@ -71,5 +72,5 @@ export const logoutApi = async (jwtToken) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
 }
