@@ -1,13 +1,15 @@
-import ShortenForm from '../components/elements/ShortenForm';
+import Hero from '../components/Hero';
 import MainLayout from '../components/layouts/MainLayout';
-import {LinksList} from '../components/sections/LinksList';
+import Shorten from '../components/Shorten';
 
 const LinksPage = () => {
   return (
     <MainLayout>
-      <ShortenForm />
-      <h1 className="text-2xl my-4 pt-4 text-gray-700">Thinly links</h1>
-      <LinksList />
+      <h1 className="text-2xl mb-4 text-gray-700">Thinly links</h1>
+
+      <Hero />
+
+      <Shorten />
     </MainLayout>
   );
 };
