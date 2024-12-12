@@ -6,7 +6,7 @@ export const registerApi = async (bodyObject) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bodyObject)
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/users`, requestOptions);
     if (response.ok) {

@@ -1,9 +1,9 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { shortenApi, getLinks } from '../apis/shorten';
-import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
-import { LOGIN_ROUTE } from '../routes';
-import { API_URL } from '../apis/config';
+import {FormEvent, useEffect, useState} from 'react';
+import {useCookies} from 'react-cookie';
+import {useNavigate} from 'react-router-dom';
+import {API_URL} from '../apis/config';
+import {getLinks, shortenApi} from '../apis/shorten';
+import {LOGIN_ROUTE} from '../routes';
 
 interface ShortenUrl {
   id: number;
