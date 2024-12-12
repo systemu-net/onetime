@@ -37,12 +37,12 @@ export const DeleteLink = ({ lookup_code, fetchLinks }) => {
 
   return (
     <button
-      className="bg-accent text-primary rounded-full font-bold w-24 h-10"
+      className="bg-red-500 text-white antialiased text-primary rounded-full font-bold w-7 h-7"
       datatype="wide"
       disabled={loading}
       onClick={() => handleDelete(lookup_code)}
     >
-      <span className="">{loading ? 'Deleting...' : 'Delete'}</span>
+      <span className="">{loading ? 'Deleting...' : 'X'}</span>
     </button>
   );
 };

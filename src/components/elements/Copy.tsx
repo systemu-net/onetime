@@ -13,7 +13,7 @@ export const CopyUrl = ({ code }: { code: string }) => {
   };
 
   return (
-    <button className="bg-accent text-primary rounded-full font-bold w-24 h-10" datatype="wide" onClick={() => handleCopy(`${API_URL}/${code}`)}>
+    <button className="bg-accent antialiased text-primary rounded-full font-bold w-24 h-10" datatype="wide" onClick={() => handleCopy(`${API_URL}/${code}`)}>
       <span className="">{copied ? 'Copied!' : 'Copy'}</span>
     </button>
   );
