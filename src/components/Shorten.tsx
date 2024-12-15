@@ -2,8 +2,7 @@ import {FormEvent, useEffect, useState} from 'react';
 import {useCookies} from 'react-cookie';
 import {useNavigate} from 'react-router-dom';
 import {API_URL} from '../apis/config';
-import {getLinks, shortenApi} from '../apis/shorten';
-import {LOGIN_ROUTE} from '../routes';
+import {DASHBOARD_ROUTE, LOGIN_ROUTE, LANDING_ROUTE} from '../routes';
 
 interface ShortenUrl {
   id: number;
@@ -18,39 +17,8 @@ const Shorten = () => {
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [shortenedUrls, setShortenedUrls] = useState<ShortenUrl[]>([]);
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-
-  // save the data when changes are made
-  useEffect(() => {
-    fetchLinks();
-  }, []);
-
-  const fetchLinks = async () => {
-    try {
-      const [response, error] = await getLinks(cookies.token);
-
-      if (error) {
-        setErrorMessage(error);
-      } else {
-        const data = await response.json();
-
-        // TODO: investigate why this is called 2 times
-        // debugger;
-
-
-        if (response.ok) {
-          setShortenedUrls(data.links);
-        } else {
-          setErrorMessage(data.message);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      setErrorMessage('');
-    }
-  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -65,34 +33,7 @@ const Shorten = () => {
       setErrorMessage('');
     }
 
-    try {
-      setLoading(true);
-
-      const [response, error] = await shortenApi(cookies.token, {
-        link: {
-          original_url: url
-        }
-      });
-
-      if (error) {
-        setErrorMessage(error);
-      } else {
-        const data = await response.json();
-
-        if (response.ok) {
-          fetchLinks();
-          setErrorMessage('');
-          setUrl('');
-        } else {
-          setErrorMessage(error);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      setErrorMessage('');
-    } finally {
-      setLoading(false);
-    }
+    navigate(DASHBOARD_ROUTE);
   }
 
   const handleCopy = (shortUrl: string, index: number) => {
@@ -129,29 +70,6 @@ const Shorten = () => {
             {/* <Button loading={loading}/> */}
           </form>
         </div>
-
-        {/* Shorten Output */}
-        {shortenedUrls.length > 0 && (
-          <div className="shorten__cards">
-            {/* Shorten Card */}
-            {shortenedUrls.map((shortenedUrl, index) => (
-              <div key={index} className="shorten__card border rounded-md">
-                <div className="actual__link">
-                  <span>{shortenedUrl.original_url}</span>
-                </div>
-
-                <hr className="line" />
-
-                <div className="shorten__link">
-                  <a href={`${API_URL}/${shortenedUrl.lookup_code}`} target="_blank">{`${API_URL}/${shortenedUrl.lookup_code}`}</a>
-                  <button className="btn" datatype="wide" onClick={() => handleCopy(`${API_URL}/${shortenedUrl.lookup_code}`, index)}>
-                    {copiedIndex === index ? 'Copied!' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </section>
   )

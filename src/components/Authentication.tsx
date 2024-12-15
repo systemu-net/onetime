@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { validateEmail, validatePassword } from '../utils/validations';
 import { Link } from 'react-router-dom';
-import { REGISTER_ROUTE, LOGIN_ROUTE, HOME_ROUTE } from '../routes';
+import { REGISTER_ROUTE, LOGIN_ROUTE, DASHBOARD_ROUTE } from '../routes';
 import { registerApi, loginApi } from '../apis/authentication';
 import { useCookies } from 'react-cookie';
 
@@ -19,7 +19,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
 
   useEffect(() => {
     if (cookies.token) {
-      navigate(HOME_ROUTE);
+      navigate(DASHBOARD_ROUTE);
     }
   }, []);
 
@@ -87,7 +87,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
     } else {
       const jwt = response.headers.get('Authorization');
       setCookie('token', jwt, { path: '/' });
-      navigate(HOME_ROUTE);
+      navigate(DASHBOARD_ROUTE);
     }
   }
 

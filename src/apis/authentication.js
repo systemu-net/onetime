@@ -21,7 +21,7 @@ export const registerApi = async (bodyObject) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
 }
 
 export const loginApi = async (bodyObject) => {
@@ -45,7 +45,7 @@ export const loginApi = async (bodyObject) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
 }
 
 export const logoutApi = async (jwtToken) => {
@@ -71,5 +71,30 @@ export const logoutApi = async (jwtToken) => {
     return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
     return ['', `Server down: ${error}`];
-  }  
+  }
+}
+
+export const getCurrentUserApi = async (jwtToken) => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+  try {
+    const response = await fetch(`${API_URL}/api/v1/current_user`, requestOptions);
+    if (response.ok) {
+      return [response, ''];
+    }
+
+    if (response.status === 401) {
+      return ['', 'Invalid email or password'];
+    }
+
+    const errorMessage = await response.json();
+    return ['', `Server side error: ${errorMessage.message}`];
+  } catch (error) {
+    return ['', `Server down: ${error}`];
+  }
 }

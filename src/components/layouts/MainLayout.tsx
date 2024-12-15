@@ -20,10 +20,12 @@ import {
   QrCodeIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Link, useLocation} from 'react-router-dom';
 import Logo from '../../assets/logo.svg';
-import {DASHBOARD_ROUTE, LINKS_ROUTE, QR_ROUTE} from '../../routes';
+import {DASHBOARD_ROUTE, LINKS_ROUTE, QR_ROUTE, LANDING_ROUTE} from '../../routes';
+import {getCurrentUserApi, logoutApi} from '../../apis/authentication';
+import {useCookies} from 'react-cookie';
 
 const navigation = [
   {name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true},
@@ -32,10 +34,14 @@ const navigation = [
   {name: 'Pages', href: '#', icon: DocumentTextIcon, current: false},
   {name: 'Analytics', href: '#', icon: ChartBarIcon, current: false},
 ];
-const userNavigation = [
-  {name: 'Your profile', href: '#'},
-  {name: 'Sign out', href: '#'},
-];
+
+interface UserInfo {
+  id: number;
+  email: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+}
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -44,6 +50,45 @@ function classNames(...classes) {
 const MainLayout = ({children}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [user, setUser] = useState<UserInfo>({});
+
+  const handleLogout = async (e) => {
+    const [result, error] = await logoutApi(cookies.token);
+    handleLogoutResponse(result, error);
+  }
+
+  const handleLogoutResponse = (result, error) => {
+    if (error) {
+      console.error(error);
+      removeCookie('token');
+    } else {
+      removeCookie('token');
+    }
+  }
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const [response, error] = await getCurrentUserApi(cookies.token);
+
+        if (error) {
+          console.error(error);
+        } else {
+          const data = await response.json();
+
+          if (response.ok) {
+            setUser(data.user);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+
+  }, []);
 
   return (
     <>
@@ -252,7 +297,7 @@ const MainLayout = ({children}) => {
                           aria-hidden="true"
                           className="ml-4 text-sm/6 font-semibold text-gray-900"
                         >
-                          Tom Cook
+                          {user.email}
                         </span>
                         <ChevronDownIcon
                           aria-hidden="true"
@@ -264,16 +309,23 @@ const MainLayout = ({children}) => {
                       transition
                       className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                     >
-                      {userNavigation.map((item) => (
-                        <MenuItem key={item.name}>
-                          <Link
-                            to={item.href}
-                            className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                          >
-                            {item.name}
-                          </Link>
-                        </MenuItem>
-                      ))}
+                      <MenuItem key={`Your profile`}>
+                        <Link
+                          to='#'
+                          className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                        >
+                          Your profile
+                        </Link>
+                      </MenuItem>
+                      <MenuItem key={`Sign out`}>
+                        <Link
+                          to={LANDING_ROUTE}
+                          className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                          onClick={handleLogout}
+                        >
+                          Sign out
+                        </Link>
+                      </MenuItem>
                     </MenuItems>
                   </Menu>
                 </div>

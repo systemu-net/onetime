@@ -79,7 +79,7 @@ export const LinksList = ({fetchLinks, shortenedUrls}) => {
                   <tr key={url.id}>
                     <td
                       title={url.original_url}
-                      className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+                      className="whitespace-nowrap antialiased py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
                     >
                       {url.original_url.length > 60
                         ? url.original_url.slice(0, 60) + '...'
