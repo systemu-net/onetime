@@ -21,9 +21,9 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {useState, useEffect} from 'react';
-import {Link, useLocation} from 'react-router-dom';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
 import Logo from '../../assets/logo.svg';
-import {DASHBOARD_ROUTE, LINKS_ROUTE, QR_ROUTE, LANDING_ROUTE} from '../../routes';
+import {DASHBOARD_ROUTE, LINKS_ROUTE, QR_ROUTE, LANDING_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE} from '../../routes';
 import {getCurrentUserApi, logoutApi} from '../../apis/authentication';
 import {useCookies} from 'react-cookie';
 
@@ -52,6 +52,7 @@ const MainLayout = ({children}) => {
   const location = useLocation();
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const [user, setUser] = useState<UserInfo>({});
+  const navigate = useNavigate();
 
   const handleLogout = async (e) => {
     const [result, error] = await logoutApi(cookies.token);
@@ -73,6 +74,7 @@ const MainLayout = ({children}) => {
         const [response, error] = await getCurrentUserApi(cookies.token);
 
         if (error) {
+          removeCookie('token');
           console.error(error);
         } else {
           const data = await response.json();
@@ -86,7 +88,11 @@ const MainLayout = ({children}) => {
       }
     };
 
-    fetchUser();
+    if (!cookies.token) {
+      navigate(LOGIN_ROUTE);
+    } else {
+      fetchUser();
+    }
 
   }, []);
 
@@ -311,7 +317,7 @@ const MainLayout = ({children}) => {
                     >
                       <MenuItem key={`Your profile`}>
                         <Link
-                          to='#'
+                          to={PROFILE_ROUTE}
                           className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
                         >
                           Your profile

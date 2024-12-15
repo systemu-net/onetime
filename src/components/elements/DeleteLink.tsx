@@ -42,7 +42,7 @@ export const DeleteLink = ({ lookup_code, fetchLinks }) => {
       disabled={loading}
       onClick={() => handleDelete(lookup_code)}
     >
-      <span className="">{loading ? 'Deleting...' : 'X'}</span>
+      <span className="">X</span>
     </button>
   );
 };

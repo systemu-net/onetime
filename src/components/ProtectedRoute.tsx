@@ -11,21 +11,19 @@ type ProtectedRouteProps = {
 };
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles}) => {
-  const [cookies] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const [user, setUser] = useState<UserInfo>({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!cookies.token) {
-      navigate(LOGIN_ROUTE);
-    }
-
     const fetchUser = async () => {
       try {
         const [response, error] = await getCurrentUserApi(cookies.token);
 
         if (error) {
+          debugger;
           console.error(error);
+          removeCookie('token');
         } else {
           const data = await response.json();
 
@@ -38,8 +36,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles})
       }
     };
 
-    fetchUser();
-
+    if (!cookies.token) {
+      navigate(LOGIN_ROUTE);
+    } else {
+      fetchUser();
+    }
   }, []);
 
   if (allowedRoles.includes(user.role)) {
@@ -53,8 +54,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles})
       </>
     );
   }
-
-  return children;
 };
 
 export default ProtectedRoute;

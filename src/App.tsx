@@ -2,10 +2,11 @@ import {Route, BrowserRouter as Router, Routes} from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardPage from './pages/Dashboard';
 import HomePage from './pages/HomePage';
-import LinksPage from './pages/Links';
+import LinksPage from './pages/LinksPage';
 import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
 import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
 import {
   DASHBOARD_ROUTE,
   LINKS_ROUTE,
@@ -13,6 +14,7 @@ import {
   PRICING_ROUTE,
   QR_ROUTE,
   REGISTER_ROUTE,
+  PROFILE_ROUTE,
 } from './routes';
 
 export const App = () => {
@@ -46,6 +48,14 @@ export const App = () => {
           element={
             <ProtectedRoute allowedRoles={['admin']}>
               <LinksPage />
+            </ProtectedRoute>
+          }
+        ></Route>
+        <Route
+          path={PROFILE_ROUTE}
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ProfilePage />
             </ProtectedRoute>
           }
         ></Route>
