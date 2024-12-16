@@ -1,10 +1,10 @@
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
-import {LINKS_ROUTE, QR_ROUTE} from '../routes';
+import { LINKS_ROUTE, QR_ROUTE } from '../routes';
 
 const tools = [
-  {path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link'},
-  {path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes'},
+  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link' },
+  { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes' },
 ];
 
 const DashboardPage = () => {

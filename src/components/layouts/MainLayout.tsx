@@ -8,7 +8,7 @@ import {
   MenuItems,
   TransitionChild,
 } from '@headlessui/react';
-import {ChevronDownIcon, MagnifyingGlassIcon} from '@heroicons/react/20/solid';
+import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   Bars3Icon,
   BellIcon,
@@ -20,19 +20,19 @@ import {
   QrCodeIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import {useState, useEffect} from 'react';
-import {Link, useLocation, useNavigate} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useCookies } from 'react-cookie';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import {DASHBOARD_ROUTE, LINKS_ROUTE, QR_ROUTE, LANDING_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE} from '../../routes';
-import {getCurrentUserApi, logoutApi} from '../../apis/authentication';
-import {useCookies} from 'react-cookie';
+import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
 
 const navigation = [
-  {name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true},
-  {name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false},
-  {name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false},
-  {name: 'Pages', href: '#', icon: DocumentTextIcon, current: false},
-  {name: 'Analytics', href: '#', icon: ChartBarIcon, current: false},
+  { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
+  { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
+  { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
+  { name: 'Pages', href: '#', icon: DocumentTextIcon, current: false },
+  { name: 'Analytics', href: '#', icon: ChartBarIcon, current: false },
 ];
 
 interface UserInfo {
@@ -47,18 +47,20 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-const MainLayout = ({children}) => {
+const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
-  const [user, setUser] = useState<UserInfo>({});
+  const [cookies, , removeCookie] = useCookies(['token']);
+  const [user, setUser] = useState<UserInfo>();
   const navigate = useNavigate();
 
+  // @ts-ignore
   const handleLogout = async (e) => {
     const [result, error] = await logoutApi(cookies.token);
     handleLogoutResponse(result, error);
   }
 
+  // @ts-ignore
   const handleLogoutResponse = (result, error) => {
     if (error) {
       console.error(error);
@@ -77,8 +79,9 @@ const MainLayout = ({children}) => {
           removeCookie('token');
           console.error(error);
         } else {
+          // @ts-ignore
           const data = await response.json();
-
+          // @ts-ignore
           if (response.ok) {
             setUser(data.user);
           }
@@ -292,7 +295,7 @@ const MainLayout = ({children}) => {
                   {/* Profile dropdown */}
                   <Menu as="div" className="relative">
                     <MenuButton className="-m-1.5 flex items-center p-1.5">
-                      <span className="sr-only">Open user menu</span> 
+                      <span className="sr-only">Open user menu</span>
                       <img
                         alt=""
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
@@ -303,7 +306,7 @@ const MainLayout = ({children}) => {
                           aria-hidden="true"
                           className="ml-4 text-sm/6 font-semibold text-gray-900"
                         >
-                          {user.email}
+                          {user?.email}
                         </span>
                         <ChevronDownIcon
                           aria-hidden="true"
@@ -338,7 +341,7 @@ const MainLayout = ({children}) => {
               </div>
             </div>
           </div>
-          <main className="pt-10 bg-gray-100">
+          <main className="pt-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               {children}
             </div>

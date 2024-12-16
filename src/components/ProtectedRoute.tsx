@@ -1,9 +1,9 @@
-import {useCookies} from 'react-cookie';
-import {LOGIN_ROUTE} from '../routes';
-import {getCurrentUserApi} from "@/apis/authentication";
+import { getCurrentUserApi } from "@/apis/authentication";
+import { useCookies } from 'react-cookie';
+import { LOGIN_ROUTE } from '../routes';
 
 import React, { useEffect, useState } from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
@@ -19,7 +19,7 @@ interface UserInfo {
 }
 
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
   const [cookies, , removeCookie] = useCookies(['token']);
   const [user, setUser] = useState<UserInfo>();
   const navigate = useNavigate();
@@ -33,8 +33,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children, allowedRoles})
           console.error(error);
           removeCookie('token');
         } else {
+          // @ts-ignore
           const data = await response.json();
-
+          // @ts-ignore
           if (response.ok) {
             setUser(data.user);
           }

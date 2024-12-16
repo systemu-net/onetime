@@ -1,11 +1,15 @@
-import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { validateEmail, validatePassword } from '../utils/validations';
-import { Link } from 'react-router-dom';
-import { REGISTER_ROUTE, LOGIN_ROUTE, DASHBOARD_ROUTE } from '../routes';
-import { registerApi, loginApi } from '../apis/authentication';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginApi, registerApi } from '../apis/authentication';
+import { DASHBOARD_ROUTE, LOGIN_ROUTE, REGISTER_ROUTE } from '../routes';
+import { validateEmail, validatePassword } from '../utils/validations';
+
+// type PageType = 'LOGIN' | 'REGISTER'; // Define PageType as a string literal union type
+
+interface AuthenticationProps {
+  pageType: PageType;
+}
 
 const initialErrorsState = {
   email: '',
@@ -13,7 +17,12 @@ const initialErrorsState = {
   api: ''
 }
 
-const Authentication = ({pageType = PageType.LOGIN}) => {
+export const LOGIN = 'LOGIN';
+export const REGISTER = 'REGISTER';
+
+export type PageType = typeof LOGIN | typeof REGISTER;
+
+const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
   const [cookies, setCookie] = useCookies(['token']);
   const navigate = useNavigate();
 
@@ -25,20 +34,20 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState(initialErrorsState);
+  const [errors, setErrors] = useState<typeof initialErrorsState>(initialErrorsState);
 
-  const handleEmailChange = (event) => {
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   }
 
-  const handlePasswordChange = (event) => { 
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    let newErrors = {}
+    let newErrors: typeof initialErrorsState = { ...initialErrorsState };
 
     if (!validateEmail(email)) {
       newErrors = {
@@ -62,7 +71,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
     // }
 
     // Make API call
-    if (pageType === PageType.LOGIN) {      
+    if (pageType === LOGIN) {
       const [response, error] = await loginApi({
         user: {
           email: email,
@@ -83,7 +92,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
 
   const handleResponse = async ([response, error]) => {
     if (error) {
-      setErrors({ ...errors, api: error});
+      setErrors({ ...errors, api: error });
     } else {
       const jwt = response.headers.get('Authorization');
       setCookie('token', jwt, { path: '/' });
@@ -98,7 +107,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
               <h2 className="mt-2 text-balance text-2xl/9 font-semibold tracking-tight text-primary">
-                {(pageType === PageType.LOGIN) ? (
+                {(pageType === LOGIN) ? (
                   <>
                     Sign in to your account
                   </>
@@ -109,7 +118,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
                 )}
               </h2>
               <p className="mt-2 text-sm/6 text-gray-500">
-                {(pageType === PageType.LOGIN) ? (
+                {(pageType === LOGIN) ? (
                   <>
                     Not a user?
                     <Link to={REGISTER_ROUTE} className="ms-1 text-indigo-500 underline">Register</Link>
@@ -215,7 +224,7 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
                       type="submit"
                       className="flex w-full justify-center rounded-md bg-accent text-primary px-3 py-1.5 hover:bg-primary hover:text-white mt-6 block rounded-md px-3 py-2 text-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
-                      {(pageType === PageType.LOGIN) ? 'Sign in' : 'Create an account' }
+                      {(pageType === 'LOGIN') ? 'Sign in' : 'Create an account'}
                     </button>
                     {errors.api && <p className="text-sm text-medium text-red-500 mt-1">{errors.api}</p>}
                   </div>
@@ -280,14 +289,5 @@ const Authentication = ({pageType = PageType.LOGIN}) => {
     </>
   );
 }
-
-export const PageType = Object.freeze({
-  LOGIN: 0,
-  REGISTER: 1
-});
-
-Authentication.propTypes = {
-  pageType: PropTypes.number.isRequired
-};
 
 export default Authentication;

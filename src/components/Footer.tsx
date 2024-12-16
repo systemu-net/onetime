@@ -1,5 +1,4 @@
 import Logo from '../assets/thinly.svg';
-import Github from '../assets/github.svg';
 
 const Footer = () => {
   return (
@@ -7,7 +6,7 @@ const Footer = () => {
       <div className="container">
         <div className="footer__content">
 
-          { /* Footer Logo */ }
+          { /* Footer Logo */}
           <div>
             <a href="#" className="logo">
               <img src={Logo} alt="Logo" />

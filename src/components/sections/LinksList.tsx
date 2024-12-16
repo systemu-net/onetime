@@ -1,5 +1,4 @@
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { useEffect, useState } from 'react';
 import { CopyUrl } from '../elements/Copy';
 import { DeleteLink } from '../elements/DeleteLink';
 
@@ -14,12 +13,10 @@ function formatDate(dateString: string): string {
     hour12: true, // 12-hour clock with AM/PM
   });
 }
-export const LinksList = ({fetchLinks, shortenedUrls}) => {
-  useEffect(() => {
-    fetchLinks();
-  }, []);
+export const LinksList = ({ fetchLinks, shortenedUrls }) => {
+
   return (
-    <div className="bg-white shadow sm:rounded-lg pt-4 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white shadow rounded-lg pt-4 px-4 sm:px-6 lg:px-8">
       <div className="mt-2 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">

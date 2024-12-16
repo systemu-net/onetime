@@ -1,17 +1,34 @@
-import {Radio, RadioGroup} from '@headlessui/react'
-import {CheckIcon} from '@heroicons/react/20/solid'
-import {useState} from 'react'
+import { Radio, RadioGroup } from '@headlessui/react';
+import { CheckIcon } from '@heroicons/react/20/solid';
+import { useState } from 'react';
 
-const frequencies = [
-  {value: 'monthly', label: 'Monthly', priceSuffix: '/month'},
-  {value: 'annually', label: 'Annually', priceSuffix: '/year'},
-]
-const tiers = [
+type Frequency = {
+  value: 'monthly' | 'annually';
+  label: string;
+  priceSuffix: string;
+};
+
+type Tier = {
+  name: string;
+  id: string;
+  href: string;
+  price: { monthly: string; annually: string };
+  description: string;
+  features: string[];
+  mostPopular: boolean;
+};
+
+const frequencies: Frequency[] = [
+  { value: 'monthly', label: 'Monthly', priceSuffix: '/month' },
+  { value: 'annually', label: 'Annually', priceSuffix: '/year' },
+];
+
+const tiers: Tier[] = [
   {
     name: 'Hobby',
     id: 'tier-hobby',
     href: '#',
-    price: {monthly: '$19', annually: '$199'},
+    price: { monthly: '$19', annually: '$199' },
     description: 'The essentials to provide your best work for clients.',
     features: ['5 products', 'Up to 1,000 subscribers', 'Basic analytics'],
     mostPopular: false,
@@ -20,7 +37,7 @@ const tiers = [
     name: 'Freelancer',
     id: 'tier-freelancer',
     href: '#',
-    price: {monthly: '$29', annually: '$299'},
+    price: { monthly: '$29', annually: '$299' },
     description: 'The essentials to provide your best work for clients.',
     features: [
       '5 products',
@@ -34,7 +51,7 @@ const tiers = [
     name: 'Startup',
     id: 'tier-startup',
     href: '#',
-    price: {monthly: '$59', annually: '$599'},
+    price: { monthly: '$59', annually: '$599' },
     description: 'A plan that scales with your rapidly growing business.',
     features: [
       '25 products',
@@ -49,7 +66,7 @@ const tiers = [
     name: 'Enterprise',
     id: 'tier-enterprise',
     href: '#',
-    price: {monthly: '$99', annually: '$999'},
+    price: { monthly: '$99', annually: '$999' },
     description: 'Dedicated support and infrastructure for your company.',
     features: [
       'Unlimited products',
@@ -61,14 +78,14 @@ const tiers = [
     ],
     mostPopular: false,
   },
-]
+];
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(' ');
 }
 
 export default function Pricing() {
-  const [frequency, setFrequency] = useState(frequencies[0])
+  const [frequency, setFrequency] = useState<Frequency>(frequencies[0]);
 
   return (
     <div className="bg-white py-24 sm:py-32">
@@ -163,5 +180,5 @@ export default function Pricing() {
         </div>
       </div>
     </div>
-  )
+  );
 }
