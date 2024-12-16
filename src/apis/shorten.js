@@ -9,7 +9,7 @@ export const shortenApi = async (jwtToken, bodyObject) => {
     },
     body: JSON.stringify(bodyObject)
   };
-  
+
   try {
     const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
     if (response.ok) {
@@ -38,18 +38,17 @@ export const getLinks = async (jwtToken) => {
 
   try {
     const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+
     if (response.ok) {
-      return [response, ''];
+      const res = await response.json();
+      return res.links;
     }
-
-    if (response.status === 401) {
-      return ['', 'Invalid email or password'];
+    else {
+      const errorData = await response.json();
+      throw new Error(errorData.message);  // throw error message if not successful
     }
-
-    const errorMessage = await response.json();
-    return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
-    return ['', `Server down: ${error}`];
+    throw new Error(error);
   }
 }
 

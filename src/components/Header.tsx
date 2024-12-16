@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Logo from '../assets/thinly.svg';
-import { LOGIN_ROUTE, LOGOUT_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 import { logoutApi } from '../apis/authentication';
+import Logo from '../assets/thinly.svg';
+import { LOGIN_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
 
 const Header = () => {
   const [click, setClick] = useState(false);
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const [cookies, , removeCookie] = useCookies(['token']);
 
-  const handleLogout = async (e) => {
+  const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
     handleLogoutResponse(result, error);
   }
 
+  // @ts-ignore
   const handleLogoutResponse = (result, error) => {
     if (error) {
       console.error(error);
@@ -30,14 +31,14 @@ const Header = () => {
   return (
     <header className="header">
       <div className="content | container">
-        { /* Desktop Navbar */ }
+        { /* Desktop Navbar */}
         <nav className="nav">
           <div className="nav__inner">
             <Link to='/' className="logo">
               <img src={Logo} alt="Logo" />
             </Link>
 
-            { /* Nav links */ }
+            { /* Nav links */}
             <ul className="nav__links | hide">
               <li><a className="nav__link" href="">Features</a></li>
               <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
@@ -57,7 +58,7 @@ const Header = () => {
           </div>
         </nav>
 
-        { /* Mobile Navbar */ }
+        { /* Mobile Navbar */}
         <nav className={`mobile-nav ${click ? 'show' : ''}`}>
           <ul className="nav__links | primary">
             <li><a className="nav__link" href="">Features</a></li>
@@ -77,7 +78,7 @@ const Header = () => {
           )}
         </nav>
 
-        { /* Menu Icons */ }
+        { /* Menu Icons */}
         <div className="menu-icons" onClick={toggleNavClick}>
           {click ? (
             <button><i className="fa-solid fa-close"></i></button>

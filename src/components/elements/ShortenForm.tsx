@@ -1,16 +1,15 @@
-import {FormEvent, useEffect, useState} from 'react';
-import {useCookies} from 'react-cookie';
-import {useNavigate} from 'react-router-dom';
-import {getLinks, shortenApi} from '../../apis/shorten';
-import {LOGIN_ROUTE} from '../../routes';
+import { FormEvent, useState } from 'react';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { shortenApi } from '../../apis/shorten';
+import { LOGIN_ROUTE } from '../../routes';
 
-const ShortenForm = ({fetchLinks}) => {
-  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+const ShortenForm = ({ fetchLinks }) => {
+  const [cookies] = useCookies(['token']);
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -35,10 +34,11 @@ const ShortenForm = ({fetchLinks}) => {
       });
 
       if (error) {
+        // @ts-ignore
         setErrorMessage(error);
       } else {
-        const data = await response.json();
-
+        // const data = await response.json();
+        // @ts-ignore
         if (response.ok) {
           setErrorMessage('');
           setUrl('');
@@ -56,7 +56,7 @@ const ShortenForm = ({fetchLinks}) => {
   };
 
   return (
-    <div className="bg-white shadow sm:rounded-lg">
+    <div className="bg-white shadow rounded-lg">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-base font-semibold text-gray-900">
           Create new thin.ly url
