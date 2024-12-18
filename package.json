@@ -1,8 +1,7 @@
 {
   "name": "onetime",
   "engines": {
-    "node": ">=22.12.0",
-    "npm": ">=10.9.0"
+    "node": "22.12.0"
   },
   "private": true,
   "version": "0.0.1",
