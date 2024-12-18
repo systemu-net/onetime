@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           persist-credentials: false
-          path: ui
+          path: ./ui
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
