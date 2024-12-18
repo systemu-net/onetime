@@ -23,12 +23,10 @@ jobs:
         with:
           persist-credentials: false
           path: ./ui
-      - name: Install Node.js
-        uses: actions/setup-node@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version-file: ./ui/package.json
-          cache: 'npm'
-          cache-dependency-path: ./ui/package-lock.json
+          node-version: 'lts/*'
       - name: Install dependencies
         run: npm install --frozen-lockfile
       - name: Lint UI
