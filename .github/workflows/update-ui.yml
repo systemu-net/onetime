@@ -39,12 +39,14 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_POLICE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_POLICE_PLEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
       - name: Checkout API code
         uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: ./api
-          repository: 'systemu-net/thin.ly'
+          ref: develop
+          repository: systemu-net/thin.ly
           token: ${{ steps.create_token.outputs.token }}
       - name: Copy UI to API
         run: cp dist/index.html /home/runner/work/onetime/onetime/api/app/views/static/ui.html && rm -rf /home/runner/work/onetime/onetime/api/app/assets/interface/* && cp -r dist/assets/* /home/runner/work/onetime/onetime/api/app/assets/interface/
