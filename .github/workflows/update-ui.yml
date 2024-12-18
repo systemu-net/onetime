@@ -49,7 +49,7 @@ jobs:
           repository: 'systemu-net/thin.ly'
           token: ${{ steps.create_token.outputs.token }}
       - name: Copy UI to API
-        run: cp dist/index.html /home/runner/work/onetime/onetime/api/app/views/static/ui.html && rm -rf /home/runner/work/onetime/onetime/api/app/assets/interface/* && cp -r dist/assets/* /home/runner/work/onetime/onetime/api/app/assets/interface/
+        run: cp ./dist/index.html /home/runner/work/onetime/onetime/api/app/views/static/ui.html && rm -rf /home/runner/work/onetime/onetime/api/app/assets/interface/* && cp -r ./dist/assets/* /home/runner/work/onetime/onetime/api/app/assets/interface
       - name: Create PR
         uses: googleapis/code-suggester@v2
         with:
