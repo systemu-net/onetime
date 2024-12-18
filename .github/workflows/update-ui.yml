@@ -1,0 +1,68 @@
+name: update-ui
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  pull-requests: write
+env:
+  HUSKY: 0
+
+jobs:
+  update-ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          path: ui
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: ui/package.json
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
+      - name: Install dependencies
+        run: npm install --frozen-lockfile
+      - name: Lint UI
+        run: npm run lint src/**/*.{ts,tsx,js,jsx}
+      - name: Build UI
+        run: npm run build
+      - id: create_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.RELEASE_POLICE_PLEASE_APP_ID }}
+          private_key: ${{ secrets.RELEASE_POLICE_PLEASE_APP_PRIVATE_KEY }}
+      - name: Checkout API code
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          path: api
+          repository: systemu-net/thin.ly
+          token: ${{ steps.create_token.outputs.token }}
+      - name: Copy UI to API
+        run: cp dist/index.html /home/runner/work/onetime/onetime/api/app/views/static/ui.html && rm -rf /home/runner/work/onetime/onetime/api/app/assets/interface/* && cp -r dist/assets/* /home/runner/work/onetime/onetime/api/app/assets/interface/
+      - name: Create PR
+        uses: googleapis/code-suggester@v2
+        with:
+          command: pr
+          upstream_repo: systemu-net/thin.ly
+          upstream_owner: ${{ github.repository_owner }}
+          description: Auto update UI from onetime repo
+          title: "feat: Auto update UI from onetime repo"
+          message: "feat: Auto update UI from onetime repo"
+          branch: "auto-update/update-ui"
+          primary: develop
+          force: true
+          fork: false
+          labels: automated
+          git_dir: api
+        env:
+          ACCESS_TOKEN: ${{ steps.create_token.outputs.token }}

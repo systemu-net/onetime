@@ -22,8 +22,7 @@ export const DeleteLink = ({ lookup_code, fetchLinks }) => {
       if (error) {
         setLoading(false);
       } else {
-        // @ts-ignore
-        if (response.ok) {
+        if (response instanceof Response && response.ok) {
           fetchLinks();
         } else {
           setLoading(false);

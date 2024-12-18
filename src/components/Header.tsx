@@ -14,8 +14,7 @@ const Header = () => {
     handleLogoutResponse(result, error);
   }
 
-  // @ts-ignore
-  const handleLogoutResponse = (result, error) => {
+  const handleLogoutResponse = (_, error) => {
     if (error) {
       console.error(error);
       removeCookie('token');
@@ -40,9 +39,9 @@ const Header = () => {
 
             { /* Nav links */}
             <ul className="nav__links | hide">
-              <li><a className="nav__link" href="">Features</a></li>
+              <li><a className="nav__link" href="/">Features</a></li>
               <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
-              <li><a className="nav__link" href="">Resources</a></li>
+              <li><a className="nav__link" href="/">Resources</a></li>
             </ul>
           </div>
 

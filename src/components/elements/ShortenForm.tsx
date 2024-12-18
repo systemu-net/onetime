@@ -34,12 +34,9 @@ const ShortenForm = ({ fetchLinks }) => {
       });
 
       if (error) {
-        // @ts-ignore
-        setErrorMessage(error);
+        setErrorMessage(typeof error === 'string' ? error : 'An unexpected error occurred');
       } else {
-        // const data = await response.json();
-        // @ts-ignore
-        if (response.ok) {
+        if (typeof response !== 'string' && response.ok) {
           setErrorMessage('');
           setUrl('');
           fetchLinks();

@@ -30,7 +30,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
     if (cookies.token) {
       navigate(DASHBOARD_ROUTE);
     }
-  }, []);
+  });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
