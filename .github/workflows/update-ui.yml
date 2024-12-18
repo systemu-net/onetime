@@ -34,12 +34,12 @@ jobs:
       - name: Build UI
         run: npm run build
       - id: create_token
-        uses: tibdex/github-app-token@v2
+        uses: actions/create-github-app-token@v1
         with:
-          app_id: ${{ secrets.RELEASE_POLICE_PLEASE_APP_ID }}
-          private_key: ${{ secrets.RELEASE_POLICE_PLEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.RELEASE_POLICE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_POLICE_PLEASE_APP_PRIVATE_KEY }}
       - name: Checkout API code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           path: api
