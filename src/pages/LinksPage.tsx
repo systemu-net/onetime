@@ -13,9 +13,8 @@ type Link = {
   updated_at: string;
   user_id: number;
 }
-interface LinksPageProps { }
 
-const LinksPage: React.FC<LinksPageProps> = () => {
+const LinksPage = () => {
   const [cookies] = useCookies(['token']);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [shortenedUrls, setShortenedUrls] = useState<Link[]>([]);

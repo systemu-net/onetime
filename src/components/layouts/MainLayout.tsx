@@ -54,14 +54,12 @@ const MainLayout = ({ children }) => {
   const [user, setUser] = useState<UserInfo>();
   const navigate = useNavigate();
 
-  // @ts-ignore
-  const handleLogout = async (e) => {
+  const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
     handleLogoutResponse(result, error);
   }
 
-  // @ts-ignore
-  const handleLogoutResponse = (result, error) => {
+  const handleLogoutResponse = (_, error) => {
     if (error) {
       console.error(error);
       removeCookie('token');
@@ -79,9 +77,9 @@ const MainLayout = ({ children }) => {
           removeCookie('token');
           console.error(error);
         } else {
-          // @ts-ignore
+          // @ts-expect-error: response might not have a json method
           const data = await response.json();
-          // @ts-ignore
+          // @ts-expect-error: response might not have a json method
           if (response.ok) {
             setUser(data.user);
           }
@@ -97,7 +95,7 @@ const MainLayout = ({ children }) => {
       fetchUser();
     }
 
-  }, []);
+  }, [cookies.token, navigate, removeCookie]);
 
   return (
     <>

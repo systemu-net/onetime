@@ -33,9 +33,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
           console.error(error);
           removeCookie('token');
         } else {
-          // @ts-ignore
+          // @ts-expect-error: response might not have a json method
           const data = await response.json();
-          // @ts-ignore
+          // @ts-expect-error: response might not have a json method
           if (response.ok) {
             setUser(data.user);
           }
@@ -50,7 +50,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     } else {
       fetchUser();
     }
-  }, []);
+  }, [cookies.token, navigate, removeCookie]);
 
   return (
     <>
