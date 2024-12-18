@@ -38,6 +38,7 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_POLICE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_POLICE_PLEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
       - name: Checkout API code
         uses: actions/checkout@v4
         with:
