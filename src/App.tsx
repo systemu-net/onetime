@@ -7,6 +7,7 @@ import LinksPage from './pages/LinksPage';
 import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
 import ProfilePage from './pages/ProfilePage';
+import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
 import {
   DASHBOARD_ROUTE,
@@ -14,6 +15,7 @@ import {
   LOGIN_ROUTE,
   PRICING_ROUTE,
   PROFILE_ROUTE,
+  QR_ROUTE,
   REGISTER_ROUTE
 } from './routes';
 
@@ -51,15 +53,14 @@ export const App = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route
+        <Route
           path={QR_ROUTE}
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <LinksPage />
+              <QrCodesPage />
             </ProtectedRoute>
           }
-        ></Route> */}
-
+        ></Route>
         <Route
           path={PROFILE_ROUTE}
           element={

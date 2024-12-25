@@ -1,12 +1,11 @@
-import { deleteLink } from '@/apis/shorten';
-import { Link as LinkType } from '@/pages/LinksPage';
-import { extractDomain } from '@/utils/transformers';
+import { deleteQrCode } from '@/apis/qr_codes';
+import { QrCode as QrCodeType } from '@/pages/QrCodesPage';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Button } from '../elements/button';
-import { CopyUrl } from '../elements/Copy';
+import { DownloadUrl } from '../elements/Download';
 import {
   Dropdown,
   DropdownButton,
@@ -15,27 +14,27 @@ import {
 } from '../elements/dropdown';
 import { ItemDetails } from '../elements/ItemDetails';
 
-type LinksListProps = {
-  fetchLinks: () => Promise<void>;
-  shortenedUrls: LinkType[];
+type QrCodesListProps = {
+  fetchQrCodes: () => Promise<void>;
+  qrCodes: QrCodeType[];
 };
-export const LinksList: React.FC<LinksListProps> = ({
-  fetchLinks,
-  shortenedUrls,
+export const QrCodesList: React.FC<QrCodesListProps> = ({
+  fetchQrCodes,
+  qrCodes,
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
 
-  const handleDelete = async (lookup_code: string) => {
+  const handleDelete = async (id: number) => {
     try {
       setLoading(true);
-      const [response, error] = await deleteLink(cookies.token, lookup_code);
+      const [response, error] = await deleteQrCode(cookies.token, id);
 
       if (error) {
         setLoading(false);
       } else {
         if (response instanceof Response && response.ok) {
-          fetchLinks();
+          fetchQrCodes();
         } else {
           setLoading(false);
         }
@@ -51,30 +50,28 @@ export const LinksList: React.FC<LinksListProps> = ({
     <div className="pt-2">
       <div className="mt-2 flow-root">
         <ul>
-          {shortenedUrls.map((item, _index) => (
+          {qrCodes.map((item, _index) => (
             <li
-              key={item.lookup_code}
+              key={item.image_url}
               className="mb-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"
             >
               <div className="flex items-center justify-between">
                 <ItemDetails
-                  title={extractDomain(item.original_url)}
-                  description={item.original_url}
-                  id={item.lookup_code}
+                  id={item.id}
+                  title={`Untitled QR Code ${item.link_id}`}
+                  image_url={item.image_url}
+                  description={`Untitled QR Code ${item.link_id}`}
                   date={item.created_at}
                 />
                 <div className="hidden lg:flex gap-4 items-center">
-                  <CopyUrl code={item.lookup_code} />
-                  {/* <Button outline to={item.lookup_code + '/edit'}>
-                      Edit
-                    </Button> */}
-                  <Button outline to={item.lookup_code}>
+                  <DownloadUrl url={item.image_url} />
+                  <Button outline to={item.id.toString()}>
                     Details
                   </Button>
                   <button
                     className="antialiased text-primary rounded-full font-bold w-7 h-7"
                     disabled={loading}
-                    onClick={() => handleDelete(item.lookup_code)}
+                    onClick={() => handleDelete(item.id)}
                   >
                     {/* <span className="">X</span> */}
                     <TrashIcon />
@@ -86,11 +83,11 @@ export const LinksList: React.FC<LinksListProps> = ({
                       <EllipsisVerticalIcon />
                     </DropdownButton>
                     <DropdownMenu anchor="bottom end">
-                      <DropdownItem to={item.lookup_code}>View</DropdownItem>
-                      <DropdownItem to={item.lookup_code + '/edit'}>Edit</DropdownItem>
+                      <DropdownItem to={item.id}>View</DropdownItem>
+                      <DropdownItem to={item.id + '/edit'}>Edit</DropdownItem>
                       <DropdownItem
                         disabled={loading}
-                        onClick={() => handleDelete(item.lookup_code)}
+                        onClick={() => handleDelete(item.id)}
                       >
                         Delete
                       </DropdownItem>

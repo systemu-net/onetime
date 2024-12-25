@@ -1,50 +1,49 @@
-import ShortenForm from '@/components/elements/ShortenForm';
+import { QrCodesList } from '@/components/sections/QrCodesList';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { getLinks } from '../apis/shorten'; // Assuming you have a .ts file and not .js
+import { getQrCodes } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
 import MainLayout from '../components/layouts/MainLayout';
-import { LinksList } from '../components/sections/LinksList';
 
-export type Link = {
+export type QrCode = {
+  id: number;
+  image_url: string;
+  link_id: number;
   created_at: string;
-  lookup_code: string;
-  original_url: string;
   updated_at: string;
 };
 
-const LinksPage = () => {
+const QrCodesPage = () => {
   const [cookies] = useCookies(['token']);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [shortenedUrls, setShortenedUrls] = useState<Link[]>([]);
+  const [qrCodes, setQrCodes] = useState<QrCode[]>([]);
 
-  const fetchLinks = async () => {
+  const retrieveQrCodes = async () => {
     try {
-      const links: Link[] = await getLinks(cookies.token);
-      setShortenedUrls(links);
+      const qrs: QrCode[] = await getQrCodes(cookies.token);
+      setQrCodes(qrs);
     } catch (error: unknown) {
       console.error(error);
-      setErrorMessage('An error occurred while fetching links.');
+      setErrorMessage('An error occurred while fetching qr codes.');
     }
   };
 
   // Optionally, you can call fetchLinks when the component mounts (if needed)
   useEffect(() => {
     if (cookies.token) {
-      fetchLinks();
+      retrieveQrCodes();
     }
   }, [cookies.token]); // Runs when the token is available
 
   return (
     <MainLayout>
-      <ShortenForm fetchLinks={fetchLinks} />
       <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl my-2 text-gray-700">Links</h1>
+        <h1 className="text-2xl my-2 text-gray-700">QR Codes</h1>
         {/* <Button>Create link</Button> */}
       </div>
-      <LinksList fetchLinks={fetchLinks} shortenedUrls={shortenedUrls} />
+      <QrCodesList fetchQrCodes={retrieveQrCodes} qrCodes={qrCodes} />
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
     </MainLayout>
   );
 };
 
-export default LinksPage;
+export default QrCodesPage;
