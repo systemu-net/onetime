@@ -22,7 +22,7 @@ export const DownloadUrl = ({ url }: { url: string }) => {
   };
 
   return (
-    <Button onClick={handleDownload}>
+    <Button onClick={handleDownload} className='cursor-pointer'>
       Download
     </Button>
   );
