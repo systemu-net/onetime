@@ -50,14 +50,14 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
     <div className="pt-2">
       <div className="mt-2 flow-root">
         <ul>
-          {qrCodes.map((item, _index) => (
+          {qrCodes.map((item) => (
             <li
               key={item.image_url}
               className="mb-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"
             >
               <div className="flex items-center justify-between">
                 <ItemDetails
-                  id={item.id}
+                  id={item.id.toString()}
                   title={`Untitled QR Code ${item.link_id}`}
                   image_url={item.image_url}
                   description={`Untitled QR Code ${item.link_id}`}
@@ -83,7 +83,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                       <EllipsisVerticalIcon />
                     </DropdownButton>
                     <DropdownMenu anchor="bottom end">
-                      <DropdownItem to={item.id}>View</DropdownItem>
+                      <DropdownItem to={item.id.toString()}>View</DropdownItem>
                       <DropdownItem to={item.id + '/edit'}>Edit</DropdownItem>
                       <DropdownItem
                         disabled={loading}

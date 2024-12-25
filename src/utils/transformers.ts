@@ -16,6 +16,7 @@ export function extractDomain(url: string): string {
     return hostname.replace('www.', ''); // Remove 'www.' if present
   } catch (error) {
     console.error('Invalid URL:', url);
+    console.error(error);
     return '';
   }
 }

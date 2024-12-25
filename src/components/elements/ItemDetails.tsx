@@ -3,12 +3,15 @@ import { formatDate } from '@/utils/transformers';
 import { CalendarIcon } from '@heroicons/react/20/solid';
 import { Link } from 'react-router-dom';
 
-type QrCodesListProps = {
-  fetchQrCodes: () => Promise<void>;
-  qrCodes: QrCodeType[];
-};
+type ItemDetailsProps = {
+  title: string;
+  description: string;
+  id: string;
+  date: string;
+  image_url?: string;
+}
 
-export const ItemDetails = ({ image_url = null, title, description, id, date }) => {
+export const ItemDetails = ({ title, description, id, date, image_url }: ItemDetailsProps) => {
     return (
         <div key={description} className="flex gap-6 py-6">
             <div className="shrink-0">

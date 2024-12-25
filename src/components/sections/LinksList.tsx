@@ -51,7 +51,7 @@ export const LinksList: React.FC<LinksListProps> = ({
     <div className="pt-2">
       <div className="mt-2 flow-root">
         <ul>
-          {shortenedUrls.map((item, _index) => (
+          {shortenedUrls.map((item) => (
             <li
               key={item.lookup_code}
               className="mb-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"

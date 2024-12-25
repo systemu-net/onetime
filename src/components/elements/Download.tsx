@@ -2,7 +2,6 @@ import { Button } from './button';
 
 export const DownloadUrl = ({ url }: { url: string }) => {
   const handleDownload = () => {
-    debugger;
     fetch(url, {
       method: "GET",
       headers: {}

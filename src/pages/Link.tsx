@@ -49,7 +49,7 @@ const LinkPage = () => {
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
         {link && <ItemDetails title={extractDomain(link.original_url)}
           description={link.original_url}
-          info={link.lookup_code}
+          id={link.lookup_code}
           date={link.created_at}
         />}
         {/* <div className="mt-8 grid gap-8 sm:grid-cols-3">
