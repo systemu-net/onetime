@@ -99,7 +99,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <>
-      <div>
+      <div className='text-textPrimary font-rubik'>
         <Dialog
           open={sidebarOpen}
           onClose={setSidebarOpen}
@@ -148,8 +148,8 @@ const MainLayout = ({ children }) => {
                               to={item.href}
                               className={classNames(
                                 item.href === location.pathname
-                                  ? 'bg-gray-50 text-indigo-600'
-                                  : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                                  ? 'bg-gray-50 text-violet-600'
+                                  : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
                                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                               )}
                             >
@@ -157,8 +157,8 @@ const MainLayout = ({ children }) => {
                                 aria-hidden="true"
                                 className={classNames(
                                   item.href === location.pathname
-                                    ? 'text-indigo-600'
-                                    : 'text-gray-400 group-hover:text-indigo-600',
+                                    ? 'text-violet-600'
+                                    : 'text-gray-400 group-hover:text-violet-600',
                                   'size-6 shrink-0'
                                 )}
                               />
@@ -172,11 +172,11 @@ const MainLayout = ({ children }) => {
                     <li className="mt-auto">
                       <Link
                         to="#"
-                        className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                        className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                       >
                         <Cog6ToothIcon
                           aria-hidden="true"
-                          className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                          className="size-6 shrink-0 text-gray-400 group-hover:text-violet-600"
                         />
                         Settings
                       </Link>
@@ -205,8 +205,8 @@ const MainLayout = ({ children }) => {
                           to={item.href}
                           className={classNames(
                             item.href === location.pathname
-                              ? 'bg-gray-50 text-indigo-600'
-                              : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                              ? 'bg-gray-50 text-violet-600'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
                             'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                           )}
                         >
@@ -214,8 +214,8 @@ const MainLayout = ({ children }) => {
                             aria-hidden="true"
                             className={classNames(
                               item.href === location.pathname
-                                ? 'text-indigo-600'
-                                : 'text-gray-400 group-hover:text-indigo-600',
+                                ? 'text-violet-600'
+                                : 'text-gray-400 group-hover:text-violet-600',
                               'size-6 shrink-0'
                             )}
                           />
@@ -229,11 +229,11 @@ const MainLayout = ({ children }) => {
                 <li className="mt-auto">
                   <Link
                     to="#"
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                   >
                     <Cog6ToothIcon
                       aria-hidden="true"
-                      className="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600"
+                      className="size-6 shrink-0 text-gray-400 group-hover:text-violet-600"
                     />
                     Settings
                   </Link>
@@ -339,7 +339,7 @@ const MainLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="pt-10">
+          <main className="pt-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               {children}
             </div>

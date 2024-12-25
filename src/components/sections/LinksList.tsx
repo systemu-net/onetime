@@ -1,103 +1,109 @@
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { deleteLink } from '@/apis/shorten';
+import { Link as LinkType } from '@/pages/LinksPage';
+import { extractDomain } from '@/utils/transformers';
+import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
+import { TrashIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { useCookies } from 'react-cookie';
+import { Button } from '../elements/button';
 import { CopyUrl } from '../elements/Copy';
-import { DeleteLink } from '../elements/DeleteLink';
+import { Divider } from '../elements/divider';
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownItem,
+  DropdownMenu,
+} from '../elements/dropdown';
+import { ItemDetails } from '../elements/ItemDetails';
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
-    month: '2-digit', // "12"
-    day: '2-digit', // "08"
-    year: 'numeric', // "2024"
-    hour: '2-digit', // "11"
-    minute: '2-digit', // "28"
-    hour12: true, // 12-hour clock with AM/PM
-  });
-}
-export const LinksList = ({ fetchLinks, shortenedUrls }) => {
+type LinksListProps = {
+  fetchLinks: () => Promise<void>;
+  shortenedUrls: LinkType[];
+};
+export const LinksList: React.FC<LinksListProps> = ({
+  fetchLinks,
+  shortenedUrls,
+}) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [cookies] = useCookies(['token']);
+
+  const handleDelete = async (lookup_code: string) => {
+    try {
+      setLoading(true);
+      const [response, error] = await deleteLink(cookies.token, lookup_code);
+
+      if (error) {
+        setLoading(false);
+      } else {
+        if (response instanceof Response && response.ok) {
+          fetchLinks();
+        } else {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="bg-white shadow rounded-lg pt-4 px-4 sm:px-6 lg:px-8">
+    <div className="pt-2">
       <div className="mt-2 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
-                  >
-                    <a href="#" className="group inline-flex">
-                      Url
-                      <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className="size-5"
-                        />
-                      </span>
-                    </a>
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    <a href="#" className="group inline-flex">
-                      Code
-                      <span className="invisible ml-2 flex-none rounded text-gray-400 group-hover:visible group-focus:visible">
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className="invisible ml-2 size-5 flex-none rounded text-gray-400 group-hover:visible group-focus:visible"
-                        />
-                      </span>
-                    </a>
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    <a href="#" className="group inline-flex">
-                      Create At
-                      <span className="ml-2 flex-none rounded bg-gray-100 text-gray-900 group-hover:bg-gray-200">
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className="size-5"
-                        />
-                      </span>
-                    </a>
-                  </th>
-                  <th scope="col" className="relative py-3.5 pl-3 pr-0">
-                    <span className="sr-only">Edit</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {shortenedUrls.map((url) => (
-                  <tr key={url.id}>
-                    <td
-                      title={url.original_url}
-                      className="whitespace-nowrap antialiased py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0"
+        <div className="overflow-x-auto">
+          <ul className="space-y-4">
+            {shortenedUrls.map((item, index) => (
+              <li
+                key={item.id}
+                className="px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"
+              >
+                <div className="flex items-center justify-between">
+                  <ItemDetails
+                    title={extractDomain(item.original_url)}
+                    description={item.original_url}
+                    info={item.lookup_code}
+                    date={item.created_at}
+                  />
+                  <div className="hidden lg:flex gap-4 items-center">
+                    <CopyUrl code={item.lookup_code} />
+                    {/* <Button outline to={item.lookup_code + '/edit'}>
+                      Edit
+                    </Button> */}
+                    <Button outline to={item.lookup_code}>
+                      Details
+                    </Button>
+                    <button
+                      className="antialiased text-primary rounded-full font-bold w-7 h-7"
+                      disabled={loading}
+                      onClick={() => handleDelete(item.lookup_code)}
                     >
-                      {url.original_url.length > 60
-                        ? url.original_url.slice(0, 60) + '...'
-                        : url.original_url}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {url.lookup_code}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {formatDate(url.created_at)}
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                      <CopyUrl code={url.lookup_code} />
-                    </td>
-                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-0">
-                      <DeleteLink lookup_code={url.lookup_code} fetchLinks={fetchLinks} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      {/* <span className="">X</span> */}
+                      <TrashIcon />
+                    </button>
+                  </div>
+                  <div className="flex lg:hidden items-center gap-4">
+                    <Dropdown>
+                      <DropdownButton plain aria-label="More options">
+                        <EllipsisVerticalIcon />
+                      </DropdownButton>
+                      <DropdownMenu anchor="bottom end">
+                        <DropdownItem to={item.lookup_code}>View</DropdownItem>
+                        <DropdownItem to={item.lookup_code + '/edit'}>Edit</DropdownItem>
+                        <DropdownItem
+                          disabled={loading}
+                          onClick={() => handleDelete(item.lookup_code)}
+                        >
+                          Delete
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </div>
+                </div>
+                <Divider soft={index > 1} />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

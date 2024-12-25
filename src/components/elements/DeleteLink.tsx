@@ -1,22 +1,14 @@
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { useNavigate } from 'react-router-dom';
 import { deleteLink } from '../../apis/shorten';
-import { LOGIN_ROUTE } from '../../routes';
 
 export const DeleteLink = ({ lookup_code, fetchLinks }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
-  const navigate = useNavigate();
 
   const handleDelete = async (lookup_code: string) => {
-    if (!cookies.token) {
-      return navigate(LOGIN_ROUTE);
-    }
-
     try {
       setLoading(true);
-
       const [response, error] = await deleteLink(cookies.token, lookup_code);
 
       if (error) {

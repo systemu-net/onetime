@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
-  allowedRoles: ('admin' | 'staff')[]; // set the user-roles
+  allowedRoles: ('admin' | 'staff')[]; // Set the user roles
 };
 
 interface UserInfo {
@@ -18,10 +18,13 @@ interface UserInfo {
   updated_at: string;
 }
 
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  allowedRoles,
+}) => {
   const [cookies, , removeCookie] = useCookies(['token']);
-  const [user, setUser] = useState<UserInfo>();
+  const [user, setUser] = useState<UserInfo | null>(null); // Explicitly allow null for initial state
+  const [loading, setLoading] = useState(true); // Loading state to avoid showing error prematurely
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,18 +33,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
         const [response, error] = await getCurrentUserApi(cookies.token);
 
         if (error) {
-          console.error(error);
+          console.error('Error fetching user:', error);
           removeCookie('token');
-        } else {
+          navigate(LOGIN_ROUTE); // Redirect to login if there's an error
+        } else if (response) {
           // @ts-expect-error: response might not have a json method
           const data = await response.json();
-          // @ts-expect-error: response might not have a json method
-          if (response.ok) {
-            setUser(data.user);
-          }
+          setUser(data.user);
+        } else {
+          console.error('Unexpected response structure');
+          removeCookie('token');
+          navigate(LOGIN_ROUTE);
         }
       } catch (error) {
-        console.error(error);
+        console.error('Fetch error:', error);
+        removeCookie('token');
+        navigate(LOGIN_ROUTE);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -52,10 +61,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     }
   }, [cookies.token, navigate, removeCookie]);
 
-  return (
-    <>
-      {user && allowedRoles.includes(user.role) ? children : <h1> Error 404 -- Page Not Found </h1>}
-    </>
+  if (loading) {
+    return <h1>Loading...</h1>; // Loading state while fetching user info
+  }
+
+  return user && allowedRoles.includes(user.role) ? (
+    children
+  ) : (
+    <h1>Error 404 -- Page Not Found</h1>
   );
 };
 

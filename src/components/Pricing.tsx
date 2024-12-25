@@ -91,7 +91,7 @@ export default function Pricing() {
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-2">
         <div className="mx-auto max-w-4xl text-center">
-          {/* <h2 className="text-base/7 font-semibold text-indigo-600">Pricing</h2> */}
+          {/* <h2 className="text-base/7 font-semibold text-violet-600">Pricing</h2> */}
           <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
             Pricing that grows with you
           </p>
@@ -156,7 +156,7 @@ export default function Pricing() {
                   tier.mostPopular
                     ? 'bg-accent text-primary shadow-sm hover:bg-primary hover:text-white'
                     : 'text-primary ring-1 ring-inset ring-accent hover:bg-primary hover:text-white hover:ring-0',
-                  'mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                  'mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
                 )}
               >
                 Buy plan

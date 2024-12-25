@@ -52,6 +52,31 @@ export const getLinks = async (jwtToken) => {
   }
 }
 
+export const getLink = async (jwtToken, lookup_code) => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/links/${lookup_code}`, requestOptions);
+
+    if (response.ok) {
+      const res = await response.json();
+      return res.link;
+    }
+    else {
+      const errorData = await response.json();
+      throw new Error(errorData.message);  // throw error message if not successful
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
 export const deleteLink = async (jwtToken, lookup_code) => {
   const requestOptions = {
     method: 'DELETE',
@@ -64,16 +89,16 @@ export const deleteLink = async (jwtToken, lookup_code) => {
   try {
     const response = await fetch(`${API_URL}/api/v1/links/${lookup_code}`, requestOptions);
     if (response.ok) {
-      return [response, ''];
+      return [response, null];
     }
 
     if (response.status === 404) {
-      return ['', 'Link not found.'];
+      return [null, 'Link not found.'];
     }
 
     const errorMessage = await response.json();
-    return ['', `Server side error: ${errorMessage.message}`];
+    return [null, `Server side error: ${errorMessage.message}`];
   } catch (error) {
-    return ['', `Server down: ${error}`];
+    return [null, `Server down: ${error}`];
   }
 }
