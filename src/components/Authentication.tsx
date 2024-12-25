@@ -121,12 +121,12 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                 {(pageType === LOGIN) ? (
                   <>
                     Not a user?
-                    <Link to={REGISTER_ROUTE} className="ms-1 text-indigo-500 underline">Register</Link>
+                    <Link to={REGISTER_ROUTE} className="ms-1 text-violet-500 underline">Register</Link>
                   </>
                 ) : (
                   <>
                     Already a user?
-                    <Link to={LOGIN_ROUTE} className="ms-1 text-indigo-500 underline">Login</Link>
+                    <Link to={LOGIN_ROUTE} className="ms-1 text-violet-500 underline">Login</Link>
                   </>
                 )}
               </p>
@@ -146,7 +146,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                         type="email"
                         required
                         autoComplete="email"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
                         placeholder="Enter email address"
                         value={email}
                         onChange={handleEmailChange}
@@ -166,7 +166,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                         type="password"
                         required
                         autoComplete="current-password"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
                         placeholder="Enter password"
                         value={password}
                         onChange={handlePasswordChange}
@@ -183,7 +183,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                             id="remember-me"
                             name="remember-me"
                             type="checkbox"
-                            className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                            className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                           />
                           <svg
                             fill="none"
@@ -213,7 +213,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                     </div>
 
                     <div className="text-sm/6">
-                      <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                      <a href="#" className="font-semibold text-violet-600 hover:text-violet-500">
                         Forgot password?
                       </a>
                     </div>
@@ -222,7 +222,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                   <div>
                     <button
                       type="submit"
-                      className="flex w-full justify-center rounded-md bg-accent text-primary px-3 py-1.5 hover:bg-primary hover:text-white mt-6 block rounded-md px-3 py-2 text-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      className="flex w-full justify-center rounded-md bg-accent text-primary px-3 py-1.5 hover:bg-primary hover:text-white mt-6 block rounded-md px-3 py-2 text-center font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
                     >
                       {(pageType === 'LOGIN') ? 'Sign in' : 'Create an account'}
                     </button>

@@ -1,6 +1,6 @@
 import { API_URL } from './config';
 
-export const shortenApi = async (jwtToken, bodyObject) => {
+export const createQrApi = async (jwtToken, bodyObject) => {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -11,7 +11,7 @@ export const shortenApi = async (jwtToken, bodyObject) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+    const response = await fetch(`${API_URL}/api/v1/qr_codes`, requestOptions);
     if (response.ok) {
       return [response, ''];
     }
@@ -27,7 +27,7 @@ export const shortenApi = async (jwtToken, bodyObject) => {
   }
 }
 
-export const getLinks = async (jwtToken) => {
+export const getQrCodes = async (jwtToken) => {
   const requestOptions = {
     method: 'GET',
     headers: {
@@ -37,11 +37,11 @@ export const getLinks = async (jwtToken) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+    const response = await fetch(`${API_URL}/api/v1/qr_codes`, requestOptions);
 
     if (response.ok) {
       const res = await response.json();
-      return res.links;
+      return res.qr_codes;
     }
     else {
       const errorData = await response.json();
@@ -52,7 +52,7 @@ export const getLinks = async (jwtToken) => {
   }
 }
 
-export const getLink = async (jwtToken, lookup_code) => {
+export const getQrCode = async (jwtToken, qr_code) => {
   const requestOptions = {
     method: 'GET',
     headers: {
@@ -62,11 +62,11 @@ export const getLink = async (jwtToken, lookup_code) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/links/${lookup_code}`, requestOptions);
+    const response = await fetch(`${API_URL}/api/v1/qr_codes/${qr_code}`, requestOptions);
 
     if (response.ok) {
       const res = await response.json();
-      return res.link;
+      return res.qr_code;
     }
     else {
       const errorData = await response.json();
@@ -77,7 +77,7 @@ export const getLink = async (jwtToken, lookup_code) => {
   }
 }
 
-export const deleteLink = async (jwtToken, lookup_code) => {
+export const deleteQrCode = async (jwtToken, qr_code) => {
   const requestOptions = {
     method: 'DELETE',
     headers: {
@@ -87,13 +87,13 @@ export const deleteLink = async (jwtToken, lookup_code) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/links/${lookup_code}`, requestOptions);
+    const response = await fetch(`${API_URL}/api/v1/qr_codes/${qr_code}`, requestOptions);
     if (response.ok) {
       return [response, null];
     }
 
     if (response.status === 404) {
-      return [null, 'Link not found.'];
+      return [null, 'QrCode not found.'];
     }
 
     const errorMessage = await response.json();

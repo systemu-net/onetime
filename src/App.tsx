@@ -1,20 +1,22 @@
-import {Route, BrowserRouter as Router, Routes} from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardPage from './pages/Dashboard';
 import HomePage from './pages/HomePage';
+import LinkPage from './pages/Link';
 import LinksPage from './pages/LinksPage';
 import LoginPage from './pages/LoginPage';
 import PricingPage from './pages/PricingPage';
-import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import QrCodesPage from './pages/QrCodesPage';
+import RegisterPage from './pages/RegisterPage';
 import {
   DASHBOARD_ROUTE,
   LINKS_ROUTE,
   LOGIN_ROUTE,
   PRICING_ROUTE,
-  QR_ROUTE,
-  REGISTER_ROUTE,
   PROFILE_ROUTE,
+  QR_ROUTE,
+  REGISTER_ROUTE
 } from './routes';
 
 export const App = () => {
@@ -34,7 +36,7 @@ export const App = () => {
               <DashboardPage />
             </ProtectedRoute>
           }
-        ></Route>
+        />
         <Route
           path={LINKS_ROUTE}
           element={
@@ -42,12 +44,20 @@ export const App = () => {
               <LinksPage />
             </ProtectedRoute>
           }
-        ></Route>
+        />
+        <Route
+          path="links/:lookup_code"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <LinkPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path={QR_ROUTE}
           element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <LinksPage />
+              <QrCodesPage />
             </ProtectedRoute>
           }
         ></Route>
