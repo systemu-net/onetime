@@ -5,6 +5,7 @@ import { LINKS_ROUTE } from '@/routes'
 
 import { getLink } from '@/apis/shorten'
 import { ItemDetails } from '@/components/elements/ItemDetails'
+import { extractDomain } from '@/utils/transformers'
 import { ChevronLeftIcon } from '@heroicons/react/16/solid'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
@@ -46,11 +47,11 @@ const LinkPage = () => {
       </div>
       <div className='px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white'>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-        <ItemDetails title={link?.original_url}
-          description={link?.original_url}
-          info={link?.lookup_code}
-          date={link?.created_at}
-        />
+        {link && <ItemDetails title={extractDomain(link.original_url)}
+          description={link.original_url}
+          info={link.lookup_code}
+          date={link.created_at}
+        />}
         {/* <div className="mt-8 grid gap-8 sm:grid-cols-3">
         <Stat title="Total revenue" value={link.totalRevenue} change={link.totalRevenueChange} />
         <Stat

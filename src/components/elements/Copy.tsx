@@ -14,7 +14,7 @@ export const CopyUrl = ({ code }: { code: string }) => {
   };
 
   return (
-    <Button color='teal' onClick={() => handleCopy(`${API_URL}/ ${code}`)}>
+    <Button color='teal' onClick={() => handleCopy(`${API_URL}/${code}`)}>
       <span className="">{copied ? 'Copied!' : 'Copy'}</span>
     </Button>
   );
