@@ -1,24 +1,20 @@
 import { Button } from './button';
 
-export const DownloadUrl = ({ url }: { url: string }) => {
-  const handleDownload = () => {
-    fetch(url, {
-      method: "GET",
-      headers: {}
-    })
-      .then(response => {
-        response.arrayBuffer().then(function(buffer) {
-          const url = window.URL.createObjectURL(new Blob([buffer]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "image.png"); //or any other extension
-          document.body.appendChild(link);
-          link.click();
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
+export const DownloadUrl = ({ fileUrl }: { fileUrl: string }) => {
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(fileUrl, { method: 'GET' });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileUrl.split('/').pop() || 'image.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

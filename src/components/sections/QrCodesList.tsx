@@ -64,7 +64,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                   date={item.created_at}
                 />
                 <div className="hidden lg:flex gap-4 items-center">
-                  <DownloadUrl url={item.image_url} />
+                  <DownloadUrl fileUrl={item.image_url} />
                   <Button outline to={item.id.toString()}>
                     Details
                   </Button>
