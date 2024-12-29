@@ -1,39 +1,35 @@
 import { API_URL } from './config';
 
-export const createQrApi = async (jwtToken, bodyObject) => {
+export const createQrCode = async (jwtToken, bodyObject) => {
   const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': jwtToken
+      Authorization: jwtToken,
     },
-    body: JSON.stringify(bodyObject)
+    body: JSON.stringify(bodyObject),
   };
 
   try {
     const response = await fetch(`${API_URL}/api/v1/qr_codes`, requestOptions);
     if (response.ok) {
-      return [response, ''];
+      return response.json();
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.message); // throw error message if not successful
     }
-
-    if (response.status === 422) {
-      return ['', 'Invalid URL.'];
-    }
-
-    const errorMessage = await response.json();
-    return ['', `Server side error: ${errorMessage.message}`];
   } catch (error) {
-    return ['', `Server down: ${error}`];
+    throw new Error(error);
   }
-}
+};
 
 export const getQrCodes = async (jwtToken) => {
   const requestOptions = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': jwtToken
-    }
+      Authorization: jwtToken,
+    },
   };
 
   try {
@@ -42,52 +38,56 @@ export const getQrCodes = async (jwtToken) => {
     if (response.ok) {
       const res = await response.json();
       return res.qr_codes;
-    }
-    else {
+    } else {
       const errorData = await response.json();
-      throw new Error(errorData.message);  // throw error message if not successful
+      throw new Error(errorData.message); // throw error message if not successful
     }
   } catch (error) {
     throw new Error(error);
   }
-}
+};
 
 export const getQrCode = async (jwtToken, qr_code) => {
   const requestOptions = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': jwtToken
-    }
+      Authorization: jwtToken,
+    },
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/qr_codes/${qr_code}`, requestOptions);
+    const response = await fetch(
+      `${API_URL}/api/v1/qr_codes/${qr_code}`,
+      requestOptions
+    );
 
     if (response.ok) {
       const res = await response.json();
       return res.qr_code;
-    }
-    else {
+    } else {
       const errorData = await response.json();
-      throw new Error(errorData.message);  // throw error message if not successful
+      throw new Error(errorData.message); // throw error message if not successful
     }
   } catch (error) {
     throw new Error(error);
   }
-}
+};
 
 export const deleteQrCode = async (jwtToken, qr_code) => {
   const requestOptions = {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': jwtToken
-    }
+      Authorization: jwtToken,
+    },
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/qr_codes/${qr_code}`, requestOptions);
+    const response = await fetch(
+      `${API_URL}/api/v1/qr_codes/${qr_code}`,
+      requestOptions
+    );
     if (response.ok) {
       return [response, null];
     }
@@ -101,4 +101,4 @@ export const deleteQrCode = async (jwtToken, qr_code) => {
   } catch (error) {
     return [null, `Server down: ${error}`];
   }
-}
+};

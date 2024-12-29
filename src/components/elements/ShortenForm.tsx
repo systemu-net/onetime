@@ -3,6 +3,7 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { shortenApi } from '../../apis/shorten';
 import { LOGIN_ROUTE } from '../../routes';
+import { Subheading } from './heading';
 
 const ShortenForm = ({ fetchLinks }) => {
   const [cookies] = useCookies(['token']);
@@ -53,12 +54,12 @@ const ShortenForm = ({ fetchLinks }) => {
   };
 
   return (
-    <div className="bg-white shadow rounded-lg mb-4">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-base font-semibold text-gray-900">
+    <div className="bg-white dark:bg-zinc-900 shadow rounded-lg mb-4">
+      <div className="px-4 py-5 lg:p-8">
+        <Subheading>
           Create new thin.ly url
-        </h3>
-        <form onSubmit={handleSubmit} className="mt-5 sm:flex sm:items-center">
+        </Subheading>
+        <form onSubmit={handleSubmit} className="mt-3 sm:flex sm:items-center">
           <div className="w-full sm:max-w-lg">
             <input
               value={url}
@@ -68,7 +69,7 @@ const ShortenForm = ({ fetchLinks }) => {
               type="text"
               placeholder="https://thin.ly"
               aria-label="url"
-              className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
+              className="block w-full rounded-md bg-white dark:bg-zinc-900 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-zinc-600 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
             />
             {errorMessage && (
               <p className="error-text">{errorMessage}</p>

@@ -60,7 +60,6 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                   id={item.id.toString()}
                   title={`Untitled QR Code ${item.link_id}`}
                   image_url={item.image_url}
-                  description={`Untitled QR Code ${item.link_id}`}
                   date={item.created_at}
                 />
                 <div className="hidden lg:flex gap-4 items-center">

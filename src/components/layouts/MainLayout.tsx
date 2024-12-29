@@ -25,13 +25,13 @@ import { useCookies } from 'react-cookie';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, LOGIN_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
+import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, LOGIN_ROUTE, PAGES_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
   { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
-  { name: 'Pages', href: '#', icon: DocumentTextIcon, current: false },
+  { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
   { name: 'Analytics', href: '#', icon: ChartBarIcon, current: false },
 ];
 
@@ -99,7 +99,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <>
-      <div className='text-textPrimary font-rubik'>
+      <div className='text-textPrimary font-rubik bg-zinc-100 dark:bg-zinc-950'>
         <Dialog
           open={sidebarOpen}
           onClose={setSidebarOpen}
@@ -132,9 +132,9 @@ const MainLayout = ({ children }) => {
 
               {/* Sidebar component, swap this element with another sidebar if you like */}
 
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-zinc-950 px-6 pb-4">
                 <div className="flex h-16 shrink-0 items-center">
-                  <Link to="/" className="logo h-8 w-auto">
+                  <Link to="/" className="logo h-8 w-auto dark:invert">
                     <img src={Logo} alt="Logo" />
                   </Link>
                 </div>
@@ -148,7 +148,7 @@ const MainLayout = ({ children }) => {
                               to={item.href}
                               className={classNames(
                                 item.href === location.pathname
-                                  ? 'bg-gray-50 text-violet-600'
+                                  ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
                                   : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
                                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                               )}
@@ -157,7 +157,7 @@ const MainLayout = ({ children }) => {
                                 aria-hidden="true"
                                 className={classNames(
                                   item.href === location.pathname
-                                    ? 'text-violet-600'
+                                    ? 'text-violet-600 dark:text-violet-500'
                                     : 'text-gray-400 group-hover:text-violet-600',
                                   'size-6 shrink-0'
                                 )}
@@ -189,9 +189,9 @@ const MainLayout = ({ children }) => {
         </Dialog>
         {/* Static sidebar for desktop */}
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 px-6 pb-4">
             <div className="flex h-16 shrink-0 items-center">
-              <Link to="/" className="logo h-8 w-auto">
+              <Link to="/" className="logo h-8 w-auto dark:invert">
                 <img src={Logo} alt="Logo" />
               </Link>
             </div>
@@ -205,8 +205,8 @@ const MainLayout = ({ children }) => {
                           to={item.href}
                           className={classNames(
                             item.href === location.pathname
-                              ? 'bg-gray-50 text-violet-600'
-                              : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
+                              ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
                             'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                           )}
                         >
@@ -214,7 +214,7 @@ const MainLayout = ({ children }) => {
                             aria-hidden="true"
                             className={classNames(
                               item.href === location.pathname
-                                ? 'text-violet-600'
+                                ? 'text-violet-600 dark:text-violet-500'
                                 : 'text-gray-400 group-hover:text-violet-600',
                               'size-6 shrink-0'
                             )}
@@ -243,8 +243,8 @@ const MainLayout = ({ children }) => {
           </div>
         </div>
         <div className="lg:pl-72">
-          <div className="border-b border-gray-200 sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
-            <div className="flex h-16 items-center gap-x-4 bg-white shadow-sm sm:gap-x-6 sm:px-6 px-4 lg:shadow-none">
+          <div className="border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
+            <div className="flex h-16 items-center gap-x-4 bg-white dark:bg-zinc-950 shadow-sm sm:gap-x-6 sm:px-6 px-4 lg:shadow-none">
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
@@ -269,7 +269,7 @@ const MainLayout = ({ children }) => {
                     type="search"
                     placeholder="Search"
                     aria-label="Search"
-                    className="col-start-1 row-start-1 block size-full bg-white pl-8 text-base text-gray-900 outline-none placeholder:text-gray-400 sm:text-sm/6"
+                    className="col-start-1 row-start-1 block size-full bg-white dark:bg-zinc-900 pl-8 text-base text-gray-900 outline-none placeholder:text-gray-400 sm:text-sm/6"
                   />
 
                   <MagnifyingGlassIcon
