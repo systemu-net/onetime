@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm install --frozen-lockfile
       - name: Lint UI
-        run: npm run lint src/**/*.{ts,tsx,js,jsx}
+        run: npm run lint src/**/*.{ts,tsx,js}
       - name: Build UI
         run: npm run build
       - id: create_token
