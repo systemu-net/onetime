@@ -20,12 +20,12 @@ import {
   QrCodeIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
+import { Link, useLocation } from 'react-router-dom';
+import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, LOGIN_ROUTE, PAGES_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
+import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -50,9 +50,7 @@ function classNames(...classes) {
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const [cookies, , removeCookie] = useCookies(['token']);
-  const [user, setUser] = useState<UserInfo>();
-  const navigate = useNavigate();
+  const [cookies, , removeCookie] = useCookies(['token', 'email']);
 
   const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
@@ -64,38 +62,10 @@ const MainLayout = ({ children }) => {
       console.error(error);
       removeCookie('token');
     } else {
+      console.error('Logged out');
       removeCookie('token');
     }
   }
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const [response, error] = await getCurrentUserApi(cookies.token);
-
-        if (error) {
-          removeCookie('token');
-          console.error(error);
-        } else {
-          // @ts-expect-error: response might not have a json method
-          const data = await response.json();
-          // @ts-expect-error: response might not have a json method
-          if (response.ok) {
-            setUser(data.user);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    if (!cookies.token) {
-      navigate(LOGIN_ROUTE);
-    } else {
-      fetchUser();
-    }
-
-  }, [cookies.token, navigate, removeCookie]);
 
   return (
     <>
@@ -304,7 +274,7 @@ const MainLayout = ({ children }) => {
                           aria-hidden="true"
                           className="ml-4 text-sm/6 font-semibold text-gray-900"
                         >
-                          {user?.email}
+                          {cookies.email}
                         </span>
                         <ChevronDownIcon
                           aria-hidden="true"
