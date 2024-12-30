@@ -1,7 +1,7 @@
-import { Input } from '@/components/components/input';
 import { Button } from '@/components/elements/button';
 import { Divider } from '@/components/elements/divider';
 import { Heading, Subheading } from '@/components/elements/heading';
+import { Input } from '@/components/elements/input';
 import { useNotification } from '@/Notifications';
 import { QR_ROUTE } from '@/routes';
 import { useState } from 'react';

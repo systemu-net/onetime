@@ -28,8 +28,6 @@ import {
 export const App = () => {
   return (
     <NotificationProvider>
-
-
       <Router>
         <Routes>
           {/* Public routes */}
