@@ -7,4 +7,6 @@ export const LANDING_ROUTE = '/landing';
 export const HOME_ROUTE = '/home';
 export const LINKS_ROUTE = '/links';
 export const QR_ROUTE = '/qr';
+export const CREATE_QR_ROUTE = '/qr/create';
 export const PROFILE_ROUTE = '/profile';
+export const PAGES_ROUTE = '/pages';

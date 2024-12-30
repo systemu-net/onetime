@@ -1,4 +1,4 @@
-import { Button } from './button';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 
 export const DownloadUrl = ({ fileUrl }: { fileUrl: string }) => {
   const handleDownload = async () => {
@@ -18,8 +18,8 @@ export const DownloadUrl = ({ fileUrl }: { fileUrl: string }) => {
   };
 
   return (
-    <Button onClick={handleDownload} className='cursor-pointer'>
-      Download
-    </Button>
+    <button title='Download' onClick={handleDownload} className="antialiased text-primary rounded-full font-bold w-7 h-7">
+      <ArrowDownTrayIcon fontSize={24} />
+    </button>
   );
 };

@@ -1,4 +1,7 @@
+import { Button } from '@/components/elements/button';
+import { Heading } from '@/components/elements/heading';
 import { QrCodesList } from '@/components/sections/QrCodesList';
+import { CREATE_QR_ROUTE } from '@/routes';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { getQrCodes } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
@@ -37,8 +40,11 @@ const QrCodesPage = () => {
   return (
     <MainLayout>
       <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl my-2 text-gray-700">QR Codes</h1>
+        <Heading>
+          QR Codes
+        </Heading>
         {/* <Button>Create link</Button> */}
+        <Button to={CREATE_QR_ROUTE}>Create QR Code</Button>
       </div>
       <QrCodesList fetchQrCodes={retrieveQrCodes} qrCodes={qrCodes} />
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}

@@ -1,3 +1,4 @@
+import { Heading } from '@/components/elements/heading';
 import ShortenForm from '@/components/elements/ShortenForm';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
@@ -38,7 +39,10 @@ const LinksPage = () => {
     <MainLayout>
       <ShortenForm fetchLinks={fetchLinks} />
       <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl my-2 text-gray-700">Links</h1>
+        <Heading>
+          Links
+        </Heading>
+        {/* <h1 className="text-2xl my-2 text-gray-700">Links</h1> */}
         {/* <Button>Create link</Button> */}
       </div>
       <LinksList fetchLinks={fetchLinks} shortenedUrls={shortenedUrls} />

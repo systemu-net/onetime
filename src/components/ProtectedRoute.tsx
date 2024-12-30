@@ -22,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles,
 }) => {
-  const [cookies, , removeCookie] = useCookies(['token']);
+  const [cookies, setCookie, removeCookie] = useCookies(['token', 'email']);
   const [user, setUser] = useState<UserInfo | null>(null); // Explicitly allow null for initial state
   const [loading, setLoading] = useState(true); // Loading state to avoid showing error prematurely
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           // @ts-expect-error: response might not have a json method
           const data = await response.json();
           setUser(data.user);
+          setCookie('email', data.user.email);
         } else {
           console.error('Unexpected response structure');
           removeCookie('token');
