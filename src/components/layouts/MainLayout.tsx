@@ -35,14 +35,6 @@ const navigation = [
   { name: 'Analytics', href: '#', icon: ChartBarIcon, current: false },
 ];
 
-interface UserInfo {
-  id: number;
-  email: string;
-  role: string;
-  created_at: string;
-  updated_at: string;
-}
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }

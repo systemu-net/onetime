@@ -40,7 +40,9 @@ const CreateQrCode = () => {
           title: title
         }
       });
-      addNotification('Code created', "success");
+      setQrCode(code);
+      addNotification('QrCode created', "success");
+      console.log(qrCode);
       navigate(QR_ROUTE)
     } catch (error: unknown) {
       console.error(error);
