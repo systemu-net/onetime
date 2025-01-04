@@ -2,6 +2,7 @@
 import { formatDate } from '@/utils/transformers';
 import { CalendarIcon } from '@heroicons/react/20/solid';
 import { Link } from 'react-router-dom';
+import { base64Image } from './base64Image';
 
 type ItemDetailsProps = {
     title: string;
@@ -21,7 +22,7 @@ export const ItemDetails = ({ title, description, id, date, image_url }: ItemDet
                         src={image_url ? image_url : 'http://' + title + '/favicon.ico'}
                         alt={title}
                         onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/favicon.svg'; // Replace with your fallback image path
+                            (e.target as HTMLImageElement).src = base64Image; // Replace with your fallback image path
                         }}
                     />
                 </Link>
