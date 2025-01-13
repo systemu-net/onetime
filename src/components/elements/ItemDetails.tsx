@@ -29,7 +29,7 @@ export const ItemDetails = ({ title, description, id, date, image_url }: ItemDet
             </div>
             <div className="space-y-1.5">
                 <div className="text-lg/6 font-semibold">
-                    <Link to={id}>{title}</Link>
+                    <Link to={id} className='hover:underline'>{title}</Link>
                 </div>
                 <div className="text-base/6 text-zinc-600">{id}</div>
                 {description && <div className="text-xs/6 text-violet-700 break-all mr-3">{description}</div>}
