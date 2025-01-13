@@ -39,6 +39,7 @@ const Header = () => {
 
             { /* Nav links */}
             <ul className="nav__links | hide">
+              {cookies.token && (<li><a className="nav__link" href="/">Dashboard</a></li>)}
               <li><a className="nav__link" href="/">Features</a></li>
               <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
               <li><a className="nav__link" href="/">Resources</a></li>

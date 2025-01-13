@@ -1,13 +1,13 @@
 import { Heading, Subheading } from '@/components/elements/heading';
 import MainLayout from '../components/layouts/MainLayout';
 
-const PagesPage = () => {
+const AnalyticsPage = () => {
   return (
     <MainLayout>
-      <Heading>Pages</Heading>
-      <Subheading>Comming soon</Subheading>
+      <Heading>Analytics</Heading>
+      <Subheading>Comming Very Soon</Subheading>
     </MainLayout>
   );
 };
 
-export default PagesPage;
+export default AnalyticsPage;

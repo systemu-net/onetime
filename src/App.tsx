@@ -1,6 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { NotificationProvider } from './Notifications';
+import AnalyticsPage from './pages/Analytics';
 import CreateQrCode from './pages/CreateQrCode';
 import DashboardPage from './pages/Dashboard';
 import HomePage from './pages/HomePage';
@@ -14,6 +15,7 @@ import QrCodePage from './pages/QrCode';
 import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
 import {
+  ANALYTICS_ROUTE,
   CREATE_QR_ROUTE,
   DASHBOARD_ROUTE,
   LINKS_ROUTE,
@@ -90,6 +92,14 @@ export const App = () => {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <PagesPage />
+              </ProtectedRoute>
+            }
+          ></Route>
+          <Route
+            path={ANALYTICS_ROUTE}
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AnalyticsPage />
               </ProtectedRoute>
             }
           ></Route>

@@ -18,21 +18,23 @@ import {
   HomeIcon,
   LinkIcon,
   QrCodeIcon,
-  XMarkIcon,
+  ShieldCheckIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link, useLocation } from 'react-router-dom';
 import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
+import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
   { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
   { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
-  { name: 'Analytics', href: '#', icon: ChartBarIcon, current: false },
+  { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
+  { name: 'Pricing', href: PRICING_ROUTE, icon: ShieldCheckIcon, current: false },
 ];
 
 function classNames(...classes) {

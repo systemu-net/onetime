@@ -1,12 +1,13 @@
-export const PRICING_ROUTE = '/pricing';
+export const PRICING_ROUTE = '/_pricing';
 export const REGISTER_ROUTE = '/register';
 export const LOGIN_ROUTE = '/login';
 export const DASHBOARD_ROUTE = '/';
 export const LOGOUT_ROUTE = '/logout';
-export const LANDING_ROUTE = '/landing';
+export const LANDING_ROUTE = '/_landing';
 export const HOME_ROUTE = '/home';
 export const LINKS_ROUTE = '/links';
 export const QR_ROUTE = '/qr';
 export const CREATE_QR_ROUTE = '/qr/create';
 export const PROFILE_ROUTE = '/profile';
 export const PAGES_ROUTE = '/pages';
+export const ANALYTICS_ROUTE = '/analytics';
