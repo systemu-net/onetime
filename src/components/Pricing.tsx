@@ -121,7 +121,7 @@ export default function Pricing() {
         throw new Error(errorData.message); // throw error message if not successful
       }
     } catch (error) {
-      throw new Error(error);
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   };
 
