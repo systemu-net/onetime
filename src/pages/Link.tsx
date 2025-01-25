@@ -73,7 +73,7 @@ const LinkPage = () => {
           </TableHead>
           <TableBody>
             {link && link.clicks.map((click) => (
-              <TableRow>
+              <TableRow key={click.id}>
                 <TableCell>{click.country}</TableCell>
                 <TableCell>{click.ip_address}</TableCell>
                 <TableCell className="text-zinc-500">{click.referrer}</TableCell>

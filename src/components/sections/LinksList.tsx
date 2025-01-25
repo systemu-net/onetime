@@ -5,6 +5,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { API_URL } from '../../apis/config';
 import { Button } from '../elements/button';
 import { CopyUrl } from '../elements/Copy';
 import {
@@ -25,6 +26,7 @@ export const LinksList: React.FC<LinksListProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const handleDelete = async (lookup_code: string) => {
     try {
@@ -45,6 +47,14 @@ export const LinksList: React.FC<LinksListProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopy = (shortUrl: string) => {
+    navigator.clipboard.writeText(shortUrl);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
 
   return (
@@ -86,6 +96,11 @@ export const LinksList: React.FC<LinksListProps> = ({
                       <EllipsisVerticalIcon />
                     </DropdownButton>
                     <DropdownMenu anchor="bottom end">
+                      <DropdownItem
+                        onClick={() => handleCopy(`${API_URL}/${item.lookup_code}`)}
+                      >
+                        {copied ? 'Copied!' : 'Copy'}
+                      </DropdownItem>
                       <DropdownItem to={item.lookup_code}>View</DropdownItem>
                       <DropdownItem to={item.lookup_code + '/edit'}>Edit</DropdownItem>
                       <DropdownItem

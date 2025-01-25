@@ -15,6 +15,7 @@ export type Link = {
 };
 
 export type Click = {
+  id: number;
   country: string | null;
   ip_address: string;
   referrer: string | null;

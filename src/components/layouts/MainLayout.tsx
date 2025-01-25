@@ -23,6 +23,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import Jdenicon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
 import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
@@ -258,11 +259,7 @@ const MainLayout = ({ children }) => {
                   <Menu as="div" className="relative">
                     <MenuButton className="-m-1.5 flex items-center p-1.5">
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        alt=""
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        className="size-8 rounded-full bg-gray-50"
-                      />
+                      <Jdenicon value={cookies.email} size={32} className="size-8 rounded-full bg-gray-50" />
                       <span className="hidden lg:flex lg:items-center">
                         <span
                           aria-hidden="true"
