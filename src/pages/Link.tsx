@@ -1,5 +1,5 @@
 import { Subheading } from '@/components/elements/heading'
-import { Table, TableHead, TableHeader, TableRow } from '@/components/elements/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/elements/table'
 import MainLayout from '@/components/layouts/MainLayout'
 import { LINKS_ROUTE } from '@/routes'
 
@@ -65,21 +65,22 @@ const LinkPage = () => {
         <Table className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
           <TableHead>
             <TableRow>
-              <TableHeader>QR codes</TableHeader>
-              <TableHeader>Clicks</TableHeader>
-              <TableHeader className="text-right">Amount</TableHeader>
+              <TableHeader className="text-right">Country</TableHeader>
+              <TableHeader>IP Address</TableHeader>
+              <TableHeader>Referrer</TableHeader>
+              <TableHeader className="text-left">User Agent</TableHeader>
             </TableRow>
           </TableHead>
-          {/* <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id} href={order.url} title={`Order #${order.id}`}>
-            <TableCell>{order.id}</TableCell>
-            <TableCell className="text-zinc-500">{order.date}</TableCell>
-            <TableCell>{order.customer.name}</TableCell>
-            <TableCell className="text-right">US{order.amount.usd}</TableCell>
-            </TableRow>
+          <TableBody>
+            {link && link.clicks.map((click) => (
+              <TableRow>
+                <TableCell>{click.country}</TableCell>
+                <TableCell>{click.ip_address}</TableCell>
+                <TableCell className="text-zinc-500">{click.referrer}</TableCell>
+                <TableCell>{click.user_agent}</TableCell>
+              </TableRow>
             ))}
-            </TableBody> */}
+          </TableBody>
         </Table>
       </div>
     </MainLayout>

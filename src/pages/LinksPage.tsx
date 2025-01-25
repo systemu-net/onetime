@@ -11,6 +11,16 @@ export type Link = {
   lookup_code: string;
   original_url: string;
   updated_at: string;
+  clicks: Click[];
+};
+
+export type Click = {
+  country: string | null;
+  ip_address: string;
+  referrer: string | null;
+  user_agent: string;
+  created_at: string;
+  updated_at: string;
 };
 
 const LinksPage = () => {
