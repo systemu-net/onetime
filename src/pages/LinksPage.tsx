@@ -1,17 +1,11 @@
 import { Heading } from '@/components/elements/heading';
 import ShortenForm from '@/components/elements/ShortenForm';
+import { Link } from '@/types';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { getLinks } from '../apis/shorten'; // Assuming you have a .ts file and not .js
 import MainLayout from '../components/layouts/MainLayout';
 import { LinksList } from '../components/sections/LinksList';
-
-export type Link = {
-  created_at: string;
-  lookup_code: string;
-  original_url: string;
-  updated_at: string;
-};
 
 const LinksPage = () => {
   const [cookies] = useCookies(['token']);

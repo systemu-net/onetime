@@ -1,12 +1,14 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { NotificationProvider } from './Notifications';
+import CreatePage from './pages/CreatePage';
 import CreateQrCode from './pages/CreateQrCode';
 import DashboardPage from './pages/Dashboard';
 import HomePage from './pages/HomePage';
 import LinkPage from './pages/Link';
 import LinksPage from './pages/LinksPage';
 import LoginPage from './pages/LoginPage';
+import SinglePage from './pages/Page';
 import PagesPage from './pages/Pages';
 import PricingPage from './pages/PricingPage';
 import ProfilePage from './pages/ProfilePage';
@@ -14,6 +16,7 @@ import QrCodePage from './pages/QrCode';
 import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
 import {
+  CREATE_PAGES_ROUTE,
   CREATE_QR_ROUTE,
   DASHBOARD_ROUTE,
   LINKS_ROUTE,
@@ -90,6 +93,22 @@ export const App = () => {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <PagesPage />
+              </ProtectedRoute>
+            }
+          ></Route>
+          <Route
+            path={`${PAGES_ROUTE}/:id`}
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <SinglePage />
+              </ProtectedRoute>
+            }
+          ></Route>
+          <Route
+            path={CREATE_PAGES_ROUTE}
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <CreatePage />
               </ProtectedRoute>
             }
           ></Route>

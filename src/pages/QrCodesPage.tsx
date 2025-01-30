@@ -43,7 +43,6 @@ const QrCodesPage = () => {
         <Heading>
           QR Codes
         </Heading>
-        {/* <Button>Create link</Button> */}
         <Button to={CREATE_QR_ROUTE}>Create QR Code</Button>
       </div>
       <QrCodesList fetchQrCodes={retrieveQrCodes} qrCodes={qrCodes} />

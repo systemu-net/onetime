@@ -9,14 +9,7 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { createQrCode } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
 import MainLayout from '../components/layouts/MainLayout';
-
-export type QrCode = {
-  id: number;
-  image_url: string;
-  link_id: number;
-  created_at: string;
-  updated_at: string;
-};
+import { QrCode } from '../types';
 
 const CreateQrCode = () => {
   const [cookies] = useCookies(['token']);

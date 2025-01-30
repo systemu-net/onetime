@@ -8,5 +8,6 @@ export const HOME_ROUTE = '/home';
 export const LINKS_ROUTE = '/links';
 export const QR_ROUTE = '/qr';
 export const CREATE_QR_ROUTE = '/qr/create';
+export const CREATE_PAGES_ROUTE = '/pages/create';
 export const PROFILE_ROUTE = '/profile';
 export const PAGES_ROUTE = '/pages';

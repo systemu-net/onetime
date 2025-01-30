@@ -1,5 +1,5 @@
 import { deleteLink } from '@/apis/shorten';
-import { Link as LinkType } from '@/pages/LinksPage';
+import { Link as LinkType } from '@/types';
 import { extractDomain } from '@/utils/transformers';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -72,7 +72,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                     Details
                   </Button>
                   <button
-                    className="antialiased text-primary rounded-full font-bold w-7 h-7"
+                    className="antialiased text-primary rounded-full font-bold w-7 h-7 hover:scale-105"
                     disabled={loading}
                     onClick={() => handleDelete(item.lookup_code)}
                   >

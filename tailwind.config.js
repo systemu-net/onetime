@@ -20,6 +20,9 @@ export default {
         neutral500: `var(--clr-neutral-500: hsl(260, 8%, 14%))`,
         neutral900: `var(--clr-neutral-900: hsl(0, 0%, 0%))`,
       },
+      scale: {
+        'preview': '0.20',
+      }
     },
   },
   plugins: [],

@@ -1,40 +1,37 @@
-import { deleteQrCode } from '@/apis/qr_codes';
-import { QrCode as QrCodeType } from '@/pages/QrCodesPage';
+import { deletePage } from '@/apis/pages';
+import { Page } from '@/types';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 import { Button } from '../elements/button';
-import { DownloadUrl } from '../elements/Download';
 import {
   Dropdown,
   DropdownButton,
   DropdownItem,
   DropdownMenu,
 } from '../elements/dropdown';
-import { ItemDetails } from '../elements/ItemDetails';
+import Preview from './Preview';
 
-type QrCodesListProps = {
-  fetchQrCodes: () => Promise<void>;
-  qrCodes: QrCodeType[];
+type PagesListProps = {
+  fetchPages: () => Promise<void>;
+  pages: Page[];
 };
-export const QrCodesList: React.FC<QrCodesListProps> = ({
-  fetchQrCodes,
-  qrCodes,
-}) => {
+export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
 
   const handleDelete = async (id: number) => {
     try {
       setLoading(true);
-      const [response, error] = await deleteQrCode(cookies.token, id);
+      const [response, error] = await deletePage(cookies.token, id);
 
       if (error) {
         setLoading(false);
       } else {
         if (response instanceof Response && response.ok) {
-          fetchQrCodes();
+          fetchPages();
         } else {
           setLoading(false);
         }
@@ -50,20 +47,28 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
     <div className="pt-2">
       <div className="mt-2 flow-root">
         <ul>
-          {qrCodes.map((item) => (
+          {pages.map((item) => (
             <li
-              key={item.image_url}
-              className="mb-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"
+              key={item.url}
+              className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900"
             >
               <div className="flex items-center justify-between">
-                <ItemDetails
-                  id={item.id.toString()}
-                  title={`Untitled QR Code ${item.link_id}`}
-                  image_url={item.image_url}
-                  date={item.created_at}
-                />
+                <Link className="flex text-violet-700 " to={item.id.toString()}>
+                  <div className="w-[53px] h-[100px] rounded-md shadow-md hover:shadow-lg mr-4">
+                    <div className="scale-preview origin-top-left">
+                      <Preview
+                        title={item.url}
+                        configuration={item.configuration}
+                        previewIcon
+                      />
+                    </div>
+                  </div>
+                  <div className='hover:underline underline-offset-2'>
+                    {item.url}
+                  </div>
+                </Link>
+
                 <div className="hidden lg:flex gap-4 items-center">
-                  <DownloadUrl fileUrl={item.image_url} />
                   <Button outline to={item.id.toString()}>
                     Details
                   </Button>
@@ -72,7 +77,6 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                     disabled={loading}
                     onClick={() => handleDelete(item.id)}
                   >
-                    {/* <span className="">X</span> */}
                     <TrashIcon />
                   </button>
                 </div>

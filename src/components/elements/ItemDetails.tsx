@@ -28,9 +28,9 @@ export const ItemDetails = ({ title, description, id, date, image_url }: ItemDet
             </div>
             <div className="space-y-1.5">
                 <div className="text-lg/6 font-semibold">
-                    <Link to={id}>{title}</Link>
+                    <Link className='hover:underline hover:underline-offset-2 dark:text-zinc-200' to={id}>{title}</Link>
                 </div>
-                <div className="text-base/6 text-zinc-600">{id}</div>
+                <div className="text-base/6 text-zinc-600 dark:text-zinc-500">{id}</div>
                 {description && <div className="text-xs/6 text-violet-700 break-all mr-3">{description}</div>}
                 <div className="text-xs/6 text-zinc-500">
                     <CalendarIcon className="size-4 inline-block mr-1 -mt-1" />

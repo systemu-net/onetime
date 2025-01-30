@@ -42,7 +42,7 @@ img {
 }
 
 button {
-  border: none;
+  /* border: none; */
   font-family: inherit;
   cursor: pointer;
   background-color: transparent;
