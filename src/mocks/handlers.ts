@@ -1,8 +1,8 @@
 // @ts-nocheck
 
-import {API_URL} from '@/apis/config';
-import {Page} from '@/types';
-import {http, HttpResponse} from 'msw';
+import { API_URL } from '@/apis/config';
+import { Page } from '@/types';
+import { http, HttpResponse } from 'msw';
 const LINKS = [
   {
     created_at: '2024-12-20T10:00:00Z',
@@ -103,39 +103,39 @@ const PAGE: Page = {
     fontFamily: "'Courier New', monospace",
   },
 };
-let pages: Page[] = [];
+const pages: Page[] = [];
 
 export const handlers = [
-  http.post(
-    `${API_URL}/users/sign_in`,
-    async ({request, params, cookies}) => {
-      // const {email, password} = await request.json();
+  // http.post(
+  //   `${API_URL}/users/sign_in`,
+  //   async ({request, params, cookies}) => {
+  //     // const {email, password} = await request.json();
 
-      // // Validate the request payload (optional)
-      // if (email === 'camomile.mail2@gmail.com' && password === 'testtest') {
-      return new HttpResponse(null, {
-        status: 200,
-        headers: {
-          Authorization: 'Bearer mock-token-123',
-        },
-      });
-    }
-    // }
-  ),
-  http.get(
-    `${API_URL}/api/v1/current_user`,
-    async ({request, params, cookies}) => {
-      return HttpResponse.json({
-        user: {
-          id: 12,
-          email: 'camomile.mail2@gmail.com',
-          role: 'admin',
-          created_at: '2024-12-19T16:30:00Z',
-          updated_at: '2024-12-19T16:30:00Z',
-        },
-      });
-    }
-  ),
+  //     // // Validate the request payload (optional)
+  //     // if (email === 'camomile.mail2@gmail.com' && password === 'testtest') {
+  //     return new HttpResponse(null, {
+  //       status: 200,
+  //       headers: {
+  //         Authorization: 'Bearer mock-token-123',
+  //       },
+  //     });
+  //   }
+  //   // }
+  // ),
+  // http.get(
+  //   `${API_URL}/api/v1/current_user`,
+  //   async ({request, params, cookies}) => {
+  //     return HttpResponse.json({
+  //       user: {
+  //         id: 12,
+  //         email: 'camomile.mail2@gmail.com',
+  //         role: 'admin',
+  //         created_at: '2024-12-19T16:30:00Z',
+  //         updated_at: '2024-12-19T16:30:00Z',
+  //       },
+  //     });
+  //   }
+  // ),
   http.post(`${API_URL}/api/v1/links`, async ({request, params, cookies}) => {
     return HttpResponse.json({
       links: LINKS,

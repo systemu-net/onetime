@@ -30,7 +30,7 @@ const Preview: React.FC<PreviewProps> = ({
         fontFamily,
         social,
     } = configuration;
-    const baseClass = `py-8 w-[298px] p-6 rounded-3xl overflow-scroll ${previewIcon ? 'h-[500px]' : 'h-[558px]'
+    const baseClass = `py-8 w-[298px] p-6 overflow-y-scroll scrollbar-hidden rounded-3xl ${previewIcon ? 'h-[500px]' : 'h-[558px]'
         }`;
 
     return (
