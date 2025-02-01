@@ -18,11 +18,17 @@ const designTemplates = [
     description: 'A clean and modern design template to highlight your links.',
     image: '/templates/blue-pink.png',
     configuration: {
+      fontFamily: 'rubik',
       button: 'rounded',
-      background: '#538eba',
+      buttonColor: '#596289',
       social: {
         fb: 'https://facebook.com/smariana',
       },
+      backgroundType: 'gradient',
+      gradientStart: '#5b90bc',
+      gradientEnd: '#d8b0c8',
+      gradientDirection: 'to bottom',
+      textColor: '#fff'
     },
   },
   {
@@ -32,14 +38,19 @@ const designTemplates = [
     image: '/templates/pink-gradient.png',
     configuration: {
       button: 'rounded',
-      background: 'linear-gradient(-45deg, #e94975, #8f7aac)',
+      buttonColor: '#fff',
       animation: 'Gradient 15s ease infinite',
       textColor: 'green',
       social: {
         ig: 'https://facebook.com/smariana',
       },
+      backgroundType: 'gradient',
+      gradientDirection: 'to bottom right',
+      gradientStart: '#8f7aac',
+      gradientEnd: '#e94975',
     },
   },
+
   // {
   //   id: 3,
   //   name: 'Bold Design',

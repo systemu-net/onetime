@@ -71,7 +71,8 @@ const QR_CODES = [
 const PAGE: Page = {
   created_at: '2024-12-19T08:30:00Z',
   id: 1,
-  url: 'Carimus',
+  url: 'Sergii Demianchuk',
+  description: 'CTO and entrepreneur',
   updated_at: '2024-12-20T09:00:00Z',
   links: [
     {
@@ -95,12 +96,13 @@ const PAGE: Page = {
   ],
   configuration: {
     button: 'rounded',
-    textColor: 'purple',
-    background: 'pink',
+    textColor: '#8b5cf6',
+    backgroundType: 'color',
+    backgroundColor: '#3b3054',
     social: {
       fb: 'https://facebook.com/smariana',
     },
-    fontFamily: "'Courier New', monospace",
+    fontFamily: 'rubik',
   },
 };
 const pages: Page[] = [];

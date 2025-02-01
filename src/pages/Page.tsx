@@ -1,6 +1,7 @@
 import { SHORT_URL } from '@/apis/config';
 import { getPage } from '@/apis/pages';
 import { Checkbox } from '@/components/elements/checkbox';
+import ColorPicker from '@/components/elements/colorPicker';
 import { CopyLink } from '@/components/elements/Copy';
 import {
   FieldGroup,
@@ -12,6 +13,8 @@ import {
 import { Subheading } from '@/components/elements/heading';
 import { Input } from '@/components/elements/input';
 import { Radio, RadioGroup } from '@/components/elements/radio';
+import { Select } from '@/components/elements/select';
+import { Text } from '@/components/elements/text';
 import MainLayout from '@/components/layouts/MainLayout';
 import Preview, { socialIcons } from '@/components/sections/Preview';
 import { PAGES_ROUTE } from '@/routes';
@@ -21,7 +24,6 @@ import {
   PaintBrushIcon,
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
-import { SliderPicker } from 'react-color';
 
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
@@ -35,9 +37,14 @@ const buttonStyles: { id: Page['configuration']['button']; title: string }[] = [
   { id: 'rounded-full', title: 'Rounded Full' },
 ];
 const fontStyles = [
+  { id: 'rubik', title: 'Rubik' },
   { id: 'mono', title: 'Monospace' },
   { id: "'Courier New', monospace", title: 'Courier New, monospace' },
   { id: "'Brush Script MT', cursive", title: 'Brush Script MT, cursive' },
+];
+const backgroundTypes = [
+  { id: 'color', title: 'Color' },
+  { id: 'gradient', title: 'Gradient' },
 ];
 const socialPlatforms = [
   { id: 'ig', title: 'Instagram' },
@@ -54,11 +61,20 @@ const tabs = [
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
+const Section = ({ title, legend = '', children }) => (
+  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
+    <Fieldset>
+      <Title>{title}</Title>
+      {legend && <Legend>{legend}</Legend>}
+      <FieldGroup>{children}</FieldGroup>
+    </Fieldset>
+  </div>
+);
 
 const SinglePage = () => {
   const { id } = useParams();
   const [cookies] = useCookies(['token']);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [page, setPage] = useState<Page | null>(null);
   const [activeTab, setActiveTab] = useState('Content');
 
@@ -68,7 +84,7 @@ const SinglePage = () => {
       setPage(res);
     } catch (error: unknown) {
       console.error(error);
-      setErrorMessage('An error occurred while fetching page.');
+      setError('An error occurred while fetching page.');
     }
   };
 
@@ -93,49 +109,55 @@ const SinglePage = () => {
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
             <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-              {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-              <Subheading className="mt-4">
-                <span className='mr-4'>{SHORT_URL + page?.url} </span><CopyLink link={SHORT_URL + page?.url} />
+              {error && <p className="text-red-500">{error}</p>}
+              <Subheading className="">
+                <span className="mr-4">{SHORT_URL + page?.url} </span>
+                <CopyLink link={SHORT_URL + page?.url} />
               </Subheading>
             </div>
-            <div>
-              <div className="border-b border-gray-200">
-                <nav aria-label="Tabs" className="-mb-px flex space-x-8">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.name}
-                      onClick={() => setActiveTab(tab.name)}
+
+            <div className="border-b border-gray-200">
+              <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.name}
+                    onClick={() => setActiveTab(tab.name)}
+                    className={classNames(
+                      tab.name === activeTab
+                        ? 'border-violet-500 text-violet-600'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'group inline-flex items-center border-b-2 px-4 py-4 text-sm font-medium focus:outline-violet-600'
+                    )}
+                  >
+                    <tab.icon
                       className={classNames(
                         tab.name === activeTab
-                          ? 'border-violet-500 text-violet-600'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                        'group inline-flex items-center border-b-2 px-4 py-4 text-sm font-medium'
+                          ? 'text-violet-500'
+                          : 'text-gray-400 group-hover:text-gray-500',
+                        '-ml-0.5 mr-2 size-5'
                       )}
-                    >
-                      <tab.icon
-                        className={classNames(
-                          tab.name === activeTab
-                            ? 'text-violet-500'
-                            : 'text-gray-400 group-hover:text-gray-500',
-                          '-ml-0.5 mr-2 size-5'
-                        )}
-                      />
-                      {tab.name}
-                    </button>
-                  ))}
-                </nav>
-              </div>
+                    />
+                    {tab.name}
+                  </button>
+                ))}
+              </nav>
             </div>
 
             <div className="mt-4 flex flex-wrap flex-col justify-between gap-4">
               {activeTab === 'Content' ? (
                 <div>
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Title</Title>
-                      <FieldGroup>
+                  <Section title="About">
+                    <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                      <Subheading>
+                        Title
+                        <span className="text-sm opacity-60">
+                          &nbsp;(optional)
+                        </span>
+                      </Subheading>
+                      <div>
                         <Input
                           type="text"
+                          maxLength={40}
                           defaultValue={page.url}
                           onChange={(e) =>
                             setPage({
@@ -144,16 +166,38 @@ const SinglePage = () => {
                             })
                           }
                         />
-                      </FieldGroup>
-                    </Fieldset>
-                  </div>
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Social Links</Title>
-                      <Legend>
-                        Select social platforms and enter their links
-                      </Legend>
-                      <div className="flex gap-6 pt-4 my-4">
+                        <Text className="float-end">{page.url.length}/40</Text>
+                      </div>
+                      <Subheading>
+                        Description
+                        <span className="text-sm opacity-60">
+                          &nbsp;(optional)
+                        </span>
+                      </Subheading>
+                      <div>
+                        <Input
+                          type="text"
+                          defaultValue={page?.description}
+                          maxLength={40}
+                          onChange={(e) =>
+                            setPage({
+                              ...page,
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                        <Text className="float-end">
+                          {page?.description?.length || 0}/40
+                        </Text>
+                      </div>
+                    </section>
+                  </Section>
+                  <Section
+                    title="Social Links"
+                    legend="Select social platforms and enter their links"
+                  >
+                    <>
+                      <div className="flex gap-6">
                         {socialPlatforms.map((platform) => (
                           <div key={platform.id}>
                             <Checkbox
@@ -184,162 +228,243 @@ const SinglePage = () => {
                           </div>
                         ))}
                       </div>
-                      <Label>Edit your links</Label>
-                      {socialPlatforms.map(
-                        (platform) =>
-                          page.configuration.social?.[platform.id] !==
-                          undefined && (
-                            <div
-                              key={platform.id}
-                              className="flex items-center mb-2"
-                            >
-                              {socialIcons[platform.id]}
-                              <Input
-                                type="text"
-                                placeholder={`Enter ${platform.title} link`}
-                                value={
-                                  page.configuration.social?.[platform.id] || ''
-                                }
-                                onChange={(e) =>
-                                  setPage({
-                                    ...page,
-                                    configuration: {
-                                      ...page.configuration,
-                                      social: {
-                                        ...page.configuration.social,
-                                        [platform.id]: e.target.value,
+                      <div>
+                        <Label className="mb-1">Edit your links</Label>
+                        {socialPlatforms.map(
+                          (platform) =>
+                            page.configuration.social?.[platform.id] !==
+                            undefined && (
+                              <div
+                                key={platform.id}
+                                className="flex items-center mb-2"
+                              >
+                                {socialIcons[platform.id]}
+                                <Input
+                                  type="text"
+                                  placeholder={`Enter ${platform.title} link`}
+                                  value={
+                                    page.configuration.social?.[platform.id] ||
+                                    ''
+                                  }
+                                  onChange={(e) =>
+                                    setPage({
+                                      ...page,
+                                      configuration: {
+                                        ...page.configuration,
+                                        social: {
+                                          ...page.configuration.social,
+                                          [platform.id]: e.target.value,
+                                        },
                                       },
-                                    },
-                                  })
-                                }
-                                className="ml-4 flex-1"
-                              />
-                            </div>
-                          )
-                      )}
-                    </Fieldset>
-                  </div>
+                                    })
+                                  }
+                                  className="ml-4 flex-1"
+                                />
+                              </div>
+                            )
+                        )}
+                      </div>
+                    </>
+                  </Section>
                 </div>
               ) : (
                 <div>
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Button Styles</Title>
-                      <Legend>How do you want your buttons look alike?</Legend>
-                      <FieldGroup>
-                        <RadioGroup
-                          value={page.configuration.button}
-                          onChange={(value: Page['configuration']['button']) =>
-                            setPage({
-                              ...page,
-                              configuration: {
-                                ...page.configuration,
-                                button: value,
-                              },
-                            })
-                          }
-                          className="grid"
-                        >
-                          {buttonStyles.map((style) => (
-                            <Radio key={style.id} value={style.id}>
-                              <Label>{style.title}</Label>
-                            </Radio>
-                          ))}
-                        </RadioGroup>
-                      </FieldGroup>
-                    </Fieldset>
-                  </div>
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Font Style</Title>
-                      <Legend className="mb-8">
-                        Select the font style for your page
-                      </Legend>
-
-                      <RadioGroup
-                        value={page.configuration.fontFamily}
-                        onChange={(value: string) =>
+                  <Section title="Page">
+                    <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                      <Subheading>Text Color</Subheading>
+                      <ColorPicker
+                        defaultValue={page.configuration.textColor}
+                        onChange={(e) =>
                           setPage({
                             ...page,
                             configuration: {
                               ...page.configuration,
-                              fontFamily: value,
+                              textColor: e.target.value,
                             },
                           })
                         }
-                        className="grid"
+                      />
+                      <Subheading>Background</Subheading>
+                      <RadioGroup
+                        value={page.configuration.backgroundType || 'color'}
+                        className="space-x-4"
+                        onChange={(value) =>
+                          setPage({
+                            ...page,
+                            configuration: {
+                              ...page.configuration,
+                              backgroundType: value,
+                            },
+                          })
+                        }
                       >
-                        {fontStyles.map((style) => (
-                          <Radio key={style.id} value={style.id}>
-                            <Label>{style.title}</Label>
+                        {backgroundTypes.map((type) => (
+                          <Radio key={type.id} value={type.id}>
+                            <Label>{type.title}</Label>
                           </Radio>
                         ))}
                       </RadioGroup>
-                    </Fieldset>
-                  </div>
 
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Text Color</Title>
-                      <FieldGroup>
-                        <Input
-                          type="text"
-                          value={page.configuration.textColor}
-                          onChange={(e) =>
-                            setPage({
-                              ...page,
-                              configuration: {
-                                ...page.configuration,
-                                textColor: e.target.value,
-                              },
-                            })
-                          }
-                        />
-                        <SliderPicker
-                          color={page.configuration.textColor}
-                          onChangeComplete={(e) =>
-                            setPage({
-                              ...page,
-                              configuration: {
-                                ...page.configuration,
-                                textColor: e.hex,
-                              },
-                            })
-                          } />
-                      </FieldGroup>
-                    </Fieldset>
-                  </div>
-                  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
-                    <Fieldset>
-                      <Title>Background</Title>
-                      <FieldGroup>
-                        <Input
-                          type="text"
-                          value={page.configuration.background}
-                          onChange={(e) =>
-                            setPage({
-                              ...page,
-                              configuration: {
-                                ...page.configuration,
-                                background: e.target.value,
-                              },
-                            })
-                          }
-                        />
-                      </FieldGroup>
-                    </Fieldset>
-                  </div>
+                      {page.configuration.backgroundType === 'color' && (
+                        <>
+                          <Label>Background Color</Label>
+                          <ColorPicker
+                            value={
+                              page.configuration.backgroundColor || '#ffffff'
+                            }
+                            onChange={(e) =>
+                              setPage({
+                                ...page,
+                                configuration: {
+                                  ...page.configuration,
+                                  backgroundColor: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </>
+                      )}
+
+                      {page.configuration.backgroundType === 'gradient' && (
+                        <>
+                          <Label>Gradient Colors</Label>
+                          <div className="flex gap-2">
+                            <ColorPicker
+                              id="hs-color-input"
+                              title="Choose your color"
+                              value={
+                                page.configuration.gradientStart || '#ffffff'
+                              }
+                              onChange={(e) =>
+                                setPage({
+                                  ...page,
+                                  configuration: {
+                                    ...page.configuration,
+                                    gradientStart: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                            <ColorPicker
+                              value={
+                                page.configuration.gradientEnd || '#000000'
+                              }
+                              onChange={(e) =>
+                                setPage({
+                                  ...page,
+                                  configuration: {
+                                    ...page.configuration,
+                                    gradientEnd: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+
+                          <Label>Gradient Direction</Label>
+                          <Select
+                            name="gradientDirection"
+                            defaultValue={
+                              page.configuration.gradientDirection ||
+                              'to bottom'
+                            }
+                            onChange={(e) =>
+                              setPage({
+                                ...page,
+                                configuration: {
+                                  ...page.configuration,
+                                  gradientDirection: e.target
+                                    .value as Page['configuration']['gradientDirection'],
+                                },
+                              })
+                            }
+                          >
+                            <option value="to right">Left to Right</option>
+                            <option value="to bottom">Top to Bottom</option>
+                            <option value="to top right">
+                              Diagonal (Top-Right)
+                            </option>
+                            <option value="to bottom left">
+                              Diagonal (Bottom-Left)
+                            </option>
+                          </Select>
+                        </>
+                      )}
+                    </section>
+                  </Section>
+                  <Section
+                    title="Button Styles"
+                    legend="How do you want your buttons look alike?"
+                  >
+                    <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                      <Subheading>Button Text Color</Subheading>
+                      <ColorPicker
+                        defaultValue={page.configuration.buttonColor}
+                        onChange={(e) =>
+                          setPage({
+                            ...page,
+                            configuration: {
+                              ...page.configuration,
+                              buttonColor: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </section>
+                    <RadioGroup
+                      value={page.configuration.button}
+                      onChange={(value: Page['configuration']['button']) =>
+                        setPage({
+                          ...page,
+                          configuration: {
+                            ...page.configuration,
+                            button: value,
+                          },
+                        })
+                      }
+                      className="grid"
+                    >
+                      {buttonStyles.map((style) => (
+                        <Radio key={style.id} value={style.id}>
+                          <Label>{style.title}</Label>
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+
+                  </Section>
+                  <Section title="Font Style" legend="Select the font style for your page">
+                    <RadioGroup
+                      value={page.configuration.fontFamily}
+                      onChange={(value: string) =>
+                        setPage({
+                          ...page,
+                          configuration: {
+                            ...page.configuration,
+                            fontFamily: value,
+                          },
+                        })
+                      }
+                      className="grid"
+                    >
+                      {fontStyles.map((style) => (
+                        <Radio key={style.id} value={style.id}>
+                          <Label>{style.title}</Label>
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+                  </Section>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden md:block mb-4">
             <div className="sticky top-20">
               <div className="text-center mb-4">Preview</div>
               <div className="shadow-lg rounded-3xl overflow-hidden">
                 <Preview
                   title={page.url}
+                  description={page.description}
                   configuration={page.configuration}
                   links={page.links}
                 />
@@ -348,6 +473,15 @@ const SinglePage = () => {
           </div>
         </div>
       )}
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
       {JSON.stringify(page)}
     </MainLayout>
   );

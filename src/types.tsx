@@ -1,4 +1,3 @@
-
 export type QrCode = {
     id: number;
     image_url: string;
@@ -29,28 +28,43 @@ export type Link = {
 };
 
 export type PageLink = {
-    id: string,
-    label: string,
-    color: string,
-    link: string,
-}
-
+    id: string;
+    label: string;
+    color: string;
+    link: string;
+};
 export type Page = {
     id: number;
     url: string;
+    description?: string;
     created_at: string;
     updated_at: string;
     links: PageLink[];
     configuration: {
-        button: "rounded-full" | "rounded" | "rounded-sm" | "rounded-lg" | "squared"
+        button:
+        | 'rounded-full'
+        | 'rounded'
+        | 'rounded-sm'
+        | 'rounded-lg'
+        | 'squared';
+        buttonColor: string;
         textColor: string;
         background: string;
+        backgroundType: string; // 'color' | 'gradient';
+        backgroundColor?: string; // For solid color background
+        gradientStart?: string; // For gradient: starting color
+        gradientEnd?: string; // For gradient: ending color
+        gradientDirection?:
+        | 'to right'
+        | 'to bottom'
+        | 'to top right'
+        | 'to bottom left'; // Gradient direction
         fontFamily: string;
         social: {
             fb?: string;
             tiktok?: string;
             ig?: string;
             linkedin?: string;
-        }
-    }
+        };
+    };
 };
