@@ -27,7 +27,7 @@ import Jdenicon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
 import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
+import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -136,7 +136,7 @@ const MainLayout = ({ children }) => {
 
                     <li className="mt-auto">
                       <Link
-                        to="#"
+                        to={SETTINGS_ROUTE}
                         className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                       >
                         <Cog6ToothIcon
@@ -193,7 +193,7 @@ const MainLayout = ({ children }) => {
 
                 <li className="mt-auto">
                   <Link
-                    to="#"
+                    to={SETTINGS_ROUTE}
                     className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                   >
                     <Cog6ToothIcon
