@@ -14,10 +14,14 @@ export const createQrCode = async (jwtToken, bodyObject) => {
     const response = await fetch(`${API_URL}/api/v1/qr_codes`, requestOptions);
     if (response.ok) {
       return response.json();
-    } else {
-      const errorData = await response.json();
-      throw new Error(errorData.message); // throw error message if not successful
     }
+
+    if (response.status === 429) {
+      return [null, 'API request limit reached. Do You want to upgrade the plan?'];
+    }
+
+    const errorData = await response.json();
+    throw new Error(errorData.message); // throw error message if not successful
   } catch (error) {
     throw new Error(error);
   }

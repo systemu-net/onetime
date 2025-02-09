@@ -11,3 +11,4 @@ export const CREATE_QR_ROUTE = '/qr/create';
 export const PROFILE_ROUTE = '/profile';
 export const PAGES_ROUTE = '/pages';
 export const ANALYTICS_ROUTE = '/analytics';
+export const SETTINGS_ROUTE = '/settings';
