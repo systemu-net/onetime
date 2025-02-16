@@ -36,7 +36,7 @@ const DashboardPage = () => {
         ))}
       </div>
       <h1 className="text-2xl my-4 text-gray-700">Plan Details</h1>
-      <div className="bg-white shadow-md rounded-lg p-6 w-80 border">
+      <div className="block max-w-sm p-6 bg-white shadow-md rounded-lg mb-2 w-80 border">
         <div className="flex justify-between items-center border-b pb-3">
             <h2 className="text-lg font-semibold">{cookies.plan.name} plan</h2>
             <button onClick={handleUpgrade} className="bg-blue-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-blue-700">Upgrade</button>
