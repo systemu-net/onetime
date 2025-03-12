@@ -7,6 +7,7 @@ import { getLinks } from '../apis/shorten'; // Assuming you have a .ts file and 
 import MainLayout from '../components/layouts/MainLayout';
 import { LinksList } from '../components/sections/LinksList';
 
+
 const LinksPage = () => {
   const [cookies] = useCookies(['token']);
   const [errorMessage, setErrorMessage] = useState<string>('');

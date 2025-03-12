@@ -18,21 +18,24 @@ import {
   HomeIcon,
   LinkIcon,
   QrCodeIcon,
-  XMarkIcon,
+  ShieldCheckIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import Jdenticon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
 import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PROFILE_ROUTE, QR_ROUTE } from '../../routes';
+import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
   { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
   { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
-  { name: 'Analytics', href: '#', icon: ChartBarIcon, current: false },
+  { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
+  { name: 'Pricing', href: PRICING_ROUTE, icon: ShieldCheckIcon, current: false },
 ];
 
 function classNames(...classes) {
@@ -133,7 +136,7 @@ const MainLayout = ({ children }) => {
 
                     <li className="mt-auto">
                       <Link
-                        to="#"
+                        to={SETTINGS_ROUTE}
                         className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                       >
                         <Cog6ToothIcon
@@ -190,7 +193,7 @@ const MainLayout = ({ children }) => {
 
                 <li className="mt-auto">
                   <Link
-                    to="#"
+                    to={SETTINGS_ROUTE}
                     className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
                   >
                     <Cog6ToothIcon
@@ -256,11 +259,7 @@ const MainLayout = ({ children }) => {
                   <Menu as="div" className="relative">
                     <MenuButton className="-m-1.5 flex items-center p-1.5">
                       <span className="sr-only">Open user menu</span>
-                      <img
-                        alt=""
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        className="size-8 rounded-full bg-gray-50"
-                      />
+                      <Jdenticon value={cookies.email} size={"32"} className="size-8 rounded-full bg-gray-50" />
                       <span className="hidden lg:flex lg:items-center">
                         <span
                           aria-hidden="true"

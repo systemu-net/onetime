@@ -57,7 +57,7 @@ const Footer = () => {
             </div>
           </div>
           {/* Copy Right */}
-          <p className="mt-4 font-medium text-sm text-gray-600">&copy; 2024 Thinly. All rights reserved.</p>
+          <p className="mt-4 font-medium text-sm text-gray-600">&copy; 2025 Thinly. All rights reserved.</p>
         </div>
       </div>
     </footer>

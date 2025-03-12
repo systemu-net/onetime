@@ -1,6 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { NotificationProvider } from './Notifications';
+import AnalyticsPage from './pages/Analytics';
 import CreatePage from './pages/CreatePage';
 import CreateQrCode from './pages/CreateQrCode';
 import DashboardPage from './pages/Dashboard';
@@ -15,7 +16,9 @@ import ProfilePage from './pages/ProfilePage';
 import QrCodePage from './pages/QrCode';
 import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
+import SettingsPage from './pages/Settings';
 import {
+  ANALYTICS_ROUTE,
   CREATE_PAGES_ROUTE,
   CREATE_QR_ROUTE,
   DASHBOARD_ROUTE,
@@ -25,7 +28,8 @@ import {
   PRICING_ROUTE,
   PROFILE_ROUTE,
   QR_ROUTE,
-  REGISTER_ROUTE
+  REGISTER_ROUTE,
+  SETTINGS_ROUTE
 } from './routes';
 
 export const App = () => {
@@ -39,6 +43,14 @@ export const App = () => {
           <Route path={LOGIN_ROUTE} element={<LoginPage />}></Route>
 
           {/* Protected routes */}
+          <Route
+            path={SETTINGS_ROUTE}
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path={DASHBOARD_ROUTE}
             element={
@@ -113,6 +125,14 @@ export const App = () => {
             }
           ></Route>
           <Route
+            path={ANALYTICS_ROUTE}
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          ></Route>
+          <Route
             path={PROFILE_ROUTE}
             element={
               <ProtectedRoute allowedRoles={['admin']}>
@@ -120,7 +140,6 @@ export const App = () => {
               </ProtectedRoute>
             }
           ></Route>
-
           <Route path="/landing" element={<HomePage />}></Route>
           <Route path="*" element={<HomePage />}></Route>
         </Routes>

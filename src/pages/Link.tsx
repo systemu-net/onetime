@@ -1,6 +1,7 @@
 import { Subheading } from '@/components/elements/heading';
 import {
   Table,
+  TableBody, TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -8,17 +9,18 @@ import {
 import MainLayout from '@/components/layouts/MainLayout';
 import { LINKS_ROUTE } from '@/routes';
 
-import { createQrCode } from '@/apis/qr_codes';
 import { getLink } from '@/apis/shorten';
-import { Button } from '@/components/elements/button';
 import { ItemDetails } from '@/components/elements/ItemDetails';
-import { useNotification } from '@/Notifications';
-import { Link } from '@/types';
 import { extractDomain } from '@/utils/transformers';
 import { ChevronLeftIcon } from '@heroicons/react/16/solid';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+import { Link } from './LinksPage';
+
+import { createQrCode } from '@/apis/qr_codes';
+import { Button } from '@/components/elements/button';
+import { useNotification } from '@/Notifications';
 
 const LinkPage = () => {
   const { lookup_code } = useParams();
@@ -97,21 +99,22 @@ const LinkPage = () => {
         <Table className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
           <TableHead>
             <TableRow>
-              <TableHeader>QR codes</TableHeader>
-              <TableHeader>Clicks</TableHeader>
-              <TableHeader className="text-right">Amount</TableHeader>
+              <TableHeader className="text-right">Country</TableHeader>
+              <TableHeader>IP Address</TableHeader>
+              <TableHeader>Referrer</TableHeader>
+              <TableHeader className="text-left">User Agent</TableHeader>
             </TableRow>
           </TableHead>
-          {/* <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id} href={order.url} title={`Order #${order.id}`}>
-            <TableCell>{order.id}</TableCell>
-            <TableCell className="text-zinc-500">{order.date}</TableCell>
-            <TableCell>{order.customer.name}</TableCell>
-            <TableCell className="text-right">US{order.amount.usd}</TableCell>
-            </TableRow>
+          <TableBody>
+            {link && link.clicks.map((click) => (
+              <TableRow key={click.id}>
+                <TableCell>{click.country}</TableCell>
+                <TableCell>{click.ip_address}</TableCell>
+                <TableCell className="text-zinc-500">{click.referrer}</TableCell>
+                <TableCell>{click.user_agent}</TableCell>
+              </TableRow>
             ))}
-            </TableBody> */}
+          </TableBody>
         </Table>
       </div>
       <div className="py-5 lg:p-8 mt-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white">

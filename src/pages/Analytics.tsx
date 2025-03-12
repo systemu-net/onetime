@@ -5,7 +5,7 @@ const AnalyticsPage = () => {
   return (
     <MainLayout>
       <Heading>Analytics</Heading>
-      <Subheading>Coming soon Zzzzz</Subheading>
+      <Subheading>Comming Very Soon</Subheading>
     </MainLayout>
   );
 };

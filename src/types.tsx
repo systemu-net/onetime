@@ -20,11 +20,23 @@ export type NotificationContextType = {
     ) => void;
     removeNotification: (id: string) => void;
 };
+
+export type Click = {
+    id: number;
+    country: string | null;
+    ip_address: string;
+    referrer: string | null;
+    user_agent: string;
+    created_at: string;
+    updated_at: string;
+};
+
 export type Link = {
     created_at: string;
     lookup_code: string;
     original_url: string;
     updated_at: string;
+    clicks: Click[];
 };
 
 export type PageLink = {

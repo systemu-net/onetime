@@ -1,6 +1,10 @@
+import { API_URL } from '@/apis/config';
 import { Radio, RadioGroup } from '@headlessui/react';
 import { CheckIcon } from '@heroicons/react/20/solid';
 import { useState } from 'react';
+import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { LOGIN_ROUTE } from '../routes';
 
 type Frequency = {
   value: 'monthly' | 'annually';
@@ -25,55 +29,58 @@ const frequencies: Frequency[] = [
 
 const tiers: Tier[] = [
   {
-    name: 'Hobby',
-    id: 'tier-hobby',
+    name: 'Core',
+    id: 'core',
     href: '#',
-    price: { monthly: '$19', annually: '$199' },
-    description: 'The essentials to provide your best work for clients.',
-    features: ['5 products', 'Up to 1,000 subscribers', 'Basic analytics'],
+    price: { monthly: '$8', annually: '$80' },
+    description: 'Everything in Free plus:',
+    features: ['10 QR Codes/month', '100 links/month', '3 custom landing pages'],
     mostPopular: false,
   },
   {
-    name: 'Freelancer',
-    id: 'tier-freelancer',
+    name: 'Growth',
+    id: 'growth',
     href: '#',
-    price: { monthly: '$29', annually: '$299' },
-    description: 'The essentials to provide your best work for clients.',
+    price: { monthly: '$29', annually: '$290' },
+    description: 'Everything in Core, plus:',
     features: [
-      '5 products',
-      'Up to 1,000 subscribers',
-      'Basic analytics',
-      '48-hour support response time',
-    ],
-    mostPopular: false,
-  },
-  {
-    name: 'Startup',
-    id: 'tier-startup',
-    href: '#',
-    price: { monthly: '$59', annually: '$599' },
-    description: 'A plan that scales with your rapidly growing business.',
-    features: [
-      '25 products',
-      'Up to 10,000 subscribers',
-      'Advanced analytics',
-      '24-hour support response time',
-      'Marketing automations',
+      '30 QR Codes/month',
+      '500 links/month',
+      '5 custom landing pages',
+      '1 months of click & scan data'
     ],
     mostPopular: true,
   },
   {
-    name: 'Enterprise',
-    id: 'tier-enterprise',
+    name: 'Premium',
+    id: 'premium',
     href: '#',
-    price: { monthly: '$99', annually: '$999' },
-    description: 'Dedicated support and infrastructure for your company.',
+    price: { monthly: '$199', annually: '$1990' },
+    description: 'Everything in Growth, plus:',
     features: [
-      'Unlimited products',
-      'Unlimited subscribers',
+      '200 QR Codes/month',
+      '3000 links/month',
+      '10 custom landing pages',
+      '1 year of click & scan data',
+      'Bulk link shortening',
+      'City-level & device type click & scan data',
+    ],
+    mostPopular: false,
+  },
+  {
+    name: 'Enterprise',
+    id: 'enterprise',
+    href: '#',
+    price: { monthly: '$999', annually: '$9990' },
+    description: 'Everything in Premium, plus:',
+    features: [
+      'High-volume API & webhook access',
+      '99.9% SLA uptime',
+      '2000 QR Codes/month',
+      '20000 links/month',
+      '50 custom landing pages',
       'Advanced analytics',
       '1-hour, dedicated support response time',
-      'Marketing automations',
       'Custom reporting tools',
     ],
     mostPopular: false,
@@ -86,6 +93,38 @@ function classNames(...classes: string[]) {
 
 export default function Pricing() {
   const [frequency, setFrequency] = useState<Frequency>(frequencies[0]);
+  const [cookies] = useCookies(['token']);
+  const navigate = useNavigate();
+
+  const handleClick = async (event) => {
+    if (!cookies.token) {
+      return navigate(LOGIN_ROUTE);
+    }
+
+    const buttonValue = event.target.value;
+
+    try {
+      const response = await fetch(`${API_URL}/api/v1/checkouts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': cookies.token,
+        },
+        body: JSON.stringify({ lookup_key: buttonValue }),
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+
+        window.location.href = url;
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message); // throw error message if not successful
+      }
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   return (
     <div className="bg-white py-24 sm:py-32">
@@ -97,8 +136,7 @@ export default function Pricing() {
           </p>
         </div>
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
-          Choose an affordable plan that’s packed with the best features for
-          engaging your audience, creating customer loyalty, and driving sales.
+          Upgrade to benefit so much more from your short links, QR Codes & Custom landing pages
         </p>
         <div className="mt-16 flex justify-center">
           <fieldset aria-label="Payment frequency">
@@ -126,8 +164,8 @@ export default function Pricing() {
               key={tier.id}
               className={classNames(
                 tier.mostPopular
-                  ? 'ring-2 ring-accent'
-                  : 'ring-1 ring-gray-200',
+                  ? 'ring-2 ring-accent shadow-2xl'
+                  : 'ring-1 ring-gray-200 shadow-2xl',
                 'rounded-3xl p-8'
               )}
             >
@@ -140,7 +178,6 @@ export default function Pricing() {
               >
                 {tier.name}
               </h3>
-              <p className="mt-4 text-sm/6 text-gray-600">{tier.description}</p>
               <p className="mt-6 flex items-baseline gap-x-1">
                 <span className="text-4xl font-semibold tracking-tight text-gray-900">
                   {tier.price[frequency.value]}
@@ -149,21 +186,23 @@ export default function Pricing() {
                   {frequency.priceSuffix}
                 </span>
               </p>
-              <a
-                href={tier.href}
+              <button
+                onClick={handleClick}
+                value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
                 aria-describedby={tier.id}
                 className={classNames(
                   tier.mostPopular
                     ? 'bg-accent text-primary shadow-sm hover:bg-primary hover:text-white'
                     : 'text-primary ring-1 ring-inset ring-accent hover:bg-primary hover:text-white hover:ring-0',
-                  'mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
+                  'w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
                 )}
               >
-                Buy plan
-              </a>
+                Upgrade to {tier.name}
+              </button>
+              <p className="mt-8 font-bold text-sm/6 text-gray-600">{tier.description}</p>
               <ul
                 role="list"
-                className="mt-8 space-y-3 text-sm/6 text-gray-600"
+                className="mt-2 space-y-3 text-sm/6 text-gray-600"
               >
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex gap-x-3">
