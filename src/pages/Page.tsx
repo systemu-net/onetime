@@ -1,5 +1,7 @@
 import { SHORT_URL } from '@/apis/config';
 import { getPage } from '@/apis/pages';
+import Box from '@/components/Box';
+import { Button } from '@/components/elements/button';
 import { Checkbox } from '@/components/elements/checkbox';
 import ColorPicker from '@/components/elements/colorPicker';
 import { CopyLink } from '@/components/elements/Copy';
@@ -17,6 +19,7 @@ import { Select } from '@/components/elements/select';
 import { Text } from '@/components/elements/text';
 import MainLayout from '@/components/layouts/MainLayout';
 import Preview, { socialIcons } from '@/components/sections/Preview';
+import { useLinks } from '@/context/LinksContext';
 import { PAGES_ROUTE } from '@/routes';
 import { Page } from '@/types';
 import {
@@ -62,13 +65,13 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 const Section = ({ title, legend = '', children }) => (
-  <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
+  <Box>
     <Fieldset>
       <Title>{title}</Title>
       {legend && <Legend>{legend}</Legend>}
       <FieldGroup>{children}</FieldGroup>
     </Fieldset>
-  </div>
+  </Box>
 );
 
 const SinglePage = () => {
@@ -77,6 +80,13 @@ const SinglePage = () => {
   const [error, setError] = useState<string>('');
   const [page, setPage] = useState<Page | null>(null);
   const [activeTab, setActiveTab] = useState('Content');
+  const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
+
+  useEffect(() => {
+    if (cookies.token && !shortenedUrls.length) {
+      fetchLinks();
+    }
+  }, []);
 
   const fetchPage = async () => {
     try {
@@ -108,13 +118,13 @@ const SinglePage = () => {
       {page && (
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
-            <div className="mb-4 p-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
+            <Box>
               {error && <p className="text-red-500">{error}</p>}
               <Subheading className="">
                 <span className="mr-4">{SHORT_URL + page?.url} </span>
                 <CopyLink link={SHORT_URL + page?.url} />
               </Subheading>
-            </div>
+            </Box>
 
             <div className="border-b border-gray-200">
               <nav aria-label="Tabs" className="-mb-px flex space-x-8">
@@ -125,7 +135,7 @@ const SinglePage = () => {
                     className={classNames(
                       tab.name === activeTab
                         ? 'border-violet-500 text-violet-600'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        : 'border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white',
                       'group inline-flex items-center border-b-2 px-4 py-4 text-sm font-medium focus:outline-violet-600'
                     )}
                   >
@@ -133,7 +143,7 @@ const SinglePage = () => {
                       className={classNames(
                         tab.name === activeTab
                           ? 'text-violet-500'
-                          : 'text-gray-400 group-hover:text-gray-500',
+                          : 'text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-white',
                         '-ml-0.5 mr-2 size-5'
                       )}
                     />
@@ -192,6 +202,23 @@ const SinglePage = () => {
                       </div>
                     </section>
                   </Section>
+
+                  <Section
+                    title="Add your links here"
+                  >
+                    <Button>TODO: add page link</Button>
+                    {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+                    <div>
+                      {page?.links.map((button) => (
+                        <div
+                          key={button.id}
+                        >
+                          {button.label}: {button.link}
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+
                   <Section
                     title="Social Links"
                     legend="Select social platforms and enter their links"
@@ -482,7 +509,9 @@ const SinglePage = () => {
       <br />
       <br />
       <br />
-      {JSON.stringify(page)}
+      <div className='max-w-2xl break-words'>
+        {JSON.stringify(page)}
+      </div>
     </MainLayout>
   );
 };

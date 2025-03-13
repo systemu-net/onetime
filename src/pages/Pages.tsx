@@ -19,7 +19,7 @@ const PagesPage = () => {
       setPages(res);
     } catch (error: unknown) {
       console.error(error);
-      setErrorMessage('An error occurred while fetching pages codes.');
+      setErrorMessage('An error occurred while fetching pages.');
     }
   };
 

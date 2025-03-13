@@ -10,17 +10,19 @@ import MainLayout from '@/components/layouts/MainLayout';
 import { LINKS_ROUTE } from '@/routes';
 
 import { getLink } from '@/apis/shorten';
+import Box from '@/components/Box';
+import { Button } from '@/components/elements/button';
 import { ItemDetails } from '@/components/elements/ItemDetails';
 import { extractDomain } from '@/utils/transformers';
 import { ChevronLeftIcon } from '@heroicons/react/16/solid';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { Link } from './LinksPage';
+
 
 import { createQrCode } from '@/apis/qr_codes';
-import { Button } from '@/components/elements/button';
 import { useNotification } from '@/Notifications';
+import { Link } from '@/types';
 
 const LinkPage = () => {
   const { lookup_code } = useParams();
@@ -76,7 +78,7 @@ const LinkPage = () => {
           Links
         </RouterLink>
       </div>
-      <div className="mb-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900">
+      <Box>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
         {link && (
           <ItemDetails
@@ -84,6 +86,7 @@ const LinkPage = () => {
             description={link.original_url}
             id={link.lookup_code}
             date={link.created_at}
+            link={false}
           />
         )}
         {/* <div className="mt-8 grid gap-8 sm:grid-cols-3">
@@ -116,13 +119,13 @@ const LinkPage = () => {
             ))}
           </TableBody>
         </Table>
-      </div>
-      <div className="py-5 lg:p-8 mt-4 px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white">
+      </Box>
+      <Box>
         <Subheading className="mt-4">QR Code</Subheading>
         <Button outline onClick={CreateQRCodeFromLink}>
           Create QR Code
         </Button>
-      </div>
+      </Box>
     </MainLayout>
   );
 };

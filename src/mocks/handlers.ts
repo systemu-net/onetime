@@ -1,8 +1,8 @@
 // @ts-nocheck
 
-import { API_URL } from '@/apis/config';
-import { Page } from '@/types';
-import { http, HttpResponse } from 'msw';
+import {API_URL} from '@/apis/config';
+import {Page} from '@/types';
+import {http, HttpResponse} from 'msw';
 const LINKS = [
   {
     created_at: '2024-12-20T10:00:00Z',

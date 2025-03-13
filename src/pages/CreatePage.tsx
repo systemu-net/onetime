@@ -1,5 +1,6 @@
 import { createPage } from '@/apis/pages';
 
+import Box from '@/components/Box';
 import { Button } from '@/components/elements/button';
 import { Divider } from '@/components/elements/divider';
 import { Heading, Subheading } from '@/components/elements/heading';
@@ -138,7 +139,7 @@ const CreatePage = () => {
       <div className="pt-2">
         <div className="mt-2 flow-root">
           {step == 1 && (
-            <div className="mb-4 px-4 py-5 sm:p-6 shadow rounded-lg bg-white dark:bg-zinc-900">
+            <Box>
               <section className="grid gap-x-8">
                 <div className="space-y-1">
                   <Subheading>Create Your Page</Subheading>
@@ -174,11 +175,11 @@ const CreatePage = () => {
                 Check out these inspiring examples!
                 <div></div>
               </section>
-            </div>
+            </Box>
           )}
 
           {step == 2 && (
-            <div className="mb-4 px-4 py-5 sm:p-6 shadow rounded-lg bg-white dark:bg-zinc-900">
+            <Box>
               <section className="grid gap-x-8">
                 <div>
                   <Subheading>Choose your Design</Subheading>
@@ -262,7 +263,7 @@ const CreatePage = () => {
                   </Button>
                 </div>
               </section>
-            </div>
+            </Box>
           )}
         </div>
       </div>

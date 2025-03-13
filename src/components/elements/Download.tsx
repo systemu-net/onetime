@@ -18,7 +18,11 @@ export const DownloadUrl = ({ fileUrl }: { fileUrl: string }) => {
   };
 
   return (
-    <button title='Download' onClick={handleDownload} className="antialiased text-primary rounded-full font-bold w-7 h-7 hover:scale-105">
+    <button
+      title="Download"
+      onClick={handleDownload}
+      className="antialiased rounded-full font-bold w-7 h-7 hover:scale-105"
+    >
       <ArrowDownTrayIcon fontSize={24} />
     </button>
   );

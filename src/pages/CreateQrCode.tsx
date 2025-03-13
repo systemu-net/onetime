@@ -1,3 +1,4 @@
+import Box from '@/components/Box';
 import { Button } from '@/components/elements/button';
 import { Divider } from '@/components/elements/divider';
 import { Heading, Subheading } from '@/components/elements/heading';
@@ -65,7 +66,7 @@ const CreateQrCode = () => {
 
       <div className="pt-2">
         <div className="mt-2 flow-root">
-          <div className='mb-4 px-4 py-5 sm:p-6 shadow rounded-lg bg-white dark:bg-zinc-900'>
+          <Box>
             <section className="grid gap-x-8">
               <div className="space-y-1">
                 <Subheading>Original url</Subheading>
@@ -83,7 +84,7 @@ const CreateQrCode = () => {
               </div>
             </section>
 
-          </div>
+          </Box>
           <Button className='float-right cursor-pointer' onClick={createCode}>Create QR Code</Button>
         </div>
       </div>
