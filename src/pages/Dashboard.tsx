@@ -7,9 +7,9 @@ import MainLayout from '../components/layouts/MainLayout';
 import { LINKS_ROUTE, PAGES_ROUTE, QR_ROUTE } from '../routes';
 
 const tools = [
-  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link', image: pageBase64Image },
+  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link', image: shortenBase64Image },
   { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes', image: qrCodeBase64Image },
-  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages', image: shortenBase64Image },
+  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages', image: pageBase64Image },
 ];
 
 const DashboardPage = () => {
