@@ -4,9 +4,9 @@ import MainLayout from '../components/layouts/MainLayout';
 import { LINKS_ROUTE, PAGES_ROUTE, QR_ROUTE } from '../routes';
 
 const tools = [
-  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link' },
-  { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes' },
-  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages' },
+  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link', image: '/images/shorten-bg.png' },
+  { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes', image: '/images/qr-bg.png' },
+  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages', image: '/images/pages-bg.png' },
 ];
 
 const DashboardPage = () => {
@@ -24,14 +24,25 @@ const DashboardPage = () => {
           <Link
             key={item.label}
             to={item.path}
-            className="block max-w-sm p-6 bg-white border border-gray-200 rounded-md shadow hover:bg-gray-100"
+            className="block max-w-sm bg-white border border-gray-200 rounded-md shadow hover:bg-gray-100 overflow-hidden"
           >
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-700">
-              {item.label}
-            </h5>
-            <p className="font-normal text-gray-700">
-              {item.descr}
-            </p>
+            {/* Container with flex to split horizontally */}
+            <div className="flex h-24 hover:bg-gray-50">
+              {/* Left half - Background image */}
+              <div className="w-2/3 p-6 flex flex-col justify-center">
+                <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-700">
+                  {item.label}
+                </h5>
+                <p className="font-normal text-gray-700 text-sm">
+                  {item.descr}
+                </p>
+              </div>
+              {/* Right half - Content */}
+              <div>
+                className="w-1/3 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${item.image})` }}
+              </div>
+            </div>
           </Link>
         ))}
       </div>
