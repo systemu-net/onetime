@@ -2,7 +2,7 @@
 import { formatDate } from '@/utils/transformers';
 import { CalendarIcon } from '@heroicons/react/20/solid';
 import { Link } from 'react-router-dom';
-import { base64Image } from './base64Image';
+import { base64Image } from '../images/base64Image';
 
 type ItemDetailsProps = {
     title: string;

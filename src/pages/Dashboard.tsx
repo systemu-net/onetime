@@ -1,12 +1,15 @@
+import { qrCodeBase64Image } from '@/components/images/qrCodeBase64Image';
+import { shortenBase64Image } from '@/components/images/shortenBase64Image';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
+import { pageBase64Image } from '../components/images/pageBase64Image';
 import MainLayout from '../components/layouts/MainLayout';
 import { LINKS_ROUTE, PAGES_ROUTE, QR_ROUTE } from '../routes';
 
 const tools = [
-  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link', image: '/images/shorten-bg.png' },
-  { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes', image: '/images/qr-bg.png' },
-  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages', image: '/images/pages-bg.png' },
+  { path: LINKS_ROUTE, label: 'Shorten It!', descr: 'Create new short link', image: pageBase64Image },
+  { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes', image: qrCodeBase64Image },
+  { path: PAGES_ROUTE, label: 'Create landing page', descr: 'Go to landing pages', image: shortenBase64Image },
 ];
 
 const DashboardPage = () => {
