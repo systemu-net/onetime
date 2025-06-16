@@ -38,9 +38,10 @@ const DashboardPage = () => {
                 </p>
               </div>
               {/* Right half - Content */}
-              <div>
+              <div
                 className="w-1/3 bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: `url(${item.image})` }}
+              >
               </div>
             </div>
           </Link>
