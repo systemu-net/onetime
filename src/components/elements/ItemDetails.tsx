@@ -26,10 +26,10 @@ export const ItemDetails = ({ title, description, id, date, image_url, link = tr
           <Link to={id}>
             <img
               className={`${image_url ? 'w-30' : 'w-10'} aspect-square rounded-lg shadow dark:bg-zinc-100`}
-              src={image_url ? image_url : 'http://' + title + '/favicon.ico'}
+              src={image_url ? image_url : 'https://' + title + '/favicon.ico'}
               alt={title}
               onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/favicon.svg'; // Replace with your fallback image path
+                  (e.target as HTMLImageElement).src = base64Image; // Use base64 fallback image
               }}
             />
           </Link>
