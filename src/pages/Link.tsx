@@ -1,11 +1,4 @@
 import { Subheading } from '@/components/elements/heading';
-import {
-  Table,
-  TableBody, TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/elements/table';
 import MainLayout from '@/components/layouts/MainLayout';
 import { LINKS_ROUTE } from '@/routes';
 
@@ -21,6 +14,7 @@ import { Link as RouterLink, useParams } from 'react-router-dom';
 
 
 import { createQrCode } from '@/apis/qr_codes';
+import LinkStatsComponent from '@/components/LinkStatsComponent';
 import { useNotification } from '@/Notifications';
 import { Link } from '@/types';
 
@@ -89,36 +83,8 @@ const LinkPage = () => {
             link={false}
           />
         )}
-        {/* <div className="mt-8 grid gap-8 sm:grid-cols-3">
-        <Stat title="Total revenue" value={link.totalRevenue} change={link.totalRevenueChange} />
-        <Stat
-        title="Tickets sold"
-        value={`${link.ticketsSold}/${link.ticketsAvailable}`}
-        change={link.ticketsSoldChange}
-        />
-        <Stat title="Pageviews" value={link.pageViews} change={link.pageViewsChange} />
-        </div> */}
-        <Subheading className="mt-4">Statistics</Subheading>
-        <Table className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
-          <TableHead>
-            <TableRow>
-              <TableHeader className="text-right">Country</TableHeader>
-              <TableHeader>IP Address</TableHeader>
-              <TableHeader>Referrer</TableHeader>
-              <TableHeader className="text-left">User Agent</TableHeader>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {link && link.clicks.map((click) => (
-              <TableRow key={click.id}>
-                <TableCell>{click.country}</TableCell>
-                <TableCell>{click.ip_address}</TableCell>
-                <TableCell className="text-zinc-500">{click.referrer}</TableCell>
-                <TableCell>{click.user_agent}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {/* Statistics Section */}
+        {link && <LinkStatsComponent link={link} />}
       </Box>
       <Box>
         <Subheading className="mt-4">QR Code</Subheading>

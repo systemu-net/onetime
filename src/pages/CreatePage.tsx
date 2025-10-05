@@ -71,27 +71,27 @@ const designTemplates = [
 const CreatePage = () => {
   const [cookies] = useCookies(['token']);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [url, setUrl] = useState('');
+  const [title, setTitle] = useState('');
   const [step, setStep] = useState(1);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const { addNotification } = useNotification();
   const navigate = useNavigate();
 
   const create = async () => {
-    if (!url) {
+    if (!title) {
       return;
     }
     try {
       setErrorMessage('');
       const page = await createPage(cookies.token, {
-        page: {
-          url: url,
+        brand_page: {
+          title: designTemplates.filter((template) => template.id === selectedTemplate)[0].name,
           content: designTemplates.filter(
             (template) => template.id === selectedTemplate
           )[0].content,
         },
       });
-      navigate(`${PAGES_ROUTE}/${page.id}`);
+      navigate(`${PAGES_ROUTE}/${page.lookup_code}`);
       addNotification('Page created', 'success');
     } catch (error: unknown) {
       console.error(error);
@@ -149,7 +149,7 @@ const CreatePage = () => {
                       aria-label="name"
                       name="name"
                       placeholder="Company or Name"
-                      onChange={(e) => setUrl(e.target.value)}
+                      onChange={(e) => setTitle(e.target.value)}
                       required
                     />
                     <div>
