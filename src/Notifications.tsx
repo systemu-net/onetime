@@ -1,31 +1,17 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import Notification from "./components/elements/notification";
-
-type Notification = {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-};
-
-type NotificationContextType = {
-  notifications: Notification[];
-  addNotification: (
-    message: string,
-    type: 'success' | 'error' | 'info' | 'warning'
-  ) => void;
-  removeNotification: (id: string) => void;
-};
+import { NotificationContextType, Notification as NotificationType } from "./types";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined
 );
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
   const addNotification = (
     message: string,
-    type: 'success' | 'error' | 'info' | 'warning'
+    type: NotificationType['type']
   ) => {
     const id = crypto.randomUUID();
     setNotifications((prev) => [...prev, { id, message, type }]);

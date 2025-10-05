@@ -1,19 +1,12 @@
+import { getQrCode } from '@/apis/qr_codes';
 import { ItemDetails } from '@/components/elements/ItemDetails';
 import { QR_ROUTE } from '@/routes';
+import { QrCode } from '@/types';
 import { ChevronLeftIcon } from '@heroicons/react/20/solid';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { getQrCode } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
 import MainLayout from '../components/layouts/MainLayout';
-
-export type QrCode = {
-  id: number;
-  image_url: string;
-  link_id: number;
-  created_at: string;
-  updated_at: string;
-};
 
 const QrCodePage = () => {
   const [cookies] = useCookies(['token']);
@@ -29,16 +22,15 @@ const QrCodePage = () => {
       setQrCode(link);
     } catch (error: unknown) {
       console.error(error);
-      setErrorMessage('An error occurred while fetching links.');
+      setErrorMessage('An error occurred while fetching qr code.');
     }
   };
 
-  // Optionally, you can call fetchLinks when the component mounts (if needed)
   useEffect(() => {
     if (cookies.token) {
       fetchLink();
     }
-  }, [cookies.token]); // Runs when the token is available
+  }, [cookies.token]);
 
   return (
     <MainLayout>

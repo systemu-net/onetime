@@ -109,7 +109,7 @@ self.addEventListener('fetch', function (event) {
   // Prevents the self-unregistered worked from handling requests
   // after it's been deleted (still remains active until the next reload).
   if (activeClientIds.size === 0) {
-    return
+    // return
   }
 
   // Generate unique request ID.
@@ -125,7 +125,7 @@ async function handleRequest(event, requestId) {
   // Ensure MSW is active and ready to handle the message, otherwise
   // this message will pend indefinitely.
   if (client && activeClientIds.has(client.id)) {
-    ;(async function () {
+    ; (async function () {
       const responseClone = response.clone()
 
       sendToClient(

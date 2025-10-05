@@ -1,44 +1,38 @@
-import { deleteLink } from '@/apis/shorten';
-import { Link as LinkType } from '@/types';
-import { extractDomain } from '@/utils/transformers';
+import { deletePage } from '@/apis/pages';
+import { Page } from '@/types';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { API_URL } from '../../apis/config';
+import { Link } from 'react-router-dom';
 import Box from '../Box';
 import { Button } from '../elements/button';
-import { CopyUrl } from '../elements/Copy';
 import {
   Dropdown,
   DropdownButton,
   DropdownItem,
   DropdownMenu,
 } from '../elements/dropdown';
-import { ItemDetails } from '../elements/ItemDetails';
+import Preview from './Preview';
 
-type LinksListProps = {
-  fetchLinks: () => Promise<void>;
-  shortenedUrls: LinkType[];
+type PagesListProps = {
+  fetchPages: () => Promise<void>;
+  pages: Page[];
 };
-export const LinksList: React.FC<LinksListProps> = ({
-  fetchLinks,
-  shortenedUrls,
-}) => {
+export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
-  const [copied, setCopied] = useState<boolean>(false);
 
   const handleDelete = async (lookup_code: string) => {
     try {
       setLoading(true);
-      const [response, error] = await deleteLink(cookies.token, lookup_code);
+      const [response, error] = await deletePage(cookies.token, lookup_code);
 
       if (error) {
         setLoading(false);
       } else {
         if (response instanceof Response && response.ok) {
-          fetchLinks();
+          fetchPages();
         } else {
           setLoading(false);
         }
@@ -50,34 +44,34 @@ export const LinksList: React.FC<LinksListProps> = ({
     }
   };
 
-  const handleCopy = (shortUrl: string) => {
-    navigator.clipboard.writeText(shortUrl);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
-
   return (
     <div className="pt-2">
       <div className="mt-2 flow-root">
         <ul>
-          {shortenedUrls.map((item) => (
-            <li key={item.lookup_code}>
+          {pages.map((item) => (
+            <li key={item.title}>
               <Box>
                 <div className="flex items-center justify-between">
-                  <ItemDetails
-                    title={extractDomain(item.original_url)}
-                    description={item.original_url}
-                    id={item.lookup_code}
-                    date={item.created_at}
-                  />
+                  <Link
+                    className="flex gap-2"
+                    to={item.lookup_code.toString()}
+                  >
+                    <div className="w-[53px] h-[100px] rounded-md shadow-md hover:shadow-lg mr-4">
+                      <div className="scale-preview origin-top-left">
+                        <Preview
+                          title={item.title}
+                          content={item.content}
+                          previewIcon
+                        />
+                      </div>
+                    </div>
+                    <div className="hover:underline underline-offset-2">
+                      {item.title}
+                    </div>
+                  </Link>
+
                   <div className="hidden lg:flex gap-4 items-center">
-                    <CopyUrl code={item.lookup_code} />
-                    {/* <Button outline to={item.lookup_code + '/edit'}>
-                      Edit
-                    </Button> */}
-                    <Button outline to={item.lookup_code}>
+                    <Button outline to={item.title.toString()}>
                       Details
                     </Button>
                     <button
@@ -85,7 +79,6 @@ export const LinksList: React.FC<LinksListProps> = ({
                       disabled={loading}
                       onClick={() => handleDelete(item.lookup_code)}
                     >
-                      {/* <span className="">X</span> */}
                       <TrashIcon />
                     </button>
                   </div>
@@ -95,17 +88,10 @@ export const LinksList: React.FC<LinksListProps> = ({
                         <EllipsisVerticalIcon />
                       </DropdownButton>
                       <DropdownMenu anchor="bottom end">
-                        <DropdownItem
-                          onClick={() =>
-                            handleCopy(`${API_URL}/${item.lookup_code}`)
-                          }
-                        >
-                          {copied ? 'Copied!' : 'Copy'}
+                        <DropdownItem to={item.title.toString()}>
+                          View
                         </DropdownItem>
-                        <DropdownItem to={item.lookup_code}>View</DropdownItem>
-                        <DropdownItem to={item.lookup_code + '/edit'}>
-                          Edit
-                        </DropdownItem>
+                        <DropdownItem to={item.title + '/edit'}>Edit</DropdownItem>
                         <DropdownItem
                           disabled={loading}
                           onClick={() => handleDelete(item.lookup_code)}

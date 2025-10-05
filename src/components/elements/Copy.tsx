@@ -19,3 +19,20 @@ export const CopyUrl = ({ code }: { code: string }) => {
     </Button>
   );
 };
+export const CopyLink = ({ link }: { link: string }) => {
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  return (
+    <Button color='teal' onClick={handleCopy}>
+      <span className="">{copied ? 'Copied!' : 'Copy '}</span>
+    </Button>
+  );
+};

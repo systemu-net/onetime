@@ -64,7 +64,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <>
-      <div className='text-textPrimary font-rubik bg-zinc-100 dark:bg-zinc-950'>
+      <div className='text-primary dark:text-gray-200 font-rubik bg-zinc-100 dark:bg-zinc-950 min-h-svh'>
         <Dialog
           open={sidebarOpen}
           onClose={setSidebarOpen}
@@ -99,7 +99,7 @@ const MainLayout = ({ children }) => {
 
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-zinc-950 px-6 pb-4">
                 <div className="flex h-16 shrink-0 items-center">
-                  <Link to="/" className="logo h-8 w-auto dark:invert">
+                  <Link to="/" className="logo h-8 w-auto dark:invert hover:bg-pink-300">
                     <img src={Logo} alt="Logo" />
                   </Link>
                 </div>
@@ -114,7 +114,7 @@ const MainLayout = ({ children }) => {
                               className={classNames(
                                 item.href === location.pathname
                                   ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                                  : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600',
+                                  : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600',
                                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                               )}
                             >
@@ -137,12 +137,20 @@ const MainLayout = ({ children }) => {
                     <li className="mt-auto">
                       <Link
                         to={SETTINGS_ROUTE}
-                        className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
-                      >
+                        className={classNames(
+                          SETTINGS_ROUTE === location.pathname
+                            ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
+                            : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600',
+                          'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                        )}                      >
                         <Cog6ToothIcon
                           aria-hidden="true"
-                          className="size-6 shrink-0 text-gray-400 group-hover:text-violet-600"
-                        />
+                          className={classNames(
+                            SETTINGS_ROUTE === location.pathname
+                              ? 'text-violet-600 dark:text-violet-500'
+                              : 'text-gray-400 group-hover:text-violet-600',
+                            'size-6 shrink-0'
+                          )} />
                         Settings
                       </Link>
                     </li>
@@ -171,7 +179,7 @@ const MainLayout = ({ children }) => {
                           className={classNames(
                             item.href === location.pathname
                               ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                              : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
+                              : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
                             'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
                           )}
                         >
@@ -194,12 +202,21 @@ const MainLayout = ({ children }) => {
                 <li className="mt-auto">
                   <Link
                     to={SETTINGS_ROUTE}
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-violet-600"
+                    className={classNames(
+                      SETTINGS_ROUTE === location.pathname
+                        ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
+                        : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
+                      'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                    )}
                   >
                     <Cog6ToothIcon
                       aria-hidden="true"
-                      className="size-6 shrink-0 text-gray-400 group-hover:text-violet-600"
-                    />
+                      className={classNames(
+                        SETTINGS_ROUTE === location.pathname
+                          ? 'text-violet-600 dark:text-violet-500'
+                          : 'text-gray-400 group-hover:text-violet-600',
+                        'size-6 shrink-0'
+                      )} />
                     Settings
                   </Link>
                 </li>
@@ -213,7 +230,7 @@ const MainLayout = ({ children }) => {
               <button
                 type="button"
                 onClick={() => setSidebarOpen(true)}
-                className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+                className="-m-2.5 p-2.5 text-gray-700 dark:text-white lg:hidden"
               >
                 <span className="sr-only">Open sidebar</span>
                 <Bars3Icon aria-hidden="true" className="size-6" />
@@ -263,7 +280,7 @@ const MainLayout = ({ children }) => {
                       <span className="hidden lg:flex lg:items-center">
                         <span
                           aria-hidden="true"
-                          className="ml-4 text-sm/6 font-semibold text-gray-900"
+                          className="ml-4 text-sm/6 font-semibold"
                         >
                           {cookies.email}
                         </span>
@@ -300,9 +317,11 @@ const MainLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="pt-6">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              {children}
+          <main className="pt-6 flex flex-1 h-full">
+            <div className='flex-grow h-full'>
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
             </div>
           </main>
         </div>
