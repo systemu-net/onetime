@@ -14,7 +14,7 @@ const LinksPage = () => {
     if (cookies.token && !shortenedUrls.length) {
       fetchLinks();
     }
-  }, []);
+  }, [cookies.token, shortenedUrls.length, fetchLinks]);
 
   return (
     <MainLayout>

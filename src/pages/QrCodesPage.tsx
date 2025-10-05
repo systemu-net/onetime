@@ -2,7 +2,7 @@ import { Button } from '@/components/elements/button';
 import { Heading } from '@/components/elements/heading';
 import { QrCodesList } from '@/components/sections/QrCodesList';
 import { CREATE_QR_ROUTE } from '@/routes';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { getQrCodes } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
 import MainLayout from '../components/layouts/MainLayout';
@@ -20,7 +20,7 @@ const QrCodesPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [qrCodes, setQrCodes] = useState<QrCode[]>([]);
 
-  const retrieveQrCodes = async () => {
+  const retrieveQrCodes = useCallback(async () => {
     try {
       const qrs: QrCode[] = await getQrCodes(cookies.token);
       setQrCodes(qrs);
@@ -28,14 +28,14 @@ const QrCodesPage = () => {
       console.error(error);
       setErrorMessage('An error occurred while fetching qr codes.');
     }
-  };
+  }, [cookies.token]);
 
   // Optionally, you can call fetchLinks when the component mounts (if needed)
   useEffect(() => {
     if (cookies.token) {
       retrieveQrCodes();
     }
-  }, [cookies.token]); // Runs when the token is available
+  }, [cookies.token, retrieveQrCodes]); // Runs when the token is available
 
   return (
     <MainLayout>

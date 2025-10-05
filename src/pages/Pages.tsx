@@ -4,7 +4,7 @@ import { Heading } from '@/components/elements/heading';
 import { PagesList } from '@/components/sections/PagesList';
 import { CREATE_PAGES_ROUTE } from '@/routes';
 import { Page } from '@/types';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import MainLayout from '../components/layouts/MainLayout';
 
@@ -13,7 +13,7 @@ const PagesPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [pages, setPages] = useState<Page[]>([]);
 
-  const retrievePages = async () => {
+  const retrievePages = useCallback(async () => {
     try {
       const res: Page[] = await getPages(cookies.token);
       setPages(res);
@@ -21,14 +21,14 @@ const PagesPage = () => {
       console.error(error);
       setErrorMessage('An error occurred while fetching pages.');
     }
-  };
+  }, [cookies.token]);
 
   // Optionally, you can call fetchLinks when the component mounts (if needed)
   useEffect(() => {
     if (cookies.token) {
       retrievePages();
     }
-  }, [cookies.token]); // Runs when the token is available
+  }, [cookies.token, retrievePages]); // Runs when the token is available
   return (
     <MainLayout>
       <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
