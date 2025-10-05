@@ -54,17 +54,17 @@ const DashboardPage = () => {
       </div>
       <h1 className="text-2xl my-4">Plan Details</h1>
       {cookies?.plan && (
-        <div className='w-1/3'>
-          <Box className="border mr-2.5">
-            <div className="flex justify-between items-center border-b pb-3">
+        <div className='w-full sm:w-2/3 md:w-1/2 lg:w-1/3'>
+          <Box className="border">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-3 gap-3">
               <h2 className="text-lg font-semibold">{cookies.plan.name} plan</h2>
-              <Button to={'/_pricing'}>Upgrade</Button>
+              <Button to={'/_pricing'} className="w-full sm:w-auto">Upgrade</Button>
             </div>
             <div className="mt-4">
               <p className="font-medium">Included in your plan:</p>
               <ul className="mt-2 space-y-2 text-sm">
-                {cookies?.plan?.features?.map((feature) => (
-                  <li className="flex items-center gap-2">
+                {cookies?.plan?.features?.map((feature, index) => (
+                  <li key={index} className="flex items-center gap-2">
                     <span>&#10003;</span> {feature.used}/{feature.limit}{' '}
                     {feature.name} per month
                   </li>
