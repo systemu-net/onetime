@@ -61,7 +61,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     } else {
       fetchUser();
     }
-  }, [cookies.token, navigate, removeCookie]);
+  }, [cookies.token, navigate, removeCookie, setCookie]);
 
   if (loading) {
     return <h1>Loading...</h1>; // Loading state while fetching user info

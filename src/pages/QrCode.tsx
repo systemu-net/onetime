@@ -16,21 +16,21 @@ const QrCodePage = () => {
   const [qrCode, setQrCode] = useState<QrCode>();
 
 
-  const fetchLink = async () => {
-    try {
-      const link: QrCode = await getQrCode(cookies.token, qr_code);
-      setQrCode(link);
-    } catch (error: unknown) {
-      console.error(error);
-      setErrorMessage('An error occurred while fetching qr code.');
-    }
-  };
-
   useEffect(() => {
+    const fetchQrCodeData = async () => {
+      try {
+        const link: QrCode = await getQrCode(cookies.token, qr_code);
+        setQrCode(link);
+      } catch (error: unknown) {
+        console.error(error);
+        setErrorMessage('An error occurred while fetching qr code.');
+      }
+    };
+
     if (cookies.token) {
-      fetchLink();
+      fetchQrCodeData();
     }
-  }, [cookies.token]);
+  }, [cookies.token, qr_code]);
 
   return (
     <MainLayout>

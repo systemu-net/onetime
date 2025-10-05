@@ -32,21 +32,21 @@ const LinkPage = () => {
 
   const [link, setLink] = useState<Link | null>(null);
 
-  const fetchLink = async () => {
-    try {
-      const link: Link = await getLink(cookies.token, lookup_code);
-      setLink(link);
-    } catch (error: unknown) {
-      console.error(error);
-      setErrorMessage('An error occurred while fetching links.');
-    }
-  };
-
   useEffect(() => {
+    const fetchLink = async () => {
+      try {
+        const link: Link = await getLink(cookies.token, lookup_code);
+        setLink(link);
+      } catch (error: unknown) {
+        console.error(error);
+        setErrorMessage('An error occurred while fetching links.');
+      }
+    };
+
     if (cookies.token) {
       fetchLink();
     }
-  }, [cookies.token]); // Runs when the token is available
+  }, [cookies.token, lookup_code]); // Runs when the token or lookup_code is available
 
   const CreateQRCodeFromLink = async () => {
     if (link?.original_url) {

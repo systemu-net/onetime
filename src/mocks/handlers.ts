@@ -1,11 +1,9 @@
-// @ts-nocheck
-
 import { API_URL } from '@/apis/config';
 import { Page } from '@/types';
 import { http, HttpResponse } from 'msw';
 const LINKS = [
   {
-    created_at: '2024-12-20T10:00:00Z',
+    created_at: '2024-12-19T08:30:00Z',
     id: 1,
     lookup_code: 'abc123',
     original_url: 'https://example.com',
@@ -69,7 +67,8 @@ const QR_CODES = [
   },
 ];
 const PAGE: Page = {
-  title: 1,
+  lookup_code: 'sergii-demo',
+  published_lookup_code: 'sergii-demo-pub',
   title: 'Sergii Demianchuk',
   description: 'CTO and entrepreneur',
   created_at: '2024-12-19T08:30:00Z',
@@ -96,7 +95,9 @@ const PAGE: Page = {
   ],
   content: {
     button: 'rounded',
+    buttonColor: '#ffffff',
     textColor: '#8b5cf6',
+    background: '#ffffff',
     backgroundType: 'color',
     backgroundColor: '#3b3054',
     social: {
@@ -138,19 +139,19 @@ export const handlers = [
   //     });
   //   }
   // ),
-  http.post(`${API_URL}/api/v1/links`, async ({request, params, cookies}) => {
+  http.post(`${API_URL}/api/v1/links`, async () => {
     return HttpResponse.json({
       links: LINKS,
     });
   }),
-  http.get(`${API_URL}/api/v1/links`, async ({request, params, cookies}) => {
+  http.get(`${API_URL}/api/v1/links`, async () => {
     return HttpResponse.json({
       links: LINKS,
     });
   }),
   http.delete(
     `${API_URL}/api/v1/links/:lookup_code`,
-    async ({request, params, cookies}) => {
+    async () => {
       return new HttpResponse(null, {
         status: 200,
       });
@@ -158,7 +159,7 @@ export const handlers = [
   ),
   http.get(
     `${API_URL}/api/v1/links/:lookup_code`,
-    async ({request, params, cookies}) => {
+    async () => {
       return HttpResponse.json({
         link: {
           created_at: '2024-12-19T08:30:00Z',
@@ -171,14 +172,14 @@ export const handlers = [
       });
     }
   ),
-  http.get(`${API_URL}/api/v1/qr_codes`, async ({request, params, cookies}) => {
+    http.get(`${API_URL}/api/v1/qr_codes`, () => {
     return HttpResponse.json({
       qr_codes: QR_CODES,
     });
   }),
   http.get(
     `${API_URL}/api/v1/qr_codes/:lookup_code`,
-    async ({request, params, cookies}) => {
+    async () => {
       return HttpResponse.json({
         qr_code: QR_CODES[0],
       });
@@ -186,13 +187,13 @@ export const handlers = [
   ),
   http.post(
     `${API_URL}/api/v1/qr_codes`,
-    async ({request, params, cookies}) => {
+    async () => {
       return HttpResponse.json({
         qr_code: QR_CODES[0],
       });
     }
   ),
-  http.get(`${API_URL}/api/v1/brand_pages`, async ({request, params, cookies}) => {
+    http.get(`${API_URL}/api/v1/brand_pages`, () => {
     if (!pages.length) {
       pages.push(PAGE);
     }
@@ -202,15 +203,15 @@ export const handlers = [
   }),
   http.get(
     `${API_URL}/api/v1/brand_pages/:id`,
-    async ({request, params, cookies}) => {
-      const id = parseInt(params?.id);
+    async ({params}) => {
+      const id = params?.id as string;
       return HttpResponse.json({
-        page: pages.filter((page) => page.title === id)[0],
+        page: pages.filter((page) => page.lookup_code === id)[0],
       });
     }
   ),
-  http.post(`${API_URL}/api/v1/brand_pages`, async ({request, params, cookies}) => {
-    const {page} = await request.json();
+  http.post(`${API_URL}/api/v1/brand_pages`, async ({request}) => {
+    const {page} = await request.json() as {page: Partial<Page>};
     const newPage = {...PAGE, ...page, id: pages.length + 1};
     pages.push(newPage);
 
