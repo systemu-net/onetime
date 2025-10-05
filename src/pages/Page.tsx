@@ -1,5 +1,5 @@
 import { SHORT_URL } from '@/apis/config';
-import { getPage } from '@/apis/pages';
+import { getPage, updatePage } from '@/apis/pages';
 import Box from '@/components/Box';
 import { Button } from '@/components/elements/button';
 import { Checkbox } from '@/components/elements/checkbox';
@@ -28,11 +28,11 @@ import {
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 
-const buttonStyles: { id: Page['configuration']['button']; title: string }[] = [
+const buttonStyles: { id: Page['content']['button']; title: string }[] = [
   { id: 'squared', title: 'Squared' },
   { id: 'rounded-sm', title: 'Rounded small' },
   { id: 'rounded', title: 'Rounded' },
@@ -75,10 +75,12 @@ const Section = ({ title, legend = '', children }) => (
 );
 
 const SinglePage = () => {
-  const { id } = useParams();
+  const { lookup_code } = useParams();
   const [cookies] = useCookies(['token']);
   const [error, setError] = useState<string>('');
   const [page, setPage] = useState<Page | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('Content');
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
 
@@ -86,23 +88,77 @@ const SinglePage = () => {
     if (cookies.token && !shortenedUrls.length) {
       fetchLinks();
     }
-  }, []);
+  }, [cookies.token, shortenedUrls.length, fetchLinks]);
 
-  const fetchPage = async () => {
-    try {
-      const res: Page = await getPage(cookies.token, id);
-      setPage(res);
-    } catch (error: unknown) {
-      console.error(error);
-      setError('An error occurred while fetching page.');
-    }
-  };
+
 
   useEffect(() => {
+    const fetchPage = async () => {
+      try {
+        const res: Page = await getPage(cookies.token, lookup_code);
+        setPage(res);
+      } catch (error: unknown) {
+        console.error(error);
+        setError('An error occurred while fetching page.');
+      }
+    };
+
     if (cookies.token) {
       fetchPage();
     }
-  }, [cookies.token]); // Runs when the token is available
+  }, [cookies.token, lookup_code]); // Runs when the token is available
+
+  const handleSave = useCallback(async () => {
+    if (!page || !cookies.token) return;
+
+    // Basic validation
+    if (page.title && page.title.length > 40) {
+      setError('Title must be 40 characters or less.');
+      return;
+    }
+
+    if (page.description && page.description.length > 40) {
+      setError('Description must be 40 characters or less.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+    setSaveSuccess(false);
+
+    try {
+      const updatedPage = await updatePage(cookies.token, lookup_code, {
+        title: page.title,
+        description: page.description,
+        content: page.content,
+        links: page.links,
+      });
+      setPage(updatedPage);
+      setSaveSuccess(true);
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error: unknown) {
+      console.error('Error updating page:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred while saving the page.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, cookies.token, lookup_code]);
+
+  // Add keyboard shortcut for saving (Cmd+S / Ctrl+S)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleSave]);
 
   return (
     <MainLayout>
@@ -119,11 +175,25 @@ const SinglePage = () => {
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
             <Box>
-              {error && <p className="text-red-500">{error}</p>}
-              <Subheading className="">
-                <span className="mr-4">{SHORT_URL + page?.url} </span>
-                <CopyLink link={SHORT_URL + page?.url} />
-              </Subheading>
+              {error && <p className="text-red-500 mb-2">{error}</p>}
+              {saveSuccess && <p className="text-green-500 mb-2">Page saved successfully!</p>}
+              <div className="flex items-center justify-between">
+                <Subheading className="">
+                  {(page?.published_lookup_code && (
+                    <>
+                      <span className="mr-4">{SHORT_URL + page?.published_lookup_code} </span>
+                      <CopyLink link={SHORT_URL + page?.published_lookup_code} />
+                    </>
+                  ))}
+                </Subheading>
+                <Button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
+                >
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
             </Box>
 
             <div className="border-b border-gray-200">
@@ -168,15 +238,15 @@ const SinglePage = () => {
                         <Input
                           type="text"
                           maxLength={40}
-                          defaultValue={page.url}
+                          defaultValue={page.title}
                           onChange={(e) =>
                             setPage({
                               ...page,
-                              url: e.target.value,
+                              title: e.target.value,
                             })
                           }
                         />
-                        <Text className="float-end">{page.url.length}/40</Text>
+                        <Text className="float-end">{page.title.length}/40</Text>
                       </div>
                       <Subheading>
                         Description
@@ -209,7 +279,7 @@ const SinglePage = () => {
                     <Button>TODO: add page link</Button>
                     {errorMessage && <p className="text-red-500">{errorMessage}</p>}
                     <div>
-                      {page?.links.map((button) => (
+                      {page?.links?.map((button) => (
                         <div
                           key={button.id}
                         >
@@ -230,16 +300,16 @@ const SinglePage = () => {
                             <Checkbox
                               id={platform.id}
                               checked={
-                                page.configuration.social?.[platform.id] !=
+                                page.content.social?.[platform.id] !=
                                 undefined
                               }
                               onChange={(checked) =>
                                 setPage({
                                   ...page,
-                                  configuration: {
-                                    ...page.configuration,
+                                  content: {
+                                    ...page.content,
                                     social: {
-                                      ...page.configuration.social,
+                                      ...page.content.social,
                                       [platform.id]: checked ? '' : undefined,
                                     },
                                   },
@@ -259,7 +329,7 @@ const SinglePage = () => {
                         <Label className="mb-1">Edit your links</Label>
                         {socialPlatforms.map(
                           (platform) =>
-                            page.configuration.social?.[platform.id] !==
+                            page.content.social?.[platform.id] !==
                             undefined && (
                               <div
                                 key={platform.id}
@@ -270,16 +340,16 @@ const SinglePage = () => {
                                   type="text"
                                   placeholder={`Enter ${platform.title} link`}
                                   value={
-                                    page.configuration.social?.[platform.id] ||
+                                    page.content.social?.[platform.id] ||
                                     ''
                                   }
                                   onChange={(e) =>
                                     setPage({
                                       ...page,
-                                      configuration: {
-                                        ...page.configuration,
+                                      content: {
+                                        ...page.content,
                                         social: {
-                                          ...page.configuration.social,
+                                          ...page.content.social,
                                           [platform.id]: e.target.value,
                                         },
                                       },
@@ -300,12 +370,12 @@ const SinglePage = () => {
                     <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
                       <Subheading>Text Color</Subheading>
                       <ColorPicker
-                        defaultValue={page.configuration.textColor}
+                        defaultValue={page.content.textColor}
                         onChange={(e) =>
                           setPage({
                             ...page,
-                            configuration: {
-                              ...page.configuration,
+                            content: {
+                              ...page.content,
                               textColor: e.target.value,
                             },
                           })
@@ -313,13 +383,13 @@ const SinglePage = () => {
                       />
                       <Subheading>Background</Subheading>
                       <RadioGroup
-                        value={page.configuration.backgroundType || 'color'}
+                        value={page.content.backgroundType || 'color'}
                         className="space-x-4"
                         onChange={(value) =>
                           setPage({
                             ...page,
-                            configuration: {
-                              ...page.configuration,
+                            content: {
+                              ...page.content,
                               backgroundType: value,
                             },
                           })
@@ -332,18 +402,18 @@ const SinglePage = () => {
                         ))}
                       </RadioGroup>
 
-                      {page.configuration.backgroundType === 'color' && (
+                      {page.content.backgroundType === 'color' && (
                         <>
                           <Label>Background Color</Label>
                           <ColorPicker
                             value={
-                              page.configuration.backgroundColor || '#ffffff'
+                              page.content.backgroundColor || '#ffffff'
                             }
                             onChange={(e) =>
                               setPage({
                                 ...page,
-                                configuration: {
-                                  ...page.configuration,
+                                content: {
+                                  ...page.content,
                                   backgroundColor: e.target.value,
                                 },
                               })
@@ -352,7 +422,7 @@ const SinglePage = () => {
                         </>
                       )}
 
-                      {page.configuration.backgroundType === 'gradient' && (
+                      {page.content.backgroundType === 'gradient' && (
                         <>
                           <Label>Gradient Colors</Label>
                           <div className="flex gap-2">
@@ -360,13 +430,13 @@ const SinglePage = () => {
                               id="hs-color-input"
                               title="Choose your color"
                               value={
-                                page.configuration.gradientStart || '#ffffff'
+                                page.content.gradientStart || '#ffffff'
                               }
                               onChange={(e) =>
                                 setPage({
                                   ...page,
-                                  configuration: {
-                                    ...page.configuration,
+                                  content: {
+                                    ...page.content,
                                     gradientStart: e.target.value,
                                   },
                                 })
@@ -374,13 +444,13 @@ const SinglePage = () => {
                             />
                             <ColorPicker
                               value={
-                                page.configuration.gradientEnd || '#000000'
+                                page.content.gradientEnd || '#000000'
                               }
                               onChange={(e) =>
                                 setPage({
                                   ...page,
-                                  configuration: {
-                                    ...page.configuration,
+                                  content: {
+                                    ...page.content,
                                     gradientEnd: e.target.value,
                                   },
                                 })
@@ -392,16 +462,16 @@ const SinglePage = () => {
                           <Select
                             name="gradientDirection"
                             defaultValue={
-                              page.configuration.gradientDirection ||
+                              page.content.gradientDirection ||
                               'to bottom'
                             }
                             onChange={(e) =>
                               setPage({
                                 ...page,
-                                configuration: {
-                                  ...page.configuration,
+                                content: {
+                                  ...page.content,
                                   gradientDirection: e.target
-                                    .value as Page['configuration']['gradientDirection'],
+                                    .value as Page['content']['gradientDirection'],
                                 },
                               })
                             }
@@ -426,12 +496,12 @@ const SinglePage = () => {
                     <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
                       <Subheading>Button Text Color</Subheading>
                       <ColorPicker
-                        defaultValue={page.configuration.buttonColor}
+                        defaultValue={page.content.buttonColor}
                         onChange={(e) =>
                           setPage({
                             ...page,
-                            configuration: {
-                              ...page.configuration,
+                            content: {
+                              ...page.content,
                               buttonColor: e.target.value,
                             },
                           })
@@ -439,12 +509,12 @@ const SinglePage = () => {
                       />
                     </section>
                     <RadioGroup
-                      value={page.configuration.button}
-                      onChange={(value: Page['configuration']['button']) =>
+                      value={page.content.button}
+                      onChange={(value: Page['content']['button']) =>
                         setPage({
                           ...page,
-                          configuration: {
-                            ...page.configuration,
+                          content: {
+                            ...page.content,
                             button: value,
                           },
                         })
@@ -461,12 +531,12 @@ const SinglePage = () => {
                   </Section>
                   <Section title="Font Style" legend="Select the font style for your page">
                     <RadioGroup
-                      value={page.configuration.fontFamily}
+                      value={page.content.fontFamily}
                       onChange={(value: string) =>
                         setPage({
                           ...page,
-                          configuration: {
-                            ...page.configuration,
+                          content: {
+                            ...page.content,
                             fontFamily: value,
                           },
                         })
@@ -490,9 +560,9 @@ const SinglePage = () => {
               <div className="text-center mb-4">Preview</div>
               <div className="shadow-lg rounded-3xl overflow-hidden">
                 <Preview
-                  title={page.url}
+                  title={page.title}
                   description={page.description}
-                  configuration={page.configuration}
+                  content={page.content}
                   links={page.links}
                 />
               </div>

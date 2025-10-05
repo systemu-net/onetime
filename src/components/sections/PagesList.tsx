@@ -23,10 +23,10 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (lookup_code: string) => {
     try {
       setLoading(true);
-      const [response, error] = await deletePage(cookies.token, id);
+      const [response, error] = await deletePage(cookies.token, lookup_code);
 
       if (error) {
         setLoading(false);
@@ -49,35 +49,35 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
       <div className="mt-2 flow-root">
         <ul>
           {pages.map((item) => (
-            <li key={item.url}>
+            <li key={item.title}>
               <Box>
                 <div className="flex items-center justify-between">
                   <Link
                     className="flex gap-2"
-                    to={item.id.toString()}
+                    to={item.lookup_code.toString()}
                   >
                     <div className="w-[53px] h-[100px] rounded-md shadow-md hover:shadow-lg mr-4">
                       <div className="scale-preview origin-top-left">
                         <Preview
-                          title={item.url}
-                          configuration={item.configuration}
+                          title={item.title}
+                          content={item.content}
                           previewIcon
                         />
                       </div>
                     </div>
                     <div className="hover:underline underline-offset-2">
-                      {item.url}
+                      {item.title}
                     </div>
                   </Link>
 
                   <div className="hidden lg:flex gap-4 items-center">
-                    <Button outline to={item.id.toString()}>
+                    <Button outline to={item.title.toString()}>
                       Details
                     </Button>
                     <button
                       className="antialiased rounded-full font-bold w-7 h-7 hover:scale-105"
                       disabled={loading}
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(item.lookup_code)}
                     >
                       <TrashIcon />
                     </button>
@@ -88,13 +88,13 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                         <EllipsisVerticalIcon />
                       </DropdownButton>
                       <DropdownMenu anchor="bottom end">
-                        <DropdownItem to={item.id.toString()}>
+                        <DropdownItem to={item.title.toString()}>
                           View
                         </DropdownItem>
-                        <DropdownItem to={item.id + '/edit'}>Edit</DropdownItem>
+                        <DropdownItem to={item.title + '/edit'}>Edit</DropdownItem>
                         <DropdownItem
                           disabled={loading}
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleDelete(item.lookup_code)}
                         >
                           Delete
                         </DropdownItem>

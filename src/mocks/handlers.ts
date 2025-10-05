@@ -1,8 +1,8 @@
 // @ts-nocheck
 
-import {API_URL} from '@/apis/config';
-import {Page} from '@/types';
-import {http, HttpResponse} from 'msw';
+import { API_URL } from '@/apis/config';
+import { Page } from '@/types';
+import { http, HttpResponse } from 'msw';
 const LINKS = [
   {
     created_at: '2024-12-20T10:00:00Z',
@@ -69,10 +69,10 @@ const QR_CODES = [
   },
 ];
 const PAGE: Page = {
-  created_at: '2024-12-19T08:30:00Z',
-  id: 1,
-  url: 'Sergii Demianchuk',
+  title: 1,
+  title: 'Sergii Demianchuk',
   description: 'CTO and entrepreneur',
+  created_at: '2024-12-19T08:30:00Z',
   updated_at: '2024-12-20T09:00:00Z',
   links: [
     {
@@ -94,7 +94,7 @@ const PAGE: Page = {
       link: 'https://example.com/learn-more',
     },
   ],
-  configuration: {
+  content: {
     button: 'rounded',
     textColor: '#8b5cf6',
     backgroundType: 'color',
@@ -192,24 +192,24 @@ export const handlers = [
       });
     }
   ),
-  http.get(`${API_URL}/api/v1/pages`, async ({request, params, cookies}) => {
+  http.get(`${API_URL}/api/v1/brand_pages`, async ({request, params, cookies}) => {
     if (!pages.length) {
       pages.push(PAGE);
     }
     return HttpResponse.json({
-      pages: pages,
+      brand_pages: pages,
     });
   }),
   http.get(
-    `${API_URL}/api/v1/pages/:id`,
+    `${API_URL}/api/v1/brand_pages/:id`,
     async ({request, params, cookies}) => {
       const id = parseInt(params?.id);
       return HttpResponse.json({
-        page: pages.filter((page) => page.id === id)[0],
+        page: pages.filter((page) => page.title === id)[0],
       });
     }
   ),
-  http.post(`${API_URL}/api/v1/pages`, async ({request, params, cookies}) => {
+  http.post(`${API_URL}/api/v1/brand_pages`, async ({request, params, cookies}) => {
     const {page} = await request.json();
     const newPage = {...PAGE, ...page, id: pages.length + 1};
     pages.push(newPage);

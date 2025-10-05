@@ -112,7 +112,7 @@ export const App = () => {
               }
             ></Route>
             <Route
-              path={`${PAGES_ROUTE}/:id`}
+              path={`${PAGES_ROUTE}/:lookup_code`}
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <SinglePage />

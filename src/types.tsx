@@ -46,13 +46,14 @@ export type PageLink = {
     link: string;
 };
 export type Page = {
-    id: number;
-    url: string;
+    lookup_code: string;
+    published_lookup_code: string | null;
+    title: string;
     description?: string;
     created_at: string;
     updated_at: string;
     links: PageLink[];
-    configuration: {
+    content: {
         button:
         | 'rounded-full'
         | 'rounded'

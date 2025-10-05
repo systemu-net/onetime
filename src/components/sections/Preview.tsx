@@ -7,7 +7,7 @@ import { FaXTwitter } from 'react-icons/fa6';
 interface PreviewProps {
     title: string;
     description?: string;
-    configuration: Page['configuration'];
+    content: Page['content'];
     links?: PageLink[];
     previewIcon?: boolean;
 }
@@ -24,7 +24,7 @@ const Preview: React.FC<PreviewProps> = ({
     title,
     description,
     links,
-    configuration,
+    content,
     previewIcon,
 }) => {
     const {
@@ -38,7 +38,7 @@ const Preview: React.FC<PreviewProps> = ({
         button: buttonStyle,
         fontFamily,
         social,
-    } = configuration;
+    } = content;
     const baseClass = `py-8 w-[298px] p-6 overflow-y-scroll scrollbar-hidden rounded-3xl ${previewIcon ? 'h-[500px]' : 'h-[558px]'
         }`;
 
@@ -59,7 +59,7 @@ const Preview: React.FC<PreviewProps> = ({
             }}>
                 <img
                     className="w-24 rounded-full"
-                    src="https://media.licdn.com/dms/image/v2/D4E03AQGxSpkUziRtJw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1670734923885?e=1741824000&v=beta&t=ttG8r70zeBc8kdVNCnXZHENQghBbaGs-zsmtuqD419Q"
+                    src="https://www.sdemian.com/images/Sergii-Demianchuk.jpeg"
                 />
                 <h1 className="text-2xl mb-4 font-bold text-center break-all">{title}</h1>
                 {description && <h2 className="text-base -mt-6 mb-4 text-center break-all">{description}</h2>}

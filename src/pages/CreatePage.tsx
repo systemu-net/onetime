@@ -18,7 +18,7 @@ const designTemplates = [
     name: 'Minimalist Design',
     description: 'A clean and modern design template to highlight your links.',
     image: '/templates/blue-pink.png',
-    configuration: {
+    content: {
       fontFamily: 'rubik',
       button: 'rounded',
       buttonColor: '#596289',
@@ -37,7 +37,7 @@ const designTemplates = [
     name: 'Professional Design',
     description: 'Perfect for showcasing links in a formal and elegant style.',
     image: '/templates/pink-gradient.png',
-    configuration: {
+    content: {
       button: 'rounded',
       buttonColor: '#fff',
       animation: 'Gradient 15s ease infinite',
@@ -57,7 +57,7 @@ const designTemplates = [
   //   name: 'Bold Design',
   //   description: 'Make a statement with this vibrant and colorful template.',
   //   image: '/templates/pink-gradient.png',
-  //   configuration: {
+  //   content: {
   //     button: 'rounded',
   //     background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
   //     animation: 'Gradient 15s ease infinite',
@@ -86,9 +86,9 @@ const CreatePage = () => {
       const page = await createPage(cookies.token, {
         page: {
           url: url,
-          configuration: designTemplates.filter(
+          content: designTemplates.filter(
             (template) => template.id === selectedTemplate
-          )[0].configuration,
+          )[0].content,
         },
       });
       navigate(`${PAGES_ROUTE}/${page.id}`);
