@@ -14,7 +14,7 @@ export const createPage = async (jwtToken, bodyObject) => {
     const response = await fetch(`${API_URL}/api/v1/brand_pages`, requestOptions);
     if (response.ok) {
       const res = await response.json();
-      return res.page;
+      return res.brand_page;
     } else {
       const errorData = await response.json();
       throw new Error(errorData.message); // throw error message if not successful

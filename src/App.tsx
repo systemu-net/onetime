@@ -18,6 +18,8 @@ import QrCodePage from './pages/QrCode';
 import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
 import SettingsPage from './pages/Settings';
+import StatsPage from './pages/Stats';
+
 import {
   ANALYTICS_ROUTE,
   CREATE_PAGES_ROUTE,
@@ -30,7 +32,8 @@ import {
   PROFILE_ROUTE,
   QR_ROUTE,
   REGISTER_ROUTE,
-  SETTINGS_ROUTE
+  SETTINGS_ROUTE,
+  STATS_ROUTE
 } from './routes';
 
 export const App = () => {
@@ -140,6 +143,14 @@ export const App = () => {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            ></Route>
+            <Route
+              path={STATS_ROUTE}
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <StatsPage />
                 </ProtectedRoute>
               }
             ></Route>

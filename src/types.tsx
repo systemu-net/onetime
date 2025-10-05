@@ -31,6 +31,32 @@ export type Click = {
     updated_at: string;
 };
 
+export type StatsPeriod = 'day' | 'week' | 'month' | 'year';
+
+export type StatsData = {
+    name: string;
+    value: number;
+};
+
+export type PeriodStats = {
+    total: number;
+    views: number[];
+    stats: {
+        referrer: StatsData[];
+        browser: StatsData[];
+        os: StatsData[];
+        country: StatsData[];
+    };
+};
+
+export type LinkStats = {
+    lastDay: PeriodStats;
+    lastWeek: PeriodStats;
+    lastMonth: PeriodStats;
+    lastYear: PeriodStats;
+    updatedAt: string;
+};
+
 export type Link = {
     created_at: string;
     lookup_code: string;
