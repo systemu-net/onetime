@@ -570,7 +570,7 @@ const SinglePage = () => {
           </div>
         </div>
       )}
-      <br />
+      {/* <br />
       <br />
       <br />
       <br />
@@ -581,7 +581,7 @@ const SinglePage = () => {
       <br />
       <div className='max-w-2xl break-words'>
         {JSON.stringify(page)}
-      </div>
+      </div> */}
     </MainLayout>
   );
 };
