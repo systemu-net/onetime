@@ -111,7 +111,7 @@ const countryCodeToName: Record<string, string> = {
   'md': 'Moldova',
   'me': 'Montenegro',
   'mg': 'Madagascar',
-  'mk': 'Macedonia',
+  'mk': 'North Macedonia',
   'ml': 'Mali',
   'mm': 'Myanmar',
   'mn': 'Mongolia',
