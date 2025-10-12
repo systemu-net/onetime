@@ -160,7 +160,7 @@ const countryCodeToName: Record<string, string> = {
   'ss': 'South Sudan',
   'sv': 'El Salvador',
   'sy': 'Syria',
-  'sz': 'Swaziland',
+  'sz': 'Eswatini',
   'td': 'Chad',
   'tf': 'French Southern and Antarctic Lands',
   'tg': 'Togo',
