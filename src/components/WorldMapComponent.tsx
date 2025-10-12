@@ -212,7 +212,7 @@ const getCountryCode = (countryName: string): string => {
     ([, name]) => name.toLowerCase() === countryName.toLowerCase()
   )?.[0];
 
-  return code || countryName.toLowerCase().slice(0, 2);
+  return code || '';
 };
 
 // Helper function to get color intensity based on visit count
