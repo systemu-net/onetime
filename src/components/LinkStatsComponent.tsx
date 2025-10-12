@@ -1,6 +1,7 @@
 import { Subheading } from '@/components/elements/heading';
 import { Link, StatsData, StatsPeriod } from '@/types';
 import { useMemo, useState } from 'react';
+import WorldMapComponent from './WorldMapComponent';
 
 interface LinkStatsComponentProps {
   link: Link;
@@ -368,7 +369,7 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <SimpleChart 
           data={processedStats.referrers} 
           title="Referrers" 
@@ -377,10 +378,14 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
           data={processedStats.browsers} 
           title="Browsers" 
         />
-        <SimpleChart 
-          data={processedStats.countries} 
-          title="Countries" 
-        />
+      </div>
+
+      {/* World Map and OS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
+          <h3 className="text-lg font-semibold mb-4">Countries</h3>
+          <WorldMapComponent data={processedStats.countries} />
+        </div>
         <SimpleChart 
           data={processedStats.os} 
           title="Operating Systems" 
