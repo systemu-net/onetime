@@ -84,6 +84,9 @@ const SinglePage = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('Content');
   const [isPreviewSliderOpen, setIsPreviewSliderOpen] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
+  const [lastSavedPageState, setLastSavedPageState] = useState<Page | null>(null);
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
 
   useEffect(() => {
@@ -99,6 +102,9 @@ const SinglePage = () => {
       try {
         const res: Page = await getPage(cookies.token, lookup_code);
         setPage(res);
+        setLastSavedPageState(res); // Store the initial state as "saved"
+        setLastSaveTime(new Date()); // Set initial load time
+        setHasUnsavedChanges(false); // Mark as saved
       } catch (error: unknown) {
         console.error(error);
         setError('An error occurred while fetching page.');
@@ -110,8 +116,25 @@ const SinglePage = () => {
     }
   }, [cookies.token, lookup_code]); // Runs when the token is available
 
-  const handleSave = useCallback(async () => {
+  // Function to check if page has actually changed
+  const hasPageChanged = useCallback((currentPage: Page, savedPage: Page | null): boolean => {
+    if (!savedPage) return true;
+    
+    // Compare the relevant fields that we save
+    return (
+      currentPage.title !== savedPage.title ||
+      currentPage.description !== savedPage.description ||
+      JSON.stringify(currentPage.content) !== JSON.stringify(savedPage.content) ||
+      JSON.stringify(currentPage.links) !== JSON.stringify(savedPage.links)
+    );
+  }, []);
+
+  const handleSave = useCallback(async (showSuccessMessage = false) => {
     if (!page || !cookies.token) return;
+    
+    // Check if there are actual changes before proceeding
+    const actuallyChanged = hasPageChanged(page, lastSavedPageState);
+    if (!actuallyChanged && !showSuccessMessage) return; // Don't auto-save if nothing changed
 
     // Basic validation
     if (page.title && page.title.length > 40) {
@@ -126,7 +149,7 @@ const SinglePage = () => {
 
     setIsLoading(true);
     setError('');
-    setSaveSuccess(false);
+    if (showSuccessMessage) setSaveSuccess(false);
 
     try {
       const updatedPage = await updatePage(cookies.token, lookup_code, {
@@ -136,23 +159,50 @@ const SinglePage = () => {
         links: page.links,
       });
       setPage(updatedPage);
-      setSaveSuccess(true);
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setLastSavedPageState(updatedPage); // Update the saved state reference
+      setHasUnsavedChanges(false);
+      setLastSaveTime(new Date());
+      
+      if (showSuccessMessage) {
+        setSaveSuccess(true);
+        // Clear success message after 3 seconds
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
     } catch (error: unknown) {
       console.error('Error updating page:', error);
       setError(error instanceof Error ? error.message : 'An error occurred while saving the page.');
     } finally {
       setIsLoading(false);
     }
-  }, [page, cookies.token, lookup_code]);
+  }, [page, cookies.token, lookup_code, hasPageChanged, lastSavedPageState]);
 
-  // Add keyboard shortcut for saving (Cmd+S / Ctrl+S)
+  // Auto-save effect - saves every 3 seconds if there are unsaved changes
+  useEffect(() => {
+    // Only set up auto-save timer if there are actual unsaved changes
+    if (!hasUnsavedChanges || !page) return;
+    
+    const autoSaveTimer = setTimeout(() => {
+      handleSave(false); // Auto-save without showing success message
+    }, 3000);
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [hasUnsavedChanges, handleSave, page]);
+
+  // Track changes to mark as unsaved
+  const handlePageChange = useCallback((updatedPage: Page) => {
+    setPage(updatedPage);
+    
+    // Only mark as unsaved if there are actual changes compared to last saved state
+    const hasChanges = hasPageChanged(updatedPage, lastSavedPageState);
+    setHasUnsavedChanges(hasChanges);
+  }, [lastSavedPageState, hasPageChanged]);
+
+  // Add keyboard shortcut for manual saving (Cmd+S / Ctrl+S)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 's') {
         event.preventDefault();
-        handleSave();
+        handleSave(true); // Manual save with success message
       }
     };
 
@@ -260,13 +310,21 @@ const SinglePage = () => {
                     <DevicePhoneMobileIcon className="w-4 h-4" />
                     Preview
                   </button>
-                  <Button
-                    onClick={handleSave}
-                    disabled={isLoading}
-                    className="bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
-                  >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </Button>
+                  {/* Auto-save status indicator */}
+                  <div className="flex items-center gap-2 text-sm">
+                    {isLoading && (
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </div>
+                    )}
+                    {!isLoading && hasUnsavedChanges && (
+                      <span className="text-amber-600 dark:text-amber-400 font-medium">● Auto-saving in 3s</span>
+                    )}
+                    {!isLoading && !hasUnsavedChanges && lastSaveTime && (
+                      <span className="text-green-600 dark:text-green-400">✓ All changes saved</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Box>
@@ -315,7 +373,7 @@ const SinglePage = () => {
                           maxLength={40}
                           defaultValue={page.title}
                           onChange={(e) =>
-                            setPage({
+                            handlePageChange({
                               ...page,
                               title: e.target.value,
                             })
@@ -335,7 +393,7 @@ const SinglePage = () => {
                           defaultValue={page?.description}
                           maxLength={40}
                           onChange={(e) =>
-                            setPage({
+                            handlePageChange({
                               ...page,
                               description: e.target.value,
                             })
@@ -379,7 +437,7 @@ const SinglePage = () => {
                                 undefined
                               }
                               onChange={(checked) =>
-                                setPage({
+                                handlePageChange({
                                   ...page,
                                   content: {
                                     ...page.content,
@@ -419,7 +477,7 @@ const SinglePage = () => {
                                     ''
                                   }
                                   onChange={(e) =>
-                                    setPage({
+                                    handlePageChange({
                                       ...page,
                                       content: {
                                         ...page.content,
@@ -447,7 +505,7 @@ const SinglePage = () => {
                       <ColorPicker
                         defaultValue={page.content.textColor}
                         onChange={(e) =>
-                          setPage({
+                          handlePageChange({
                             ...page,
                             content: {
                               ...page.content,
@@ -461,7 +519,7 @@ const SinglePage = () => {
                         value={page.content.backgroundType || 'color'}
                         className="space-x-4"
                         onChange={(value) =>
-                          setPage({
+                          handlePageChange({
                             ...page,
                             content: {
                               ...page.content,
@@ -485,7 +543,7 @@ const SinglePage = () => {
                               page.content.backgroundColor || '#ffffff'
                             }
                             onChange={(e) =>
-                              setPage({
+                              handlePageChange({
                                 ...page,
                                 content: {
                                   ...page.content,
@@ -508,7 +566,7 @@ const SinglePage = () => {
                                 page.content.gradientStart || '#ffffff'
                               }
                               onChange={(e) =>
-                                setPage({
+                                handlePageChange({
                                   ...page,
                                   content: {
                                     ...page.content,
@@ -522,7 +580,7 @@ const SinglePage = () => {
                                 page.content.gradientEnd || '#000000'
                               }
                               onChange={(e) =>
-                                setPage({
+                                handlePageChange({
                                   ...page,
                                   content: {
                                     ...page.content,
@@ -541,7 +599,7 @@ const SinglePage = () => {
                               'to bottom'
                             }
                             onChange={(e) =>
-                              setPage({
+                              handlePageChange({
                                 ...page,
                                 content: {
                                   ...page.content,
@@ -573,7 +631,7 @@ const SinglePage = () => {
                       <ColorPicker
                         defaultValue={page.content.buttonColor}
                         onChange={(e) =>
-                          setPage({
+                          handlePageChange({
                             ...page,
                             content: {
                               ...page.content,
@@ -586,7 +644,7 @@ const SinglePage = () => {
                     <RadioGroup
                       value={page.content.button}
                       onChange={(value: Page['content']['button']) =>
-                        setPage({
+                        handlePageChange({
                           ...page,
                           content: {
                             ...page.content,
@@ -608,7 +666,7 @@ const SinglePage = () => {
                     <RadioGroup
                       value={page.content.fontFamily}
                       onChange={(value: string) =>
-                        setPage({
+                        handlePageChange({
                           ...page,
                           content: {
                             ...page.content,
