@@ -23,7 +23,7 @@ export default {
         neutral900: `var(--clr-neutral-900: hsl(0, 0%, 0%))`,
       },
       scale: {
-        'preview': '0.20',
+        'preview': '0.20'
       }
     },
   },
@@ -38,6 +38,14 @@ export default {
         ".scrollbar-hidden": {
           "scrollbar-width": "none" /* Firefox */,
           "-ms-overflow-style": "none" /* IE and Edge */,
+        },
+
+        /* Mobile slider utilities */
+        ".slide-in-right": {
+          "transform": "translateX(0)",
+        },
+        ".slide-out-right": {
+          "transform": "translateX(100%)",
         },
       })
     }),
