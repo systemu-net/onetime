@@ -343,7 +343,7 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
       {/* Top Countries List */}
       {data.length > 0 && (
         <div className="mt-4 space-y-2">
-          <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Top Countries</h4>
+          <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Top Countries by clicks</h4>
           <div className="space-y-1">
             {data.slice(0, 5).map((country, index) => (
               <div key={index} className="flex justify-between items-center text-sm">
