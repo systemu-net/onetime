@@ -23,7 +23,8 @@ const designTemplates = [
       button: 'rounded',
       buttonColor: '#596289',
       social: {
-        fb: 'https://facebook.com/smariana',
+        fb: 'https://www.facebook.com/TaylorSwift/',
+        linkedin: 'https://www.linkedin.com/in/sdemian'
       },
       backgroundType: 'gradient',
       gradientStart: '#5b90bc',
@@ -43,7 +44,8 @@ const designTemplates = [
       animation: 'Gradient 15s ease infinite',
       textColor: 'green',
       social: {
-        ig: 'https://facebook.com/smariana',
+        fb: 'https://www.facebook.com/TaylorSwift/',
+        ig: 'https://www.instagram.com/taylorswift/',
       },
       backgroundType: 'gradient',
       gradientDirection: 'to bottom right',
