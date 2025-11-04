@@ -27,6 +27,7 @@ import {
   PaintBrushIcon,
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
+import { DevicePhoneMobileIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
@@ -82,6 +83,7 @@ const SinglePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('Content');
+  const [isPreviewSliderOpen, setIsPreviewSliderOpen] = useState<boolean>(false);
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
 
   useEffect(() => {
@@ -160,6 +162,68 @@ const SinglePage = () => {
     };
   }, [handleSave]);
 
+  // Mobile preview slider handlers
+  const openPreviewSlider = () => {
+    setIsPreviewSliderOpen(true);
+  };
+
+  const closePreviewSlider = () => {
+    setIsPreviewSliderOpen(false);
+  };
+
+  // Handle touch gestures for swipe to close
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const element = e.currentTarget as HTMLElement;
+    element.dataset.startX = touch.clientX.toString();
+    element.dataset.startY = touch.clientY.toString();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPreviewSliderOpen) return;
+    
+    const touch = e.touches[0];
+    const element = e.currentTarget as HTMLElement;
+    const startX = parseFloat(element.dataset.startX || '0');
+    const deltaX = touch.clientX - startX;
+    
+    // Only allow rightward swipes and apply transform
+    if (deltaX > 0) {
+      element.style.transform = `translateX(${Math.min(deltaX, element.offsetWidth)}px)`;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    const element = e.currentTarget as HTMLElement;
+    const startX = parseFloat(element.dataset.startX || '0');
+    const startY = parseFloat(element.dataset.startY || '0');
+    const deltaX = touch.clientX - startX;
+    const deltaY = Math.abs(touch.clientY - startY);
+    
+    // Reset transform
+    element.style.transform = '';
+    
+    // If swipe right more than 1/3 of the width or swipe velocity is high, close the slider
+    // Also ensure it's more horizontal than vertical movement
+    if (deltaX > element.offsetWidth / 3 && deltaY < 100) {
+      closePreviewSlider();
+    }
+  };
+
+  // Prevent body scroll when slider is open
+  useEffect(() => {
+    if (isPreviewSliderOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isPreviewSliderOpen]);
+
   return (
     <MainLayout>
       <div className="max-lg:hidden mb-3">
@@ -186,13 +250,24 @@ const SinglePage = () => {
                     </>
                   ))}
                 </Subheading>
-                <Button
-                  onClick={handleSave}
-                  disabled={isLoading}
-                  className="bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
-                >
-                  {isLoading ? 'Saving...' : 'Save Changes'}
-                </Button>
+                <div className="flex items-center gap-3">
+                  {/* Mobile Preview Button */}
+                  <button
+                    onClick={openPreviewSlider}
+                    className="md:hidden flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm"
+                    title="Open mobile preview"
+                  >
+                    <DevicePhoneMobileIcon className="w-4 h-4" />
+                    Preview
+                  </button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
               </div>
             </Box>
 
@@ -557,7 +632,10 @@ const SinglePage = () => {
 
           <div className="hidden md:block mb-4">
             <div className="sticky top-20">
-              <div className="text-center mb-4">Preview</div>
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Preview</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Live preview of your page</p>
+              </div>
               <div className="shadow-lg rounded-3xl overflow-hidden">
                 <Preview
                   title={page.title}
@@ -570,6 +648,63 @@ const SinglePage = () => {
           </div>
         </div>
       )}
+
+      {/* Mobile Preview Slider */}
+      {page && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${
+              isPreviewSliderOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+            onClick={closePreviewSlider}
+          />
+          
+          {/* Slider */}
+          <div 
+            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+              isPreviewSliderOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Live Preview</h2>
+              <button
+                onClick={closePreviewSlider}
+                className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Preview Content */}
+            <div className="flex-1 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 min-h-0">
+              <div className="w-full max-w-[280px]">
+                <div className="scale-90 origin-center">
+                  <Preview
+                    title={page.title}
+                    description={page.description}
+                    content={page.content}
+                    links={page.links}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Swipe indicator */}
+            <div className="absolute top-1/2 left-2 transform -translate-y-1/2 text-gray-400">
+              <div className="flex flex-col items-center">
+                <span className="text-xs mb-1">Swipe</span>
+                <div className="w-6 h-0.5 bg-gray-400 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* <br />
       <br />
       <br />
