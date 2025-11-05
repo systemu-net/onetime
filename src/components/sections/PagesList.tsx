@@ -137,7 +137,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                   </Link>
 
                   <div className="hidden lg:flex gap-4 items-center">
-                    <Button outline to={item.title.toString()}>
+                    <Button outline to={item.lookup_code.toString()}>
                       Details
                     </Button>
                     <button
@@ -162,10 +162,9 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                         >
                           Preview
                         </DropdownItem>
-                        <DropdownItem to={item.title.toString()}>
-                          View
+                        <DropdownItem to={item.lookup_code.toString()}>
+                          Edit
                         </DropdownItem>
-                        <DropdownItem to={item.title + '/edit'}>Edit</DropdownItem>
                         <DropdownItem
                           disabled={loading}
                           onClick={() => handleDelete(item.lookup_code)}
