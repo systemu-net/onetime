@@ -14,11 +14,17 @@ import { Page } from '../types';
 interface PublishComponentProps {
   page: Page;
   onStatusChange?: (updatedPage: Page) => void;
+  isSaving?: boolean;
+  hasUnsavedChanges?: boolean;
+  lastSaveTime?: Date | null;
 }
 
 const PublishComponent: React.FC<PublishComponentProps> = ({
   page,
-  onStatusChange
+  onStatusChange,
+  isSaving = false,
+  hasUnsavedChanges = false,
+  lastSaveTime = null
 }) => {
   const [cookies] = useCookies(['token']);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,6 +106,27 @@ const PublishComponent: React.FC<PublishComponentProps> = ({
             Publishing Status
           </h3>
           <div className="flex items-center gap-2">
+            {/* Auto-save status indicator - shown first on the left */}
+            {isSaving && (
+              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                Saving...
+              </span>
+            )}
+            {!isSaving && hasUnsavedChanges && (
+              <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                Auto-save
+              </span>
+            )}
+            {!isSaving && !hasUnsavedChanges && lastSaveTime && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <CheckCircleIcon className="w-3 h-3 mr-1" />
+                Saved
+              </span>
+            )}
+            
+            {/* Draft/Published status - shown second on the right */}
             {isPublished ? (
               <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <CheckCircleIcon className="w-3 h-3 mr-1" />

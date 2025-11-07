@@ -3,7 +3,6 @@ import Box from '@/components/Box';
 import { Button } from '@/components/elements/button';
 import { Checkbox } from '@/components/elements/checkbox';
 import ColorPicker from '@/components/elements/colorPicker';
-import { CopyLink } from '@/components/elements/Copy';
 import {
   FieldGroup,
   Fieldset,
@@ -288,7 +287,7 @@ const SinglePage = () => {
       {page && (
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
-            <Box>
+            {/* <Box>
               {error && <p className="text-red-500 mb-2">{error}</p>}
               {saveSuccess && <p className="text-green-500 mb-2">Page saved successfully!</p>}
               <div className="flex items-center justify-between">
@@ -300,38 +299,15 @@ const SinglePage = () => {
                     </>
                   ))}
                 </Subheading>
-                <div className="flex items-center gap-3">
-                  {/* Mobile Preview Button */}
-                  <button
-                    onClick={openPreviewSlider}
-                    className="md:hidden flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm"
-                    title="Open mobile preview"
-                  >
-                    <DevicePhoneMobileIcon className="w-4 h-4" />
-                    Preview
-                  </button>
-                  {/* Auto-save status indicator */}
-                  <div className="flex items-center gap-2 text-sm">
-                    {isLoading && (
-                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                      </div>
-                    )}
-                    {!isLoading && hasUnsavedChanges && (
-                      <span className="text-amber-600 dark:text-amber-400 font-medium">● Auto-saving in 3s</span>
-                    )}
-                    {!isLoading && !hasUnsavedChanges && lastSaveTime && (
-                      <span className="text-green-600 dark:text-green-400">✓ All changes saved</span>
-                    )}
-                  </div>
-                </div>
               </div>
-            </Box>
+            </Box> */}
 
             {/* Publishing Component */}
             <PublishComponent 
               page={page}
+              isSaving={isLoading}
+              hasUnsavedChanges={hasUnsavedChanges}
+              lastSaveTime={lastSaveTime}
               onStatusChange={(updatedPage) => {
                 // Update the page state with new publishing information from API
                 setPage(prev => prev ? {
@@ -351,29 +327,41 @@ const SinglePage = () => {
             />
 
             <div className="border-b border-gray-200">
-              <nav aria-label="Tabs" className="-mb-px flex space-x-8">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.name}
-                    onClick={() => setActiveTab(tab.name)}
-                    className={classNames(
-                      tab.name === activeTab
-                        ? 'border-violet-500 text-violet-600'
-                        : 'border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white',
-                      'group inline-flex items-center border-b-2 px-4 py-4 text-sm font-medium focus:outline-violet-600'
-                    )}
-                  >
-                    <tab.icon
+              <nav aria-label="Tabs" className="-mb-px flex justify-between items-center">
+                <div className="flex space-x-8">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.name}
+                      onClick={() => setActiveTab(tab.name)}
                       className={classNames(
                         tab.name === activeTab
-                          ? 'text-violet-500'
-                          : 'text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-white',
-                        '-ml-0.5 mr-2 size-5'
+                          ? 'border-violet-500 text-violet-600'
+                          : 'border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-white',
+                        'group inline-flex items-center border-b-2 px-4 py-4 text-sm font-medium focus:outline-violet-600'
                       )}
-                    />
-                    {tab.name}
-                  </button>
-                ))}
+                    >
+                      <tab.icon
+                        className={classNames(
+                          tab.name === activeTab
+                            ? 'text-violet-500'
+                            : 'text-gray-400 dark:text-gray-300 group-hover:text-gray-500 dark:group-hover:text-white',
+                          '-ml-0.5 mr-2 size-5'
+                        )}
+                      />
+                      {tab.name}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Mobile Preview Button */}
+                <button
+                  onClick={openPreviewSlider}
+                  className="md:hidden flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm"
+                  title="Open mobile preview"
+                >
+                  <DevicePhoneMobileIcon className="w-4 h-4" />
+                  Preview
+                </button>
               </nav>
             </div>
 
