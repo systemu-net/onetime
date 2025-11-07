@@ -1,4 +1,3 @@
-import { SHORT_URL } from '@/apis/config';
 import { getPage, updatePage } from '@/apis/pages';
 import Box from '@/components/Box';
 import { Button } from '@/components/elements/button';
@@ -18,6 +17,7 @@ import { Radio, RadioGroup } from '@/components/elements/radio';
 import { Select } from '@/components/elements/select';
 import { Text } from '@/components/elements/text';
 import MainLayout from '@/components/layouts/MainLayout';
+import PublishComponent from '@/components/PublishComponent';
 import Preview, { socialIcons } from '@/components/sections/Preview';
 import { useLinks } from '@/context/LinksContext';
 import { PAGES_ROUTE } from '@/routes';
@@ -293,10 +293,10 @@ const SinglePage = () => {
               {saveSuccess && <p className="text-green-500 mb-2">Page saved successfully!</p>}
               <div className="flex items-center justify-between">
                 <Subheading className="">
-                  {(page?.published_lookup_code && (
+                  {(page?.published_url && (
                     <>
-                      <span className="mr-4">{SHORT_URL + page?.published_lookup_code} </span>
-                      <CopyLink link={SHORT_URL + page?.published_lookup_code} />
+                      <span className="mr-4">{page.published_url} </span>
+                      <CopyLink link={page.published_url} />
                     </>
                   ))}
                 </Subheading>
@@ -328,6 +328,27 @@ const SinglePage = () => {
                 </div>
               </div>
             </Box>
+
+            {/* Publishing Component */}
+            <PublishComponent 
+              page={page}
+              onStatusChange={(updatedPage) => {
+                // Update the page state with new publishing information from API
+                setPage(prev => prev ? {
+                  ...prev,
+                  id: updatedPage.id,
+                  lookup_code: updatedPage.lookup_code || prev.lookup_code,
+                  published_lookup_code: updatedPage.published_lookup_code,
+                  status: updatedPage.status,
+                  published_url: updatedPage.published_url,
+                  published_at: updatedPage.published_at,
+                  has_published_version: updatedPage.has_published_version,
+                  has_draft_version: updatedPage.has_draft_version,
+                  published_version: updatedPage.published_version,
+                  updated_at: updatedPage.published_at || prev.updated_at
+                } : prev);
+              }}
+            />
 
             <div className="border-b border-gray-200">
               <nav aria-label="Tabs" className="-mb-px flex space-x-8">

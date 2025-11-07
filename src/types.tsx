@@ -72,12 +72,23 @@ export type PageLink = {
     link: string;
 };
 export type Page = {
+    id?: number;
     lookup_code: string;
     published_lookup_code: string | null;
     title: string;
     description?: string;
     created_at: string;
     updated_at: string;
+    published_at?: string | null;
+    published_url?: string | null;
+    status?: 'DRAFT' | 'PUBLISHED';  // Backend only has these two statuses
+    has_published_version?: boolean | null;
+    has_draft_version?: boolean;
+    published_version?: {
+        lookup_code: string;
+        published_at: string;
+        published_url: string;
+    };
     links: PageLink[];
     content: {
         button:
