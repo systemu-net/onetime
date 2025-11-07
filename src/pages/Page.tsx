@@ -77,10 +77,10 @@ const Section = ({ title, legend = '', children }) => (
 const SinglePage = () => {
   const { lookup_code } = useParams();
   const [cookies] = useCookies(['token']);
-  const [error, setError] = useState<string>('');
+  const [, setError] = useState<string>('');
   const [page, setPage] = useState<Page | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('Content');
   const [isPreviewSliderOpen, setIsPreviewSliderOpen] = useState<boolean>(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -287,21 +287,6 @@ const SinglePage = () => {
       {page && (
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
-            {/* <Box>
-              {error && <p className="text-red-500 mb-2">{error}</p>}
-              {saveSuccess && <p className="text-green-500 mb-2">Page saved successfully!</p>}
-              <div className="flex items-center justify-between">
-                <Subheading className="">
-                  {(page?.published_url && (
-                    <>
-                      <span className="mr-4">{page.published_url} </span>
-                      <CopyLink link={page.published_url} />
-                    </>
-                  ))}
-                </Subheading>
-              </div>
-            </Box> */}
-
             {/* Publishing Component */}
             <PublishComponent 
               page={page}
