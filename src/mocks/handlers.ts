@@ -100,6 +100,7 @@ const PAGE: Page = {
     background: '#ffffff',
     backgroundType: 'color',
     backgroundColor: '#3b3054',
+    profileImage: 'https://www.sdemian.com/images/Sergii-Demianchuk.jpeg',
     social: {
       fb: 'https://facebook.com/smariana',
     },

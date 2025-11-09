@@ -110,6 +110,7 @@ export type Page = {
         | 'to top right'
         | 'to bottom left'; // Gradient direction
         fontFamily: string;
+        profileImage?: string; // Profile/avatar image URL or base64
         social: {
             fb?: string;
             tiktok?: string;

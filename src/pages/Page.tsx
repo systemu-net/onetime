@@ -11,6 +11,7 @@ import {
   Title,
 } from '@/components/elements/fieldset';
 import { Subheading } from '@/components/elements/heading';
+import ImageUploadModal from '@/components/elements/ImageUploadModal';
 import { Input } from '@/components/elements/input';
 import { Radio, RadioGroup } from '@/components/elements/radio';
 import { Select } from '@/components/elements/select';
@@ -86,6 +87,7 @@ const SinglePage = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
   const [lastSavedPageState, setLastSavedPageState] = useState<Page | null>(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
 
   useEffect(() => {
@@ -353,53 +355,6 @@ const SinglePage = () => {
             <div className="mt-4 flex flex-wrap flex-col justify-between gap-4">
               {activeTab === 'Content' ? (
                 <div>
-                  <Section title="About">
-                    <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-                      <Subheading>
-                        Title
-                        <span className="text-sm opacity-60">
-                          &nbsp;(optional)
-                        </span>
-                      </Subheading>
-                      <div>
-                        <Input
-                          type="text"
-                          maxLength={40}
-                          defaultValue={page.title}
-                          onChange={(e) =>
-                            handlePageChange({
-                              ...page,
-                              title: e.target.value,
-                            })
-                          }
-                        />
-                        <Text className="float-end">{page.title.length}/40</Text>
-                      </div>
-                      <Subheading>
-                        Description
-                        <span className="text-sm opacity-60">
-                          &nbsp;(optional)
-                        </span>
-                      </Subheading>
-                      <div>
-                        <Input
-                          type="text"
-                          defaultValue={page?.description}
-                          maxLength={40}
-                          onChange={(e) =>
-                            handlePageChange({
-                              ...page,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                        <Text className="float-end">
-                          {page?.description?.length || 0}/40
-                        </Text>
-                      </div>
-                    </section>
-                  </Section>
-
                   <Section
                     title="Add your links here"
                   >
@@ -493,6 +448,102 @@ const SinglePage = () => {
                 </div>
               ) : (
                 <div>
+                  <Section title="Profile">
+                    <div className="space-y-6">
+                      {/* Image Section */}
+                      <div>
+                        <Subheading>Image</Subheading>
+                        <div className="flex items-center gap-6 mt-2">
+                          {page.content.profileImage && (
+                            <div className="flex-shrink-0">
+                              <img
+                                src={page.content.profileImage}
+                                alt="Profile"
+                                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+                              />
+                            </div>
+                          )}
+                          <div className="flex flex-col gap-2">
+                            <Button
+                              onClick={() => setIsImageModalOpen(true)}
+                              type="button"
+                            >
+                              {page.content.profileImage ? 'Edit image' : 'Add image'}
+                            </Button>
+                            {page.content.profileImage && (
+                              <Button
+                                onClick={() =>
+                                  handlePageChange({
+                                    ...page,
+                                    content: {
+                                      ...page.content,
+                                      profileImage: undefined,
+                                    },
+                                  })
+                                }
+                                type="button"
+                                plain
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* About Section */}
+                      <div>
+                        <Subheading>About</Subheading>
+                        <section className="space-y-6 mt-2">
+                          <div>
+                            <Subheading>
+                              Title
+                              <span className="text-sm opacity-60">
+                                &nbsp;(optional)
+                              </span>
+                            </Subheading>
+                            <Input
+                              type="text"
+                              maxLength={40}
+                              defaultValue={page.title}
+                              onChange={(e) =>
+                                handlePageChange({
+                                  ...page,
+                                  title: e.target.value,
+                                })
+                              }
+                              className="w-full"
+                            />
+                            <Text className="float-end">{page.title.length}/40</Text>
+                          </div>
+                          <div>
+                            <Subheading>
+                              Description
+                              <span className="text-sm opacity-60">
+                                &nbsp;(optional)
+                              </span>
+                            </Subheading>
+                            <Input
+                              type="text"
+                              defaultValue={page?.description}
+                              maxLength={40}
+                              onChange={(e) =>
+                                handlePageChange({
+                                  ...page,
+                                  description: e.target.value,
+                                })
+                              }
+                              className="w-full"
+                            />
+                            <Text className="float-end">
+                              {page?.description?.length || 0}/40
+                            </Text>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </Section>
+
                   <Section title="Page">
                     <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
                       <Subheading>Text Color</Subheading>
@@ -755,6 +806,25 @@ const SinglePage = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Image Upload Modal */}
+      {page && (
+        <ImageUploadModal
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          onSave={(imageUrl) => {
+            handlePageChange({
+              ...page,
+              content: {
+                ...page.content,
+                profileImage: imageUrl,
+              },
+            });
+          }}
+          currentImage={page.content.profileImage}
+          title={page.content.profileImage ? 'Edit image' : 'Add image'}
+        />
       )}
 
       {/* <br />
