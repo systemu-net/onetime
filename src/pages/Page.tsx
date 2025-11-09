@@ -375,75 +375,55 @@ const SinglePage = () => {
                     title="Social Links"
                     legend="Select social platforms and enter their links"
                   >
-                    <>
-                      <div className="flex gap-6">
-                        {socialPlatforms.map((platform) => (
-                          <div key={platform.id}>
-                            <Checkbox
-                              id={platform.id}
-                              checked={
-                                page.content.social?.[platform.id] !=
-                                undefined
-                              }
-                              onChange={(checked) =>
-                                handlePageChange({
-                                  ...page,
-                                  content: {
-                                    ...page.content,
-                                    social: {
-                                      ...page.content.social,
-                                      [platform.id]: checked ? '' : undefined,
-                                    },
+                    <div className="space-y-4">
+                      {socialPlatforms.map((platform) => (
+                        <div
+                          key={platform.id}
+                          className="flex items-center gap-3"
+                        >
+                          <Checkbox
+                            id={platform.id}
+                            checked={
+                              page.content.social?.[platform.id] != undefined
+                            }
+                            onChange={(checked) =>
+                              handlePageChange({
+                                ...page,
+                                content: {
+                                  ...page.content,
+                                  social: {
+                                    ...page.content.social,
+                                    [platform.id]: checked ? '' : undefined,
                                   },
-                                })
-                              }
-                            ></Checkbox>
-                            <Label
-                              className="ml-2 align-top cursor-pointer"
-                              htmlFor={platform.id}
-                            >
-                              {platform.title}
-                            </Label>
+                                },
+                              })
+                            }
+                          />
+                          <div className="flex-shrink-0">
+                            {socialIcons[platform.id]}
                           </div>
-                        ))}
-                      </div>
-                      <div>
-                        <Label className="mb-1">Edit your links</Label>
-                        {socialPlatforms.map(
-                          (platform) =>
-                            page.content.social?.[platform.id] !==
-                            undefined && (
-                              <div
-                                key={platform.id}
-                                className="flex items-center mb-2"
-                              >
-                                {socialIcons[platform.id]}
-                                <Input
-                                  type="text"
-                                  placeholder={`Enter ${platform.title} link`}
-                                  value={
-                                    page.content.social?.[platform.id] ||
-                                    ''
-                                  }
-                                  onChange={(e) =>
-                                    handlePageChange({
-                                      ...page,
-                                      content: {
-                                        ...page.content,
-                                        social: {
-                                          ...page.content.social,
-                                          [platform.id]: e.target.value,
-                                        },
-                                      },
-                                    })
-                                  }
-                                  className="ml-4 flex-1"
-                                />
-                              </div>
-                            )
-                        )}
-                      </div>
-                    </>
+                          <Input
+                            type="text"
+                            placeholder={`Enter ${platform.title} link`}
+                            value={page.content.social?.[platform.id] || ''}
+                            onChange={(e) =>
+                              handlePageChange({
+                                ...page,
+                                content: {
+                                  ...page.content,
+                                  social: {
+                                    ...page.content.social,
+                                    [platform.id]: e.target.value,
+                                  },
+                                },
+                              })
+                            }
+                            disabled={page.content.social?.[platform.id] === undefined}
+                            className="flex-1"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </Section>
                 </div>
               ) : (
