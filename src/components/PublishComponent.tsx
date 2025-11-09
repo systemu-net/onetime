@@ -35,6 +35,12 @@ const PublishComponent: React.FC<PublishComponentProps> = ({
   const isPublished = !!page.published_url;
   const publishedUrl = page.published_url;
   const lastPublishedAt = page.published_at;
+  
+  // Check if there are unpublished changes
+  const hasUnpublishedChanges = isPublished && 
+    page.updated_at && 
+    page.published_at && 
+    new Date(page.updated_at) > new Date(page.published_at);
 
   const handlePublish = useCallback(async () => {
     if (isLoading || !page.lookup_code) return;
@@ -172,7 +178,32 @@ const PublishComponent: React.FC<PublishComponentProps> = ({
             </>
           ) : (
             <>
-              {/* Desktop button */}
+              {/* Show "Publish new changes" button if there are unpublished modifications */}
+              {hasUnpublishedChanges && (
+                <>
+                  {/* Desktop button */}
+                  <button
+                    onClick={handlePublish}
+                    disabled={isLoading}
+                    className="hidden sm:flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  >
+                    <GlobeAltIcon className="w-4 h-4 mr-2" />
+                    Publish new changes
+                  </button>
+
+                  {/* Mobile button */}
+                  <button
+                    onClick={handlePublish}
+                    disabled={isLoading}
+                    className="sm:hidden flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title="Publish new changes"
+                  >
+                    <GlobeAltIcon className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+              
+              {/* Desktop unpublish button */}
               <button
                 onClick={handleUnpublish}
                 disabled={isLoading}
@@ -182,7 +213,7 @@ const PublishComponent: React.FC<PublishComponentProps> = ({
                 Unpublish
               </button>
 
-              {/* Mobile button */}
+              {/* Mobile unpublish button */}
               <button
                 onClick={handleUnpublish}
                 disabled={isLoading}
