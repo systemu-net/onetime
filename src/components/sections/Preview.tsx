@@ -38,6 +38,7 @@ const Preview: React.FC<PreviewProps> = ({
         button: buttonStyle,
         fontFamily,
         social,
+        profileImage,
     } = content;
     const baseClass = `py-8 w-[298px] p-6 overflow-y-scroll scrollbar-hidden rounded-3xl ${previewIcon ? 'h-[500px]' : 'h-[558px]'
         }`;
@@ -57,10 +58,13 @@ const Preview: React.FC<PreviewProps> = ({
             <div className="flex items-center flex-col gap-4" style={{
                 color: textColor
             }}>
-                <img
-                    className="w-24 rounded-full"
-                    src="https://www.sdemian.com/images/Sergii-Demianchuk.jpeg"
-                />
+                {profileImage && (
+                    <img
+                        className="w-24 h-24 rounded-full object-cover"
+                        src={profileImage}
+                        alt="Profile"
+                    />
+                )}
                 <h1 className="text-2xl mb-4 font-bold text-center break-all">{title}</h1>
                 {description && <h2 className="text-base -mt-6 mb-4 text-center break-all">{description}</h2>}
             </div>

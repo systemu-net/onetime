@@ -30,7 +30,8 @@ const designTemplates = [
       gradientStart: '#5b90bc',
       gradientEnd: '#d8b0c8',
       gradientDirection: 'to bottom',
-      textColor: '#fff'
+      textColor: '#fff',
+      profileImage: 'https://www.sdemian.com/images/Sergii-Demianchuk.jpeg',
     },
   },
   {
@@ -51,6 +52,7 @@ const designTemplates = [
       gradientDirection: 'to bottom right',
       gradientStart: '#8f7aac',
       gradientEnd: '#e94975',
+      profileImage: 'https://www.sdemian.com/images/Sergii-Demianchuk.jpeg',
     },
   },
 
