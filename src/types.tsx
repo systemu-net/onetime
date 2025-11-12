@@ -70,7 +70,29 @@ export type PageLink = {
     label: string;
     color: string;
     link: string;
+    description?: string; // Used as alt/title text in rendered links
 };
+
+// Resource types for the new Resources API
+export type ResourceLink = {
+    id: number;
+    lookup_code: string;
+    original_url: string;
+    title?: string | null;
+    description?: string | null;
+    clicks_count?: number;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Resource = {
+    id: number;
+    sort_order: number;
+    color?: string | null;
+    linkable_type: 'Link' | 'QrCode' | 'Image';
+    linkable: ResourceLink; // Can be expanded to include QrCode and Image types later
+};
+
 export type Page = {
     id?: number;
     lookup_code: string;
