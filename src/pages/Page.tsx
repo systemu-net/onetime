@@ -1,8 +1,10 @@
 import { getPage, updatePage } from '@/apis/pages';
 import Box from '@/components/Box';
+import AddLinkModal from '@/components/elements/AddLinkModal';
 import { Button } from '@/components/elements/button';
 import { Checkbox } from '@/components/elements/checkbox';
 import ColorPicker from '@/components/elements/colorPicker';
+import EditLinkModal from '@/components/elements/EditLinkModal';
 import {
   FieldGroup,
   Fieldset,
@@ -21,17 +23,37 @@ import PublishComponent from '@/components/PublishComponent';
 import Preview, { socialIcons } from '@/components/sections/Preview';
 import { useLinks } from '@/context/LinksContext';
 import { PAGES_ROUTE } from '@/routes';
-import { Page } from '@/types';
+import { Page, Resource } from '@/types';
 import {
   ChevronLeftIcon,
   PaintBrushIcon,
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
-import { DevicePhoneMobileIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { DevicePhoneMobileIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/solid';
 
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+import { useResources } from '../hooks/useResources';
+import { extractDomain } from '../utils/transformers';
 
 const buttonStyles: { id: Page['content']['button']; title: string }[] = [
   { id: 'squared', title: 'Squared' },
@@ -75,6 +97,73 @@ const Section = ({ title, legend = '', children }) => (
   </Box>
 );
 
+// Sortable Item Component for drag-and-drop
+const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: resource.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="mr-3 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+        title="Drag to reorder"
+      >
+        <Bars3Icon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+          {resource.linkable.title || extractDomain(resource.linkable.original_url)}
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          {resource.linkable.original_url}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 ml-4">
+        <button
+          onClick={() => onEdit(resource)}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-md shadow-sm hover:shadow transition-all duration-200"
+          title="Edit link"
+        >
+          <PencilIcon className="w-4 h-4" />
+          <span>Edit</span>
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await onRemove(resource.id);
+            } catch (error) {
+              console.error('Error removing resource:', error);
+              onError(error instanceof Error ? error.message : 'Failed to remove link');
+            }
+          }}
+          className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+          title="Remove link"
+        >
+          <XMarkIcon className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const SinglePage = () => {
   const { lookup_code } = useParams();
   const [cookies] = useCookies(['token']);
@@ -88,7 +177,73 @@ const SinglePage = () => {
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
   const [lastSavedPageState, setLastSavedPageState] = useState<Page | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
+  
+  // Use Resources API for managing page links
+  const { 
+    resources, 
+    loading: resourcesLoading, 
+    error: resourcesError, 
+    remove: removeResource,
+    update: updateResource,
+    reorder: reorderResources
+  } = useResources(lookup_code);
+
+  // Drag-and-drop sensors for mouse, touch, and keyboard
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end event to reorder resources
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = resources.findIndex((r) => r.id === active.id);
+    const newIndex = resources.findIndex((r) => r.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      // Optimistically update UI
+      const reorderedResources = arrayMove(resources, oldIndex, newIndex);
+      
+      try {
+        // Call the API to persist the new order with id and sort_order
+        await reorderResources(
+          reorderedResources.map((r, index) => ({
+            id: r.id,
+            sort_order: index
+          }))
+        );
+      } catch (error) {
+        console.error('Error reordering resources:', error);
+        setError(error instanceof Error ? error.message : 'Failed to reorder links');
+      }
+    }
+  };
+
+  // Handle edit link
+  const handleEditLink = (resource: Resource) => {
+    setEditingResource(resource);
+    setIsEditModalOpen(true);
+  };
+
+  // Convert resources to PageLink format for Preview component (backward compatibility)
+  const pageLinks = (resources || []).map(resource => ({
+    id: resource.linkable.lookup_code,
+    label: resource.linkable.title || extractDomain(resource.linkable.original_url),
+    link: resource.linkable.original_url,
+    color: resource.color || '#3b82f6', // Use resource color (stored on resource, not linkable)
+    description: resource.linkable.description || undefined // Pass description for alt/title attribute
+  }));
 
   useEffect(() => {
     if (cookies.token && !shortenedUrls.length) {
@@ -358,16 +513,51 @@ const SinglePage = () => {
                   <Section
                     title="Add your links here"
                   >
-                    <Button>TODO: add page link</Button>
+                    <button
+                      onClick={() => setIsLinkModalOpen(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Link
+                    </button>
                     {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-                    <div>
-                      {page?.links?.map((button) => (
-                        <div
-                          key={button.id}
-                        >
-                          {button.label}: {button.link}
+                    {resourcesError && (
+                      <p className="text-red-500 mt-2">Error loading links: {resourcesError}</p>
+                    )}
+                    <div className="mt-4 space-y-2">
+                      {resourcesLoading ? (
+                        <div className="text-center py-8">
+                          <div className="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading links...</p>
                         </div>
-                      ))}
+                      ) : resources.length > 0 ? (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={resources.map((r) => r.id)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            {resources.map((resource) => (
+                              <SortableResourceItem
+                                key={resource.id}
+                                resource={resource}
+                                onRemove={removeResource}
+                                onEdit={handleEditLink}
+                                onError={setError}
+                              />
+                            ))}
+                          </SortableContext>
+                        </DndContext>
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+                          No links added yet. Click "Add Link" to get started.
+                        </p>
+                      )}
                     </div>
                   </Section>
 
@@ -724,7 +914,7 @@ const SinglePage = () => {
                   title={page.title}
                   description={page.description}
                   content={page.content}
-                  links={page.links}
+                  links={pageLinks}
                 />
               </div>
             </div>
@@ -771,7 +961,7 @@ const SinglePage = () => {
                     title={page.title}
                     description={page.description}
                     content={page.content}
-                    links={page.links}
+                    links={pageLinks}
                   />
                 </div>
               </div>
@@ -804,6 +994,32 @@ const SinglePage = () => {
           }}
           currentImage={page.content.profileImage}
           title={page.content.profileImage ? 'Edit image' : 'Add image'}
+        />
+      )}
+
+      {/* Add Link Modal */}
+      {page && (
+        <AddLinkModal
+          isOpen={isLinkModalOpen}
+          onClose={() => setIsLinkModalOpen(false)}
+          lookupCode={lookup_code}
+          onAddResource={async (resource) => {
+            // Resource is already added via the hook, no need to do anything else
+            console.log('Resource added:', resource);
+          }}
+        />
+      )}
+
+      {/* Edit Link Modal */}
+      {editingResource && (
+        <EditLinkModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingResource(null);
+          }}
+          resource={editingResource}
+          onUpdate={updateResource}
         />
       )}
 

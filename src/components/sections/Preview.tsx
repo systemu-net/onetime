@@ -68,14 +68,32 @@ const Preview: React.FC<PreviewProps> = ({
                 <h1 className="text-2xl mb-4 font-bold text-center break-all">{title}</h1>
                 {description && <h2 className="text-base -mt-6 mb-4 text-center break-all">{description}</h2>}
             </div>
+            {!previewIcon && (
+                <div className="flex gap-4 mt-6 content-center justify-center">
+                    {Object.entries(social).map(([key, link]) =>
+                        link ? (
+                            <a
+                                key={key}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white hover:scale-105"
+                            >
+                                {socialIcons[key as keyof typeof socialIcons]}
+                            </a>
+                        ) : null
+                    )}
+                </div>
+            )}
             {links && (
-                <div className="mt-20 space-y-4 grid grid-cols-1">
+                <div className="mt-10 space-y-4 grid grid-cols-1">
                     {links.map((button) => (
                         <a
                             key={button.id}
                             href={button.link}
                             target="_blank"
                             rel="noopener noreferrer"
+                            title={button.description || button.label}
                             style={{
                                 backgroundColor: button.color,
                                 color: buttonColor,
@@ -98,23 +116,6 @@ const Preview: React.FC<PreviewProps> = ({
                             {SHORT_URL}
                         </a>
                     ))}
-                </div>
-            )}
-            {!previewIcon && (
-                <div className="flex gap-4 mt-6 content-center justify-center">
-                    {Object.entries(social).map(([key, link]) =>
-                        link ? (
-                            <a
-                                key={key}
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-white hover:scale-105"
-                            >
-                                {socialIcons[key as keyof typeof socialIcons]}
-                            </a>
-                        ) : null
-                    )}
                 </div>
             )}
         </div>
