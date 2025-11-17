@@ -118,17 +118,17 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+      className="flex items-center gap-2 p-2 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors overflow-hidden"
     >
       <button
         {...attributes}
         {...listeners}
-        className="mr-3 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
         title="Drag to reorder"
       >
-        <Bars3Icon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <Bars3Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500" />
       </button>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {resource.linkable.title || extractDomain(resource.linkable.original_url)}
         </p>
@@ -136,17 +136,17 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
           {resource.linkable.original_url}
         </p>
       </div>
-      <div className="flex items-center gap-2 ml-4">
+      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
         <button
           onClick={() => onEdit(resource)}
           style={{
             backgroundColor: resource.color || 'rgb(59, 130, 246)',
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90"
+          className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90"
           title="Edit link"
         >
           <PencilIcon className="w-4 h-4" />
-          <span>Edit</span>
+          <span className="hidden sm:inline">Edit</span>
         </button>
         <button
           onClick={async () => {
@@ -157,10 +157,10 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
               onError(error instanceof Error ? error.message : 'Failed to remove link');
             }
           }}
-          className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+          className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
           title="Remove link"
         >
-          <XMarkIcon className="w-5 h-5" />
+          <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
     </div>
