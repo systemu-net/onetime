@@ -29,7 +29,7 @@ import {
   PaintBrushIcon,
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
-import { DevicePhoneMobileIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Bars3Icon } from '@heroicons/react/24/solid';
 
 import {
@@ -184,6 +184,11 @@ const SinglePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
+  
+  // Preview slider drag state
+  const [previewDragX, setPreviewDragX] = useState(0);
+  const [previewDragStartX, setPreviewDragStartX] = useState(0);
+  const [isPreviewDragging, setIsPreviewDragging] = useState(false);
   
   // Use Resources API for managing page links
   const { 
@@ -401,53 +406,54 @@ const SinglePage = () => {
     };
   }, [handleSave]);
 
-  // Mobile preview slider handlers
-  const openPreviewSlider = () => {
-    setIsPreviewSliderOpen(true);
+  // Mobile preview slider handlers with drag functionality
+  const handlePreviewDragStart = (clientX: number) => {
+    setIsPreviewDragging(true);
+    setPreviewDragStartX(clientX);
+    setPreviewDragX(0);
+  };
+
+  const handlePreviewDragMove = (clientX: number) => {
+    if (!isPreviewDragging) return;
+    
+    const deltaX = clientX - previewDragStartX;
+    
+    if (isPreviewSliderOpen) {
+      // When open, only allow dragging right (closing)
+      if (deltaX > 0) {
+        setPreviewDragX(Math.min(deltaX, 400)); // Max drag distance
+      }
+    } else {
+      // When closed, only allow dragging left (opening)
+      if (deltaX < 0) {
+        setPreviewDragX(Math.max(deltaX, -400)); // Max drag distance
+      }
+    }
+  };
+
+  const handlePreviewDragEnd = () => {
+    setIsPreviewDragging(false);
+    
+    const threshold = 150; // Distance needed to trigger open/close
+    
+    if (isPreviewSliderOpen) {
+      // If dragged right more than threshold, close
+      if (previewDragX > threshold) {
+        setIsPreviewSliderOpen(false);
+      }
+    } else {
+      // If dragged left more than threshold, open
+      if (previewDragX < -threshold) {
+        setIsPreviewSliderOpen(true);
+      }
+    }
+    
+    setPreviewDragX(0);
+    setPreviewDragStartX(0);
   };
 
   const closePreviewSlider = () => {
     setIsPreviewSliderOpen(false);
-  };
-
-  // Handle touch gestures for swipe to close
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const element = e.currentTarget as HTMLElement;
-    element.dataset.startX = touch.clientX.toString();
-    element.dataset.startY = touch.clientY.toString();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isPreviewSliderOpen) return;
-    
-    const touch = e.touches[0];
-    const element = e.currentTarget as HTMLElement;
-    const startX = parseFloat(element.dataset.startX || '0');
-    const deltaX = touch.clientX - startX;
-    
-    // Only allow rightward swipes and apply transform
-    if (deltaX > 0) {
-      element.style.transform = `translateX(${Math.min(deltaX, element.offsetWidth)}px)`;
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const touch = e.changedTouches[0];
-    const element = e.currentTarget as HTMLElement;
-    const startX = parseFloat(element.dataset.startX || '0');
-    const startY = parseFloat(element.dataset.startY || '0');
-    const deltaX = touch.clientX - startX;
-    const deltaY = Math.abs(touch.clientY - startY);
-    
-    // Reset transform
-    element.style.transform = '';
-    
-    // If swipe right more than 1/3 of the width or swipe velocity is high, close the slider
-    // Also ensure it's more horizontal than vertical movement
-    if (deltaX > element.offsetWidth / 3 && deltaY < 100) {
-      closePreviewSlider();
-    }
   };
 
   // Prevent body scroll when slider is open
@@ -527,16 +533,6 @@ const SinglePage = () => {
                     </button>
                   ))}
                 </div>
-                
-                {/* Mobile Preview Button */}
-                <button
-                  onClick={openPreviewSlider}
-                  className="md:hidden flex items-center gap-2 px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm"
-                  title="Open mobile preview"
-                >
-                  <DevicePhoneMobileIcon className="w-4 h-4" />
-                  Preview
-                </button>
               </nav>
             </div>
 
@@ -956,7 +952,7 @@ const SinglePage = () => {
         </div>
       )}
 
-      {/* Mobile Preview Slider */}
+      {/* Mobile Preview Slider with Draggable Button */}
       {page && (
         <>
           {/* Backdrop */}
@@ -967,47 +963,80 @@ const SinglePage = () => {
             onClick={closePreviewSlider}
           />
           
-          {/* Slider */}
+          {/* Preview Panel */}
           <div 
-            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transition-transform duration-300 ease-in-out md:hidden ${
               isPreviewSliderOpen ? 'translate-x-0' : 'translate-x-full'
             }`}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            style={{
+              transform: isPreviewDragging && !isPreviewSliderOpen 
+                ? `translateX(calc(100% + ${previewDragX}px))` 
+                : isPreviewDragging && isPreviewSliderOpen
+                ? `translateX(${previewDragX}px)`
+                : undefined
+            }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Live Preview</h2>
-              <button
-                onClick={closePreviewSlider}
-                className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-            
             {/* Preview Content */}
-            <div className="flex-1 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 min-h-0">
-              <div className="w-full max-w-[280px]">
-                <div className="scale-90 origin-center">
-                  <Preview
-                    title={page.title}
-                    description={page.description}
-                    content={page.content}
-                    links={pageLinks}
-                  />
+            <div className="h-full flex flex-col">
+              <div className="flex-1 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 overflow-auto">
+                <div className="w-full max-w-[280px]">
+                  <div className="scale-90 origin-center">
+                    <Preview
+                      title={page.title}
+                      description={page.description}
+                      content={page.content}
+                      links={pageLinks}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            
-            {/* Swipe indicator */}
-            <div className="absolute top-1/2 left-2 transform -translate-y-1/2 text-gray-400">
-              <div className="flex flex-col items-center">
-                <span className="text-xs mb-1">Swipe</span>
-                <div className="w-6 h-0.5 bg-gray-400 rounded"></div>
-              </div>
-            </div>
+          </div>
+
+          {/* Draggable Preview Button */}
+          <div
+            className={`fixed top-1/2 -translate-y-1/2 z-50 md:hidden transition-all duration-300 ${
+              isPreviewSliderOpen ? 'left-0' : 'right-0'
+            }`}
+            style={{
+              transform: isPreviewDragging 
+                ? isPreviewSliderOpen
+                  ? `translate(${previewDragX}px, -50%)`
+                  : `translate(${previewDragX}px, -50%)`
+                : undefined
+            }}
+          >
+            <button
+              onTouchStart={(e) => handlePreviewDragStart(e.touches[0].clientX)}
+              onTouchMove={(e) => handlePreviewDragMove(e.touches[0].clientX)}
+              onTouchEnd={handlePreviewDragEnd}
+              onMouseDown={(e) => handlePreviewDragStart(e.clientX)}
+              onMouseMove={(e) => isPreviewDragging && handlePreviewDragMove(e.clientX)}
+              onMouseUp={handlePreviewDragEnd}
+              onMouseLeave={() => isPreviewDragging && handlePreviewDragEnd()}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isPreviewDragging) {
+                  setIsPreviewSliderOpen(!isPreviewSliderOpen);
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-6 text-sm font-semibold text-white shadow-lg transition-all touch-none ${
+                isPreviewSliderOpen 
+                  ? 'bg-blue-600 hover:bg-blue-700 rounded-r-lg' 
+                  : 'bg-blue-500 hover:bg-blue-600 rounded-l-lg'
+              }`}
+              style={{ cursor: isPreviewDragging ? 'grabbing' : 'grab' }}
+            >
+              {isPreviewSliderOpen ? (
+                <>
+                  <span className="writing-mode-vertical-rl rotate-180">Preview</span>
+                </>
+              ) : (
+                <>
+                  <span className="writing-mode-vertical-rl rotate-180">Preview</span>
+                </>
+              )}
+            </button>
           </div>
         </>
       )}
