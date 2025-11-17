@@ -197,14 +197,44 @@ const SinglePage = () => {
 
   // Drag-and-drop sensors for mouse, touch, and keyboard
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+  // Prevent body scroll during drag
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (isDragging) {
+      // Prevent scrolling on mobile during drag
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isDragging]);
+
+  // Handle drag start
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   // Handle drag end event to reorder resources
   const handleDragEnd = async (event: DragEndEvent) => {
+    setIsDragging(false);
+    
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -539,6 +569,7 @@ const SinglePage = () => {
                         <DndContext
                           sensors={sensors}
                           collisionDetection={closestCenter}
+                          onDragStart={handleDragStart}
                           onDragEnd={handleDragEnd}
                         >
                           <SortableContext
