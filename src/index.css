@@ -10,6 +10,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 :root {
   --clr-primary-400: hsl(180, 66%, 49%);
   --clr-primary-500: hsl(257, 27%, 26%);

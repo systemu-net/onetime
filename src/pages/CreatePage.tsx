@@ -5,13 +5,13 @@ import { Button } from '@/components/elements/button';
 import { Divider } from '@/components/elements/divider';
 import { Heading, Subheading } from '@/components/elements/heading';
 import { Input } from '@/components/elements/input';
+import { bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
 import { useNotification } from '@/Notifications';
 import { PAGES_ROUTE } from '@/routes';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
-import { bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
 
 const designTemplates = [
   {
@@ -188,7 +188,7 @@ const CreatePage = () => {
               <section className="grid gap-x-8">
                 <div>
                   <Subheading>Choose your Design</Subheading>
-                  <div className="my-4 flex w-3/4 gap-4">
+                  <div className="my-4">
                     {/* <fieldset>
                     <legend className="text-sm/6 font-semibold text-gray-900">Select a mailing list</legend>
                     <RadioGroup
@@ -227,14 +227,14 @@ const CreatePage = () => {
                       {designTemplates.map((template) => (
                         <div
                           key={template.id}
-                          className={`max-w-sm bg-white border rounded-[26px] shadow dark:bg-gray-800 dark:border-gray-700 hover:ring-2 hover:ring-violet-600 ${selectedTemplate === template.id
+                          className={`w-full bg-white border rounded-[26px] shadow dark:bg-gray-800 dark:border-gray-700 hover:ring-2 hover:ring-violet-600 cursor-pointer ${selectedTemplate === template.id
                             ? 'ring-2 ring-violet-600 '
                             : ''
                             }`}
                           onClick={() => setSelectedTemplate(template.id)}
                         >
                           <img
-                            className="rounded-t-[26px]"
+                            className="rounded-t-[26px] w-full h-auto"
                             src={template.image}
                             alt={template.name}
                           />
