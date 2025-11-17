@@ -37,7 +37,7 @@ import {
   DndContext,
   DragEndEvent,
   KeyboardSensor,
-  PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -118,16 +118,13 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 p-2 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors overflow-hidden"
+      {...attributes}
+      {...listeners}
+      className="flex items-center gap-2 p-2 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors overflow-hidden cursor-grab active:cursor-grabbing"
     >
-      <button
-        {...attributes}
-        {...listeners}
-        className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-        title="Drag to reorder"
-      >
+      <div className="flex-shrink-0">
         <Bars3Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500" />
-      </button>
+      </div>
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {resource.linkable.title || extractDomain(resource.linkable.original_url)}
@@ -136,13 +133,18 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
           {resource.linkable.original_url}
         </p>
       </div>
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+      <div 
+        className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <button
           onClick={() => onEdit(resource)}
           style={{
             backgroundColor: resource.color || 'rgb(59, 130, 246)',
           }}
-          className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90"
+          className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90 cursor-pointer"
           title="Edit link"
         >
           <PencilIcon className="w-4 h-4" />
@@ -157,7 +159,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
               onError(error instanceof Error ? error.message : 'Failed to remove link');
             }
           }}
-          className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0"
+          className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors flex-shrink-0 cursor-pointer"
           title="Remove link"
         >
           <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -202,9 +204,10 @@ const SinglePage = () => {
 
   // Drag-and-drop sensors for mouse, touch, and keyboard
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(TouchSensor, {
       activationConstraint: {
-        distance: 8, // 8px movement required before drag starts
+        delay: 150,       // Press and hold for 150ms before drag starts (shorter = more responsive)
+        tolerance: 8,     // Allow 8px movement during the delay
       },
     }),
     useSensor(KeyboardSensor, {
