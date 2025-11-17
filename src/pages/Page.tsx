@@ -132,7 +132,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {resource.linkable.title || extractDomain(resource.linkable.original_url)}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+        <p className="text-xs text-gray-500 dark:text-gray-400 break-all overflow-hidden line-clamp-2">
           {resource.linkable.original_url}
         </p>
       </div>
