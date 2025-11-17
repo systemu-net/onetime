@@ -139,7 +139,10 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       <div className="flex items-center gap-2 ml-4">
         <button
           onClick={() => onEdit(resource)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 active:bg-violet-800 rounded-md shadow-sm hover:shadow transition-all duration-200"
+          style={{
+            backgroundColor: resource.color || 'rgb(59, 130, 246)',
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90"
           title="Edit link"
         >
           <PencilIcon className="w-4 h-4" />

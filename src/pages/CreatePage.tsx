@@ -11,13 +11,14 @@ import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
+import { bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
 
 const designTemplates = [
   {
     id: 1,
     name: 'Minimalist Design',
     description: 'A clean and modern design template to highlight your links.',
-    image: '/templates/blue-pink.png',
+    image: bluePinkTemplateBase64,
     content: {
       fontFamily: 'rubik',
       button: 'rounded',
@@ -38,7 +39,7 @@ const designTemplates = [
     id: 2,
     name: 'Professional Design',
     description: 'Perfect for showcasing links in a formal and elegant style.',
-    image: '/templates/pink-gradient.png',
+    image: pinkGradientTemplateBase64,
     content: {
       button: 'rounded',
       buttonColor: '#fff',
