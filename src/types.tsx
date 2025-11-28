@@ -62,7 +62,10 @@ export type Link = {
     lookup_code: string;
     original_url: string;
     updated_at: string;
-    clicks: Click[];
+    title?: string | null;
+    description?: string | null;
+    clicks?: Click[]; // Returned when fetching individual link
+    clicks_count?: number; // Returned when fetching list of links
 };
 
 export type PageLink = {

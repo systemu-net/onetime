@@ -317,8 +317,8 @@ const MainLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="pt-6 flex flex-1 h-full">
-            <div className='flex-grow h-full'>
+          <main className="pt-6 flex flex-1 h-full overflow-x-hidden">
+            <div className='flex-grow h-full min-w-0'>
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {children}
               </div>
