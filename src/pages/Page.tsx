@@ -37,6 +37,7 @@ import {
   DndContext,
   DragEndEvent,
   KeyboardSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
@@ -204,6 +205,11 @@ const SinglePage = () => {
 
   // Drag-and-drop sensors for mouse, touch, and keyboard
   const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,      // Require 8px movement to start drag (prevents accidental drags)
+      },
+    }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 150,       // Press and hold for 150ms before drag starts (shorter = more responsive)
@@ -264,6 +270,17 @@ const SinglePage = () => {
             sort_order: index
           }))
         );
+        
+        // Update the page's updated_at timestamp to mark as having unpublished changes
+        // Note: We don't set hasUnsavedChanges because reordering is already saved via the API
+        if (page) {
+          const updatedPage = {
+            ...page,
+            updated_at: new Date().toISOString()
+          };
+          setPage(updatedPage);
+          setLastSavedPageState(updatedPage); // Update saved state to prevent auto-save loop
+        }
       } catch (error) {
         console.error('Error reordering resources:', error);
         setError(error instanceof Error ? error.message : 'Failed to reorder links');
@@ -494,10 +511,10 @@ const SinglePage = () => {
               lastSaveTime={lastSaveTime}
               onStatusChange={(updatedPage) => {
                 // Update the page state with new publishing information from API
-                setPage(prev => prev ? {
-                  ...prev,
+                const newPageState = {
+                  ...page,
                   id: updatedPage.id,
-                  lookup_code: updatedPage.lookup_code || prev.lookup_code,
+                  lookup_code: updatedPage.lookup_code || page?.lookup_code,
                   published_lookup_code: updatedPage.published_lookup_code,
                   status: updatedPage.status,
                   published_url: updatedPage.published_url,
@@ -505,8 +522,11 @@ const SinglePage = () => {
                   has_published_version: updatedPage.has_published_version,
                   has_draft_version: updatedPage.has_draft_version,
                   published_version: updatedPage.published_version,
-                  updated_at: updatedPage.published_at || prev.updated_at
-                } : prev);
+                  updated_at: updatedPage.updated_at || page?.updated_at
+                };
+                setPage(newPageState);
+                // Update the saved state to match the published state
+                setLastSavedPageState(newPageState);
               }}
             />
 
