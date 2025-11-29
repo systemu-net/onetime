@@ -33,7 +33,7 @@ const Header = () => {
         { /* Desktop Navbar */}
         <nav className="nav">
           <div className="nav__inner">
-            <Link to='/' className="logo">
+            <Link to={cookies.token ? '/' : '/home'} className="logo">
               <img src={Logo} alt="Logo" />
             </Link>
 

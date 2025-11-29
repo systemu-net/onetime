@@ -1,44 +1,16 @@
-import MainLayout from '@/components/layouts/MainLayout';
-import { COOKIES_ROUTE, PRIVACY_ROUTE, TERMS_ROUTE, USER_POLICY_ROUTE } from '@/routes';
-import { Link, useLocation } from 'react-router-dom';
+import Boost from '@/components/Boost';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import LegalNav from '@/components/legalNav';
 
-const LegalNav = () => {
-  const location = useLocation();
-  
-  const navItems = [
-    { path: TERMS_ROUTE, label: 'Terms of Service' },
-    { path: PRIVACY_ROUTE, label: 'Privacy Policy' },
-    { path: COOKIES_ROUTE, label: 'Cookie Policy' },
-    { path: USER_POLICY_ROUTE, label: 'User Policy' },
-  ];
-
-  return (
-    <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav className="flex flex-wrap gap-4 px-4 -mb-px">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-              location.pathname === item.path
-                ? 'border-violet-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300'
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
-};
 
 const PrivacyPage = () => {
   return (
-    <MainLayout>
+    <>
+      <Header />
       <div className="bg-white dark:bg-gray-900 min-h-screen">
         <LegalNav />
-        
+
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -79,7 +51,7 @@ const PrivacyPage = () => {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Information We Collect</h2>
 
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">1.1 Information You Provide to Us</h3>
-              
+
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2 mt-4">Account Information:</h4>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300 ml-4 mb-4">
                 <li>Name or username</li>
@@ -100,7 +72,7 @@ const PrivacyPage = () => {
               </ul>
 
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">1.2 Information Automatically Collected</h3>
-              
+
               <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2 mt-4">Usage Data:</h4>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300 ml-4 mb-4">
                 <li>IP address</li>
@@ -113,7 +85,7 @@ const PrivacyPage = () => {
 
             <section id="how-we-use-information" className="mb-8 scroll-mt-20">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. How We Use Your Information</h2>
-              
+
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">2.1 Provide and Maintain the Service</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300 ml-4 mb-4">
                 <li>Create and manage your account</li>
@@ -126,7 +98,7 @@ const PrivacyPage = () => {
 
             <section id="how-we-share-information" className="mb-8 scroll-mt-20">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. How We Share Your Information</h2>
-              
+
               <p className="text-gray-700 dark:text-gray-300 mb-4">
                 <strong className="text-gray-900 dark:text-white">We do not sell your personal information.</strong> We may share your information in the following circumstances:
               </p>
@@ -182,7 +154,7 @@ const PrivacyPage = () => {
               </p>
             </section>
           </div>
-          
+
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
             <p className="text-gray-600 dark:text-gray-400">
               Questions about your privacy?{' '}
@@ -193,7 +165,9 @@ const PrivacyPage = () => {
           </div>
         </div>
       </div>
-    </MainLayout>
+      <Boost />
+      <Footer />
+    </>
   );
 };
 

@@ -1,44 +1,16 @@
-import MainLayout from '@/components/layouts/MainLayout';
-import { COOKIES_ROUTE, PRIVACY_ROUTE, TERMS_ROUTE, USER_POLICY_ROUTE } from '@/routes';
-import { Link, useLocation } from 'react-router-dom';
+import Boost from '@/components/Boost';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import LegalNav from '@/components/legalNav';
 
-const LegalNav = () => {
-  const location = useLocation();
-  
-  const navItems = [
-    { path: TERMS_ROUTE, label: 'Terms of Service' },
-    { path: PRIVACY_ROUTE, label: 'Privacy Policy' },
-    { path: COOKIES_ROUTE, label: 'Cookie Policy' },
-    { path: USER_POLICY_ROUTE, label: 'User Policy' },
-  ];
-
-  return (
-    <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-      <nav className="flex flex-wrap gap-4 px-4 -mb-px">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-              location.pathname === item.path
-                ? 'border-violet-600 text-violet-600 dark:text-violet-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300'
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
-};
 
 const UserPolicyPage = () => {
   return (
-    <MainLayout>
+    <>
+      <Header />
       <div className="bg-white dark:bg-gray-900 min-h-screen">
         <LegalNav />
-        
+
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -59,7 +31,7 @@ const UserPolicyPage = () => {
             <section id="prohibited-content" className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Prohibited Content</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">You may not use our Service to shorten, share, or promote URLs that contain:</p>
-              
+
               <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4 mb-4">
                 <li><strong className="text-gray-900 dark:text-white">Illegal Content:</strong> Content that violates any applicable laws or regulations</li>
                 <li><strong className="text-gray-900 dark:text-white">Malware:</strong> Viruses, trojans, worms, or other malicious code</li>
@@ -76,7 +48,7 @@ const UserPolicyPage = () => {
             <section id="prohibited-activities" className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Prohibited Activities</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">You may not:</p>
-              
+
               <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4 mb-4">
                 <li>Attempt to gain unauthorized access to our systems</li>
                 <li>Interfere with or disrupt the Service</li>
@@ -118,7 +90,7 @@ const UserPolicyPage = () => {
               </p>
             </section>
           </div>
-          
+
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
             <p className="text-gray-600 dark:text-gray-400">
               Questions about this Policy?{' '}
@@ -129,7 +101,9 @@ const UserPolicyPage = () => {
           </div>
         </div>
       </div>
-    </MainLayout>
+      <Boost />
+      <Footer />
+    </>
   );
 };
 
