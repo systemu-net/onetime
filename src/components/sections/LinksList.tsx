@@ -2,16 +2,22 @@ import { deleteLink } from '@/apis/shorten';
 import { Link as LinkType } from '@/types';
 import { extractDomain } from '@/utils/transformers';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { HiArrowUturnRight } from "react-icons/hi2";
+import { IoCopyOutline } from 'react-icons/io5';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { RiQrCodeLine } from 'react-icons/ri';
 import { Link as RouterLink } from 'react-router-dom';
 import { API_URL } from '../../apis/config';
 import {
   Dropdown,
   DropdownButton,
+  DropdownDivider,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
+  DropdownShortcut,
 } from '../elements/dropdown';
 
 type LinksListProps = {
@@ -84,7 +90,7 @@ export const LinksList: React.FC<LinksListProps> = ({
               <div className="min-w-0 grow">
                 <div className="flex items-center gap-3">
                   {/* Favicon */}
-                  <div className="hidden sm:block shrink-0">
+                  <div className="shrink-0">
                     <img
                       alt={extractDomain(item.original_url)}
                       draggable="false"
@@ -147,7 +153,7 @@ export const LinksList: React.FC<LinksListProps> = ({
 
                     {/* Destination URL */}
                     <div className="flex items-center gap-1 text-xs sm:text-sm">
-                      <ArrowRightIcon className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500" />
+                      <HiArrowUturnRight className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500 scale-y-[-1]" />
                       <a
                         href={item.original_url}
                         target="_blank"
@@ -275,19 +281,36 @@ export const LinksList: React.FC<LinksListProps> = ({
                     <EllipsisVerticalIcon className="w-5 h-5" />
                   </DropdownButton>
                   <DropdownMenu anchor="bottom end">
-                    <DropdownItem
-                      onClick={() => handleCopy(item.lookup_code)}
-                    >
-                      {copied === item.lookup_code ? 'Copied!' : 'Copy'}
+                    <DropdownItem>
+                      <MdEdit data-slot="icon" />
+                      <DropdownLabel>Edit</DropdownLabel>
+                      <DropdownShortcut keys="E" />
                     </DropdownItem>
-                    <DropdownItem to={item.lookup_code}>
-                      View Details
+
+                    <DropdownItem>
+                      <RiQrCodeLine data-slot="icon" />
+                      <DropdownLabel>QR Code</DropdownLabel>
+                      <DropdownShortcut keys="Q" />
                     </DropdownItem>
+
+                    <DropdownItem onClick={() => handleCopy(item.lookup_code)}>
+                      <IoCopyOutline data-slot="icon" />
+                      <DropdownLabel>
+                        {copied === item.lookup_code ? 'Copied!' : 'Copy Link ID'}
+                      </DropdownLabel>
+                      <DropdownShortcut keys="I" />
+                    </DropdownItem>
+
+                    <DropdownDivider />
+
                     <DropdownItem
                       disabled={loading}
                       onClick={() => handleDelete(item.lookup_code)}
+                      className="data-[focus]:bg-red-600 data-[focus]:text-white [&>[data-slot=icon]]:data-[focus]:text-white"
                     >
-                      Delete
+                      <MdDelete data-slot="icon" />
+                      <DropdownLabel>Delete</DropdownLabel>
+                      <DropdownShortcut keys="X" />
                     </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>

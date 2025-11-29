@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../../apis/config';
 import { shortenApi } from '../../apis/shorten';
 import { LOGIN_ROUTE } from '../../routes';
 import { Subheading } from './heading';
@@ -38,6 +39,14 @@ const ShortenForm = ({ fetchLinks }) => {
         setErrorMessage(typeof error === 'string' ? error : 'An unexpected error occurred');
       } else {
         if (typeof response !== 'string' && response.ok) {
+          const data = await response.json();
+          const lookupCode = data.link?.lookup_code || data.lookup_code;
+          
+          if (lookupCode) {
+            const shortUrl = `${API_URL}/${lookupCode}`;
+            navigator.clipboard.writeText(shortUrl);
+          }
+          
           setErrorMessage('');
           setUrl('');
           fetchLinks();
