@@ -9,7 +9,7 @@ import { IoCopyOutline } from 'react-icons/io5';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { RiQrCodeLine } from 'react-icons/ri';
 import { Link as RouterLink } from 'react-router-dom';
-import { API_URL } from '../../apis/config';
+import { API_URL, SHORT_URL } from '../../apis/config';
 import {
   Dropdown,
   DropdownButton,
@@ -19,6 +19,7 @@ import {
   DropdownMenu,
   DropdownShortcut,
 } from '../elements/dropdown';
+import { ClicksIcon } from '../icons/ClicksIcon';
 
 type LinksListProps = {
   fetchLinks: () => Promise<void>;
@@ -85,7 +86,10 @@ export const LinksList: React.FC<LinksListProps> = ({
             key={item.lookup_code}
             className="w-full group/card border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 border rounded-xl transition-all hover:shadow-md overflow-hidden"
           >
-            <div className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm">
+            <RouterLink 
+              to={item.lookup_code}
+              className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm no-underline cursor-default"
+            >
               {/* Left section - Link info */}
               <div className="min-w-0 grow">
                 <div className="flex items-center gap-3">
@@ -105,17 +109,18 @@ export const LinksList: React.FC<LinksListProps> = ({
                   {/* Link details */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <RouterLink
-                        to={item.lookup_code}
-                        className="font-semibold text-neutral-800 dark:text-neutral-100 hover:text-black dark:hover:text-white transition-colors truncate"
-                      >
-                        {API_URL.replace(/^https?:\/\//, '')}/{item.lookup_code}
-                      </RouterLink>
+                      <span className="font-semibold text-neutral-800 dark:text-neutral-100 group-hover/card:text-black dark:group-hover/card:text-white transition-colors truncate">
+                        {SHORT_URL.replace(/^https?:\/\//, '')}/{item.lookup_code}
+                      </span>
                       
                       {/* Copy button */}
                       <button
-                        onClick={() => handleCopy(item.lookup_code)}
-                        className="group/copy rounded-full transition-all duration-75 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-700 active:bg-neutral-200 dark:active:bg-neutral-600 p-1.5"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleCopy(item.lookup_code);
+                        }}
+                        className="group/copy rounded-full transition-all duration-75 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-700 active:bg-neutral-200 dark:active:bg-neutral-600 p-1.5 relative z-10"
                         type="button"
                       >
                         <span className="sr-only">Copy</span>
@@ -154,15 +159,9 @@ export const LinksList: React.FC<LinksListProps> = ({
                     {/* Destination URL */}
                     <div className="flex items-center gap-1 text-xs sm:text-sm">
                       <HiArrowUturnRight className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500 scale-y-[-1]" />
-                      <a
-                        href={item.original_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={item.original_url}
-                        className="truncate text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 hover:underline hover:underline-offset-2"
-                      >
+                      <span className="truncate text-neutral-500 dark:text-neutral-400 group-hover/card:text-neutral-700 dark:group-hover/card:text-neutral-300">
                         {item.original_url}
-                      </a>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -176,146 +175,74 @@ export const LinksList: React.FC<LinksListProps> = ({
                 </span>
 
                 {/* Clicks badge */}
-                <RouterLink
-                  to={item.lookup_code}
-                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 relative z-10"
                 >
                   <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5">
-                    <svg
-                      height="18"
-                      width="18"
-                      viewBox="0 0 18 18"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5 shrink-0 text-blue-500"
-                    >
-                      <g fill="currentColor">
-                        <path
-                          d="M8.095,7.778l7.314,2.51c.222,.076,.226,.388,.007,.47l-3.279,1.233c-.067,.025-.121,.079-.146,.146l-1.233,3.279c-.083,.219-.394,.215-.47-.007l-2.51-7.314c-.068-.197,.121-.385,.318-.318Z"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                        ></path>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="12.031"
-                          x2="16.243"
-                          y1="12.031"
-                          y2="16.243"
-                        ></line>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="7.75"
-                          x2="7.75"
-                          y1="1.75"
-                          y2="3.75"
-                        ></line>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="11.993"
-                          x2="10.578"
-                          y1="3.507"
-                          y2="4.922"
-                        ></line>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="3.507"
-                          x2="4.922"
-                          y1="11.993"
-                          y2="10.578"
-                        ></line>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="1.75"
-                          x2="3.75"
-                          y1="7.75"
-                          y2="7.75"
-                        ></line>
-                        <line
-                          fill="none"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          x1="3.507"
-                          x2="4.922"
-                          y1="3.507"
-                          y2="4.922"
-                        ></line>
-                      </g>
-                    </svg>
+                    <ClicksIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
                     <span className="whitespace-nowrap">
                       {item.clicks_count ?? 0} {(item.clicks_count ?? 0) === 1 ? 'click' : 'clicks'}
                     </span>
                   </div>
-                </RouterLink>
+                </div>
 
                 {/* More menu */}
-                <Dropdown>
-                  <DropdownButton
-                    plain
-                    aria-label="More options"
-                    className="flex items-center justify-center rounded-md border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 transition-all h-8 px-1.5"
-                  >
-                    <EllipsisVerticalIcon className="w-5 h-5" />
-                  </DropdownButton>
-                  <DropdownMenu anchor="bottom end">
-                    <DropdownItem>
-                      <MdEdit data-slot="icon" />
-                      <DropdownLabel>Edit</DropdownLabel>
-                      <DropdownShortcut keys="E" />
-                    </DropdownItem>
-
-                    <DropdownItem>
-                      <RiQrCodeLine data-slot="icon" />
-                      <DropdownLabel>QR Code</DropdownLabel>
-                      <DropdownShortcut keys="Q" />
-                    </DropdownItem>
-
-                    <DropdownItem onClick={() => handleCopy(item.lookup_code)}>
-                      <IoCopyOutline data-slot="icon" />
-                      <DropdownLabel>
-                        {copied === item.lookup_code ? 'Copied!' : 'Copy Link ID'}
-                      </DropdownLabel>
-                      <DropdownShortcut keys="I" />
-                    </DropdownItem>
-
-                    <DropdownDivider />
-
-                    <DropdownItem
-                      disabled={loading}
-                      onClick={() => handleDelete(item.lookup_code)}
-                      className="data-[focus]:bg-red-600 data-[focus]:text-white [&>[data-slot=icon]]:data-[focus]:text-white"
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  className="relative z-50"
+                >
+                  <Dropdown>
+                    <DropdownButton
+                      plain
+                      aria-label="More options"
+                      className="flex items-center justify-center rounded-md border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 transition-all h-8 px-1.5"
                     >
-                      <MdDelete data-slot="icon" />
-                      <DropdownLabel>Delete</DropdownLabel>
-                      <DropdownShortcut keys="X" />
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
+                      <EllipsisVerticalIcon className="w-5 h-5" />
+                    </DropdownButton>
+                    <DropdownMenu anchor="bottom end" className="z-50">
+                      <DropdownItem>
+                        <MdEdit data-slot="icon" />
+                        <DropdownLabel>Edit</DropdownLabel>
+                        <DropdownShortcut keys="E" />
+                      </DropdownItem>
+
+                      <DropdownItem>
+                        <RiQrCodeLine data-slot="icon" />
+                        <DropdownLabel>QR Code</DropdownLabel>
+                        <DropdownShortcut keys="Q" />
+                      </DropdownItem>
+
+                      <DropdownItem onClick={() => handleCopy(item.lookup_code)}>
+                        <IoCopyOutline data-slot="icon" />
+                        <DropdownLabel>
+                          {copied === item.lookup_code ? 'Copied!' : 'Copy Link ID'}
+                        </DropdownLabel>
+                        <DropdownShortcut keys="I" />
+                      </DropdownItem>
+
+                      <DropdownDivider />
+
+                      <DropdownItem
+                        disabled={loading}
+                        onClick={() => handleDelete(item.lookup_code)}
+                        className="data-[focus]:bg-red-600 data-[focus]:text-white [&>[data-slot=icon]]:data-[focus]:text-white"
+                      >
+                        <MdDelete data-slot="icon" />
+                        <DropdownLabel>Delete</DropdownLabel>
+                        <DropdownShortcut keys="X" />
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
               </div>
-            </div>
+            </RouterLink>
           </li>
         ))}
       </ul>
