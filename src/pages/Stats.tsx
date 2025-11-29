@@ -101,7 +101,8 @@ const StatsPage: React.FC<StatsPageProps> = ({ linkData, statsData, error }) => 
     original_url: 'https://example.com/very-long-url',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
-    clicks: []
+    clicks: [],
+    is_safe: true
   };
 
   const mockStatsData: LinkStats = {
