@@ -8,6 +8,7 @@ import { HiArrowUturnRight } from "react-icons/hi2";
 import { IoCopyOutline } from 'react-icons/io5';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { RiQrCodeLine } from 'react-icons/ri';
+import { TbWorld } from 'react-icons/tb';
 import { Link as RouterLink } from 'react-router-dom';
 import { API_URL, SHORT_URL } from '../../apis/config';
 import {
@@ -19,6 +20,7 @@ import {
   DropdownMenu,
   DropdownShortcut,
 } from '../elements/dropdown';
+import { AnimatedShortTextIcon } from '../icons/AnimatedShortTextIcon';
 import { ClicksIcon } from '../icons/ClicksIcon';
 
 type LinksListProps = {
@@ -33,6 +35,7 @@ export const LinksList: React.FC<LinksListProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [cookies] = useCookies(['token']);
   const [copied, setCopied] = useState<string | null>(null);
+  const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
 
   const handleDelete = async (lookup_code: string) => {
     try {
@@ -81,29 +84,54 @@ export const LinksList: React.FC<LinksListProps> = ({
   return (
     <div className="w-full">
       <ul className="group/card-list w-full flex flex-col gap-2">
-        {shortenedUrls.map((item) => (
-          <li
-            key={item.lookup_code}
-            className="w-full group/card border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 border rounded-xl transition-all hover:shadow-md overflow-hidden"
-          >
-            <RouterLink 
-              to={item.lookup_code}
-              className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm no-underline cursor-default"
+        {shortenedUrls.map((item) => {
+          const isUnsafe = item.is_safe === false;
+          
+          return (
+            <li
+              key={item.lookup_code}
+              className={`w-full group/card border rounded-xl transition-all hover:shadow-md overflow-hidden ${
+                isUnsafe 
+                  ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 opacity-75' 
+                  : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800'
+              }`}
             >
+              {/* Warning banner for unsafe links */}
+              {isUnsafe && (
+                <div className="bg-red-100 dark:bg-red-900/50 border-b border-red-200 dark:border-red-800 px-4 py-2 flex items-center gap-2">
+                  <span className="text-xs text-red-800 dark:text-red-300 font-medium">
+                    ⚠️ This link has been flagged as potentially unsafe and is currently disabled
+                  </span>
+                </div>
+              )}
+              
+              <RouterLink 
+                to={item.lookup_code}
+                className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm no-underline cursor-default"
+              >
               {/* Left section - Link info */}
               <div className="min-w-0 grow">
                 <div className="flex items-center gap-3">
                   {/* Favicon */}
                   <div className="shrink-0">
-                    <img
-                      alt={extractDomain(item.original_url)}
-                      draggable="false"
-                      loading="lazy"
-                      width="20"
-                      height="20"
-                      className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600"
-                      src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(item.original_url)}`}
-                    />
+                    {faviconErrors.has(item.lookup_code) ? (
+                      <div className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+                        <TbWorld className="w-3 h-3 text-neutral-500 dark:text-neutral-400" />
+                      </div>
+                    ) : (
+                      <img
+                        alt={extractDomain(item.original_url)}
+                        draggable="false"
+                        loading="lazy"
+                        width="20"
+                        height="20"
+                        className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600"
+                        src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(item.original_url)}`}
+                        onError={() => {
+                          setFaviconErrors(prev => new Set(prev).add(item.lookup_code));
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* Link details */}
@@ -159,7 +187,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                     {/* Destination URL */}
                     <div className="flex items-center gap-1 text-xs sm:text-sm">
                       <HiArrowUturnRight className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500 scale-y-[-1]" />
-                      <span className="truncate text-neutral-500 dark:text-neutral-400 group-hover/card:text-neutral-700 dark:group-hover/card:text-neutral-300">
+                      <span className={`truncate text-neutral-500 dark:text-neutral-400 group-hover/card:text-neutral-700 dark:group-hover/card:text-neutral-300 ${isUnsafe ? 'line-through opacity-60' : ''}`}>
                         {item.original_url}
                       </span>
                     </div>
@@ -175,12 +203,8 @@ export const LinksList: React.FC<LinksListProps> = ({
                 </span>
 
                 {/* Clicks badge */}
-                <RouterLink
-                  to={item.lookup_code}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 relative z-10 cursor-default no-underline"
+                <div
+                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 relative z-10 cursor-pointer"
                 >
                   <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5">
                     <ClicksIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
@@ -188,7 +212,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                       {item.clicks_count ?? 0} {(item.clicks_count ?? 0) === 1 ? 'click' : 'clicks'}
                     </span>
                   </div>
-                </RouterLink>
+                </div>
 
                 {/* More menu */}
                 <div
@@ -244,8 +268,21 @@ export const LinksList: React.FC<LinksListProps> = ({
               </div>
             </RouterLink>
           </li>
-        ))}
+          );
+        })}
       </ul>
+      
+      {/* End of list banner */}
+      {shortenedUrls.length > 0 && (
+        <div className="flex flex-col items-center justify-center py-8 mt-4">
+          <div className="mb-3">
+            <AnimatedShortTextIcon size={48} isAnimating={true} className="text-violet-600 dark:text-violet-500" />
+          </div>
+          <span className="text-sm text-neutral-500 dark:text-neutral-400">
+            You made it to the end!
+          </span>
+        </div>
+      )}
     </div>
   );
 };

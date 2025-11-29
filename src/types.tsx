@@ -66,6 +66,7 @@ export type Link = {
     description?: string | null;
     clicks?: Click[]; // Returned when fetching individual link
     clicks_count?: number; // Returned when fetching list of links
+    is_safe: boolean; // Safety status from threat detection
 };
 
 export type PageLink = {
