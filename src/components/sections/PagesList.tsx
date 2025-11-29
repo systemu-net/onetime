@@ -1,3 +1,4 @@
+import { API_URL } from '@/apis/config';
 import { deletePage } from '@/apis/pages';
 import { Page } from '@/types';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
@@ -24,6 +25,17 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
   const [cookies] = useCookies(['token']);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [isSliderOpen, setIsSliderOpen] = useState<boolean>(false);
+
+  // Transform page links to use shortened URLs
+  const transformPageLinks = (page: Page) => {
+    if (!page.links || !Array.isArray(page.links)) {
+      return [];
+    }
+    return page.links.map(link => ({
+      ...link,
+      link: `${API_URL}/${link.id}`, // Use shortened URL instead of original
+    }));
+  };
 
   const handleDelete = async (lookup_code: string) => {
     try {
@@ -114,7 +126,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
       <div className="mt-2 flow-root">
         <ul>
           {pages.map((item) => (
-            <li key={item.title}>
+            <li key={item.lookup_code}>
               <Box>
                 <div className="flex items-center justify-between">
                   <Link
@@ -127,7 +139,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                           title={item.title}
                           description={item.description}
                           content={item.content}
-                          links={item.links}
+                          links={transformPageLinks(item)}
                         />
                       </div>
                     </div>
@@ -220,7 +232,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                     title={selectedPage.title}
                     description={selectedPage.description}
                     content={selectedPage.content}
-                    links={selectedPage.links}
+                    links={transformPageLinks(selectedPage)}
                   />
                 </div>
               </div>

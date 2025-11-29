@@ -1,3 +1,4 @@
+import { API_URL } from '@/apis/config';
 import { getPage, updatePage } from '@/apis/pages';
 import Box from '@/components/Box';
 import AddLinkModal from '@/components/elements/AddLinkModal';
@@ -18,6 +19,7 @@ import { Input } from '@/components/elements/input';
 import { Radio, RadioGroup } from '@/components/elements/radio';
 import { Select } from '@/components/elements/select';
 import { Text } from '@/components/elements/text';
+import { ClicksIcon } from '@/components/icons/ClicksIcon';
 import MainLayout from '@/components/layouts/MainLayout';
 import PublishComponent from '@/components/PublishComponent';
 import Preview, { socialIcons } from '@/components/sections/Preview';
@@ -29,8 +31,10 @@ import {
   PaintBrushIcon,
   RectangleGroupIcon,
 } from '@heroicons/react/16/solid';
-import { PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Bars3Icon } from '@heroicons/react/24/solid';
+import { HiArrowUturnRight } from 'react-icons/hi2';
+import { TbWorld } from 'react-icons/tb';
 
 import {
   closestCenter,
@@ -115,44 +119,86 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const [faviconError, setFaviconError] = useState(false);
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="flex items-center gap-2 p-2 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors overflow-hidden cursor-grab active:cursor-grabbing"
+      onClick={() => onEdit(resource)}
+      className="flex items-center gap-3 sm:gap-5 p-2 sm:p-4 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors overflow-hidden cursor-grab active:cursor-grabbing bg-white dark:bg-neutral-800 hover:cursor-pointer"
     >
+      {/* Drag handle */}
       <div className="flex-shrink-0">
         <Bars3Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500" />
       </div>
-      <div className="flex-1 min-w-0 overflow-hidden">
-        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-          {resource.linkable.title || extractDomain(resource.linkable.original_url)}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 break-all overflow-hidden line-clamp-2">
-          {resource.linkable.original_url}
-        </p>
+
+      {/* Left section - Link info */}
+      <div className="min-w-0 grow">
+        <div className="flex items-center gap-3">
+          {/* Favicon */}
+          <div className="shrink-0">
+            {faviconError ? (
+              <div className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+                <TbWorld className="w-3 h-3 text-neutral-500 dark:text-neutral-400" />
+              </div>
+            ) : (
+              <img
+                alt={extractDomain(resource.linkable.original_url)}
+                draggable="false"
+                loading="lazy"
+                width="20"
+                height="20"
+                className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600"
+                src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(resource.linkable.original_url)}`}
+                onError={() => setFaviconError(true)}
+              />
+            )}
+          </div>
+
+          {/* Link details */}
+          <div className="min-w-0 flex-1">
+            <div className="mb-0.5">
+              <span className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate block">
+                {resource.linkable.title || extractDomain(resource.linkable.original_url)}
+              </span>
+            </div>
+
+            {/* Destination URL */}
+            <div className="flex items-center gap-1 text-xs sm:text-sm">
+              <HiArrowUturnRight className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500 scale-y-[-1]" />
+              <span className="truncate text-neutral-500 dark:text-neutral-400">
+                {resource.linkable.original_url}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Right section - Clicks badge and Delete button */}
       <div 
-        className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
+        className="flex items-center gap-2 sm:gap-3 flex-shrink-0"
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
+        {/* Clicks badge */}
+        {resource.linkable.clicks_count !== undefined && (
+          <div className="overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">
+            <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5">
+              <ClicksIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+              <span className="whitespace-nowrap">
+                {resource.linkable.clicks_count ?? 0} {(resource.linkable.clicks_count ?? 0) === 1 ? 'click' : 'clicks'}
+              </span>
+            </div>
+          </div>
+        )}
+
         <button
-          onClick={() => onEdit(resource)}
-          style={{
-            backgroundColor: resource.color || 'rgb(59, 130, 246)',
-          }}
-          className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 text-sm font-semibold text-white rounded-md shadow-sm hover:shadow transition-all duration-200 hover:opacity-90 cursor-pointer"
-          title="Edit link"
-        >
-          <PencilIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Edit</span>
-        </button>
-        <button
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation();
             try {
               await onRemove(resource.id);
             } catch (error) {
@@ -168,9 +214,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       </div>
     </div>
   );
-};
-
-const SinglePage = () => {
+};const SinglePage = () => {
   const { lookup_code } = useParams();
   const [cookies] = useCookies(['token']);
   const [, setError] = useState<string>('');
@@ -200,7 +244,8 @@ const SinglePage = () => {
     error: resourcesError, 
     remove: removeResource,
     update: updateResource,
-    reorder: reorderResources
+    reorder: reorderResources,
+    refetch: refetchResources
   } = useResources(lookup_code);
 
   // Drag-and-drop sensors for mouse, touch, and keyboard
@@ -298,7 +343,7 @@ const SinglePage = () => {
   const pageLinks = (resources || []).map(resource => ({
     id: resource.linkable.lookup_code,
     label: resource.linkable.title || extractDomain(resource.linkable.original_url),
-    link: resource.linkable.original_url,
+    link: `${API_URL}/${resource.linkable.lookup_code}`, // Use shortened URL instead of original
     color: resource.color || '#3b82f6', // Use resource color (stored on resource, not linkable)
     description: resource.linkable.description || undefined // Pass description for alt/title attribute
   }));
@@ -1090,7 +1135,8 @@ const SinglePage = () => {
           onClose={() => setIsLinkModalOpen(false)}
           lookupCode={lookup_code}
           onAddResource={async (resource) => {
-            // Resource is already added via the hook, no need to do anything else
+            // Refetch resources to update the list with the newly added link
+            await refetchResources();
             console.log('Resource added:', resource);
           }}
         />
