@@ -47,7 +47,7 @@ const Shorten = () => {
             </div>
 
             <button className="btn" datatype="wide" disabled={loading}>
-              {loading ? 'Shortening...' : 'Shorten It!'}
+              {loading ? 'Thinlifying...' : 'Thinlify'}
             </button>
 
             {/* <Button loading={loading}/> */}

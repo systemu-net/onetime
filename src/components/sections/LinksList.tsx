@@ -175,12 +175,12 @@ export const LinksList: React.FC<LinksListProps> = ({
                 </span>
 
                 {/* Clicks badge */}
-                <div
+                <RouterLink
+                  to={item.lookup_code}
                   onClick={(e) => {
-                    e.preventDefault();
                     e.stopPropagation();
                   }}
-                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 relative z-10"
+                  className="block overflow-hidden rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-0.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 relative z-10 cursor-default no-underline"
                 >
                   <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5">
                     <ClicksIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
@@ -188,7 +188,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                       {item.clicks_count ?? 0} {(item.clicks_count ?? 0) === 1 ? 'click' : 'clicks'}
                     </span>
                   </div>
-                </div>
+                </RouterLink>
 
                 {/* More menu */}
                 <div

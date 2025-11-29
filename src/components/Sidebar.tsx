@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { MdMenuOpen } from "react-icons/md";
+import { FaUserCircle } from "react-icons/fa";
 import { IoHomeOutline } from 'react-icons/io5';
 import { LiaLinkSolid } from "react-icons/lia";
-import { FaUserCircle } from "react-icons/fa";
-import { RiQrCodeLine } from "react-icons/ri";
-import { MdArticle } from "react-icons/md";
-import { TbBrandGoogleAnalytics } from "react-icons/tb";
-import { RiSettings4Fill } from "react-icons/ri";
+import { MdArticle, MdMenuOpen } from "react-icons/md";
+import { RiQrCodeLine, RiSettings4Fill } from "react-icons/ri";
 import { SiThingiverse } from "react-icons/si";
+import { TbBrandGoogleAnalytics } from "react-icons/tb";
 
 
 const menuItems = [
