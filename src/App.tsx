@@ -7,6 +7,10 @@ import CreatePage from './pages/CreatePage';
 import CreateQrCode from './pages/CreateQrCode';
 import DashboardPage from './pages/Dashboard';
 import HomePage from './pages/HomePage';
+import CookiesPage from './pages/legal/CookiesPage';
+import PrivacyPage from './pages/legal/PrivacyPage';
+import TermsPage from './pages/legal/TermsPage';
+import UserPolicyPage from './pages/legal/UserPolicyPage';
 import LinkPage from './pages/Link';
 import LinksPage from './pages/LinksPage';
 import LoginPage from './pages/LoginPage';
@@ -22,6 +26,7 @@ import StatsPage from './pages/Stats';
 
 import {
   ANALYTICS_ROUTE,
+  COOKIES_ROUTE,
   CREATE_PAGES_ROUTE,
   CREATE_QR_ROUTE,
   DASHBOARD_ROUTE,
@@ -29,11 +34,14 @@ import {
   LOGIN_ROUTE,
   PAGES_ROUTE,
   PRICING_ROUTE,
+  PRIVACY_ROUTE,
   PROFILE_ROUTE,
   QR_ROUTE,
   REGISTER_ROUTE,
   SETTINGS_ROUTE,
-  STATS_ROUTE
+  STATS_ROUTE,
+  TERMS_ROUTE,
+  USER_POLICY_ROUTE
 } from './routes';
 
 export const App = () => {
@@ -47,6 +55,12 @@ export const App = () => {
             <Route path={PRICING_ROUTE} element={<PricingPage />}></Route>
             <Route path={REGISTER_ROUTE} element={<RegisterPage />}></Route>
             <Route path={LOGIN_ROUTE} element={<LoginPage />}></Route>
+            
+            {/* Legal routes */}
+            <Route path={TERMS_ROUTE} element={<TermsPage />}></Route>
+            <Route path={PRIVACY_ROUTE} element={<PrivacyPage />}></Route>
+            <Route path={COOKIES_ROUTE} element={<CookiesPage />}></Route>
+            <Route path={USER_POLICY_ROUTE} element={<UserPolicyPage />}></Route>
 
             {/* Protected routes */}
             <Route

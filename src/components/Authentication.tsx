@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginApi, registerApi } from '../apis/authentication';
-import { DASHBOARD_ROUTE, LOGIN_ROUTE, REGISTER_ROUTE } from '../routes';
+import { DASHBOARD_ROUTE, LOGIN_ROUTE, PRIVACY_ROUTE, REGISTER_ROUTE, TERMS_ROUTE, USER_POLICY_ROUTE } from '../routes';
 import { validateEmail, validatePassword } from '../utils/validations';
 
 // type PageType = 'LOGIN' | 'REGISTER'; // Define PageType as a string literal union type
@@ -14,7 +14,8 @@ interface AuthenticationProps {
 const initialErrorsState = {
   email: '',
   password: '',
-  api: ''
+  api: '',
+  terms: ''
 }
 
 export const LOGIN = 'LOGIN';
@@ -34,6 +35,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<typeof initialErrorsState>(initialErrorsState);
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -63,12 +65,21 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
       }
     }
 
+    // Validate legal agreements for registration only
+    if (pageType === REGISTER && !termsAccepted) {
+      newErrors = {
+        ...newErrors,
+        terms: 'You must accept the terms and policies to continue'
+      }
+    }
+
     setErrors(newErrors);
 
-    // const hasErrors = Object.values(errors).some(error => error !== '');
-    // if (hasErrors) {
-    //   return;
-    // }
+    // Check if there are any errors
+    const hasErrors = Object.values(newErrors).some(error => error !== '');
+    if (hasErrors) {
+      return;
+    }
 
     // Make API call
     if (pageType === LOGIN) {
@@ -83,7 +94,8 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
       const [response, error] = await registerApi({
         user: {
           email: email,
-          password: password
+          password: password,
+          terms_accepted: termsAccepted
         }
       })
       handleResponse([response, error]);
@@ -175,49 +187,102 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-3">
-                      <div className="flex h-6 shrink-0 items-center">
-                        <div className="group grid size-4 grid-cols-1">
+                  {/* Legal Agreement - Only for Registration */}
+                  {pageType === REGISTER && (
+                    <div className="border-t border-gray-200 pt-6">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-6 shrink-0 items-center">
                           <input
-                            id="remember-me"
-                            name="remember-me"
+                            id="terms-accepted"
+                            name="terms-accepted"
                             type="checkbox"
-                            className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                            required
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            className="size-4 rounded border-gray-300 text-violet-600 focus:ring-violet-600"
                           />
-                          <svg
-                            fill="none"
-                            viewBox="0 0 14 14"
-                            className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
-                          >
-                            <path
-                              d="M3 8L6 11L11 3.5"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="opacity-0 group-has-[:checked]:opacity-100"
-                            />
-                            <path
-                              d="M3 7H11"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="opacity-0 group-has-[:indeterminate]:opacity-100"
-                            />
-                          </svg>
                         </div>
+                        <label htmlFor="terms-accepted" className="text-sm text-gray-700 leading-tight">
+                          I agree to the{' '}
+                          <Link
+                            to={TERMS_ROUTE}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-violet-600 hover:text-violet-500 underline"
+                          >
+                            Terms of Service
+                          </Link>
+                          ,{' '}
+                          <Link
+                            to={PRIVACY_ROUTE}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-violet-600 hover:text-violet-500 underline"
+                          >
+                            Privacy Policy
+                          </Link>
+                          {' '}and{' '}
+                          <Link
+                            to={USER_POLICY_ROUTE}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-violet-600 hover:text-violet-500 underline"
+                          >
+                            User Policy
+                          </Link>
+                          .
+                        </label>
                       </div>
-                      <label htmlFor="remember-me" className="block text-sm/6 text-gray-900">
-                        Remember me
-                      </label>
+                      {errors.terms && <p className="text-sm text-red-500 mt-2 ml-7">{errors.terms}</p>}
                     </div>
+                  )}
 
-                    <div className="text-sm/6">
-                      <a href="#" className="font-semibold text-violet-600 hover:text-violet-500">
-                        Forgot password?
-                      </a>
+                  {/* Remember me and Forgot password - Only for Login */}
+                  {pageType === LOGIN && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-3">
+                        <div className="flex h-6 shrink-0 items-center">
+                          <div className="group grid size-4 grid-cols-1">
+                            <input
+                              id="remember-me"
+                              name="remember-me"
+                              type="checkbox"
+                              className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                            />
+                            <svg
+                              fill="none"
+                              viewBox="0 0 14 14"
+                              className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+                            >
+                              <path
+                                d="M3 8L6 11L11 3.5"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="opacity-0 group-has-[:checked]:opacity-100"
+                              />
+                              <path
+                                d="M3 7H11"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="opacity-0 group-has-[:indeterminate]:opacity-100"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <label htmlFor="remember-me" className="block text-sm/6 text-gray-900">
+                          Remember me
+                        </label>
+                      </div>
+
+                      <div className="text-sm/6">
+                        <a href="#" className="font-semibold text-violet-600 hover:text-violet-500">
+                          Forgot password?
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <button
@@ -231,17 +296,19 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                 </form>
               </div>
 
-              <div className="mt-10">
-                <div className="relative">
-                  <div aria-hidden="true" className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" />
+              {/* OAuth sign-in options - Only for Login */}
+              {pageType === LOGIN && (
+                <div className="mt-10">
+                  <div className="relative">
+                    <div aria-hidden="true" className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-sm/6 font-medium">
+                      <span className="bg-white px-6 text-gray-900">Or continue with</span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-sm/6 font-medium">
-                    <span className="bg-white px-6 text-gray-900">Or continue with</span>
-                  </div>
-                </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-4">
+                  <div className="mt-6 grid grid-cols-2 gap-4">
                   <a
                     href="#"
                     className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
@@ -282,6 +349,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                   </a>
                 </div>
               </div>
+              )}
             </div>
           </div>
         </div>

@@ -14,3 +14,9 @@ export const PAGES_ROUTE = '/pages';
 export const ANALYTICS_ROUTE = '/analytics';
 export const SETTINGS_ROUTE = '/settings';
 export const STATS_ROUTE = '/stats';
+
+// Legal routes
+export const TERMS_ROUTE = '/terms';
+export const PRIVACY_ROUTE = '/privacy';
+export const COOKIES_ROUTE = '/cookies';
+export const USER_POLICY_ROUTE = '/user-policy';
