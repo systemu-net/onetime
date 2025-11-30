@@ -60,7 +60,7 @@ const TermsPage = () => {
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
             <p className="text-gray-600 dark:text-gray-400">
               Questions about these Terms?{' '}
-              <a href="/contact" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              <a href="mailto:support@thin.ly" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
                 Contact us
               </a>{' '}
               or email{' '}

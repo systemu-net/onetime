@@ -76,7 +76,7 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/contact" className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
+                <a href="mailto:support@thin.ly" className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                   Contact Us
                 </a>
               </li>
