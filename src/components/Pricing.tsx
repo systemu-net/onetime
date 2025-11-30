@@ -29,69 +29,70 @@ const frequencies: Frequency[] = [
 
 const tiers: Tier[] = [
   {
-    name: 'Core',
-    id: 'core',
+    name: 'Free',
+    id: 'free',
     href: '#',
-    price: { monthly: '$8', annually: '$80' },
-    description: 'Everything in Free plus:',
-    features: ['10 QR Codes/month', '100 links/month', '3 custom landing pages'],
+    price: { monthly: '$0', annually: '$0' },
+    description: 'Free plan:',
+    features: ['5 QR Codes/month', '50 links/month', '1 custom landing pages'],
     mostPopular: false,
   },
   {
-    name: 'Growth',
-    id: 'growth',
+    name: 'Creator',
+    id: 'creator',
     href: '#',
-    price: { monthly: '$29', annually: '$290' },
-    description: 'Everything in Core, plus:',
+    price: { monthly: '$7', annually: '$70' },
+    description: 'Everything in Free, plus:',
     features: [
       '30 QR Codes/month',
-      '500 links/month',
+      '100 links/month',
       '5 custom landing pages',
       '1 months of click & scan data'
     ],
     mostPopular: true,
   },
   {
-    name: 'Premium',
-    id: 'premium',
+    name: 'Influencer',
+    id: 'influencer',
     href: '#',
-    price: { monthly: '$199', annually: '$1990' },
-    description: 'Everything in Growth, plus:',
+    price: { monthly: '$19', annually: '$190' },
+    description: 'Everything in Creator, plus:',
     features: [
       '200 QR Codes/month',
-      '3000 links/month',
+      '1000 links/month',
       '10 custom landing pages',
       '1 year of click & scan data',
-      'Bulk link shortening',
+      // 'Bulk link shortening',
       'City-level & device type click & scan data',
     ],
     mostPopular: false,
   },
-  {
-    name: 'Enterprise',
-    id: 'enterprise',
-    href: '#',
-    price: { monthly: '$999', annually: '$9990' },
-    description: 'Everything in Premium, plus:',
-    features: [
-      'High-volume API & webhook access',
-      '99.9% SLA uptime',
-      '2000 QR Codes/month',
-      '20000 links/month',
-      '50 custom landing pages',
-      'Advanced analytics',
-      '1-hour, dedicated support response time',
-      'Custom reporting tools',
-    ],
-    mostPopular: false,
-  },
+  // {
+  //   name: 'Enterprise',
+  //   id: 'enterprise',
+  //   href: '#',
+  //   price: { monthly: '$999', annually: '$9990' },
+  //   description: 'Everything in Premium, plus:',
+  //   features: [
+  //     'High-volume API & webhook access',
+  //     '99.9% SLA uptime',
+  //     '2000 QR Codes/month',
+  //     '20000 links/month',
+  //     '50 custom landing pages',
+  //     'Advanced analytics',
+  //     '1-hour, dedicated support response time',
+  //     'Custom reporting tools',
+  //   ],
+  //   mostPopular: false,
+  // },
 ];
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Pricing() {
+export default function Pricing({ inline }: { inline?: boolean }) {
+
   const [frequency, setFrequency] = useState<Frequency>(frequencies[0]);
   const [cookies] = useCookies(['token']);
   const navigate = useNavigate();
@@ -127,14 +128,16 @@ export default function Pricing() {
   };
 
   return (
-    <div className="bg-white py-24 sm:py-32">
+    <div className={`bg-white ${inline ? 'py-4' : 'py-24 sm:py-32'}`}>
       <div className="mx-auto max-w-7xl px-6 lg:px-2">
-        <div className="mx-auto max-w-4xl text-center">
-          {/* <h2 className="text-base/7 font-semibold text-violet-600">Pricing</h2> */}
-          <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
-            Pricing that grows with you
-          </p>
-        </div>
+        {!inline && (
+          < div className="mx-auto max-w-4xl text-center">
+            {/* <h2 className="text-base/7 font-semibold text-violet-600">Pricing</h2> */}
+            <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
+              Pricing that grows with you
+            </p>
+          </div>
+        )}
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
           Upgrade to benefit so much more from your short links, QR Codes & Custom landing pages
         </p>
@@ -158,7 +161,7 @@ export default function Pricing() {
             </RadioGroup>
           </fieldset>
         </div>
-        <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 md:max-w-2xl md:grid-cols-2 lg:max-w-4xl xl:mx-0 xl:max-w-none xl:grid-cols-4">
+        <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 md:max-w-2xl md:grid-cols-3 lg:max-w-4xl xl:mx-0 xl:max-w-none">
           {tiers.map((tier) => (
             <div
               key={tier.id}
@@ -186,19 +189,21 @@ export default function Pricing() {
                   {frequency.priceSuffix}
                 </span>
               </p>
-              <button
-                onClick={handleClick}
-                value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
-                aria-describedby={tier.id}
-                className={classNames(
-                  tier.mostPopular
-                    ? 'bg-accent text-primary shadow-sm hover:bg-primary hover:text-white'
-                    : 'text-primary ring-1 ring-inset ring-accent hover:bg-primary hover:text-white hover:ring-0',
-                  'w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
-                )}
-              >
-                Upgrade to {tier.name}
-              </button>
+              {tier.name !== 'Free' && (
+                <button
+                  onClick={handleClick}
+                  value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
+                  aria-describedby={tier.id}
+                  className={classNames(
+                    tier.mostPopular
+                      ? 'bg-accent text-primary shadow-sm hover:bg-primary hover:text-white'
+                      : 'text-primary ring-1 ring-inset ring-accent hover:bg-primary hover:text-white hover:ring-0',
+                    'w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
+                  )}
+                >
+                  Upgrade to {tier.name}
+                </button>
+              )}
               <p className="mt-8 font-bold text-sm/6 text-gray-600">{tier.description}</p>
               <ul
                 role="list"
@@ -218,6 +223,6 @@ export default function Pricing() {
           ))}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
