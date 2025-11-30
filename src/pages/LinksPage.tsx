@@ -11,10 +11,10 @@ const LinksPage = () => {
   const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
 
   useEffect(() => {
-    if (cookies.token && !shortenedUrls.length) {
+    if (cookies.token) {
       fetchLinks();
     }
-  }, [cookies.token, shortenedUrls.length, fetchLinks]);
+  }, [cookies.token, fetchLinks]);
 
   return (
     <MainLayout>

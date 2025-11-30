@@ -230,7 +230,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
-  const { shortenedUrls, fetchLinks, errorMessage } = useLinks();
+  const { fetchLinks, errorMessage } = useLinks();
   
   // Preview slider drag state
   const [previewDragX, setPreviewDragX] = useState(0);
@@ -349,10 +349,10 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   }));
 
   useEffect(() => {
-    if (cookies.token && !shortenedUrls.length) {
+    if (cookies.token) {
       fetchLinks();
     }
-  }, [cookies.token, shortenedUrls.length, fetchLinks]);
+  }, [cookies.token, fetchLinks]);
 
 
 
