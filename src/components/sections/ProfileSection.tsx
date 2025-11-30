@@ -107,9 +107,9 @@ export const ProfileSection = () => {
             Upload a profile picture to personalize your account.
           </p>
 
-          <div className="mt-6 flex items-center gap-6">
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
             {/* Avatar Preview */}
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               {loading ? (
                 <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse ring-4 ring-gray-100 dark:ring-gray-800" />
               ) : user?.avatar_url ? (
@@ -131,12 +131,13 @@ export const ProfileSection = () => {
             </div>
 
             {/* Upload Controls */}
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-3">
+            <div className="flex flex-col gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={loading || uploading || deleting}
+                  className="w-full sm:w-auto"
                 >
                   <PhotoIcon className="h-5 w-5 mr-2" />
                   {uploading ? 'Uploading...' : 'Upload Photo'}
@@ -148,6 +149,7 @@ export const ProfileSection = () => {
                     color="red"
                     onClick={handleDeleteAvatar}
                     disabled={loading || uploading || deleting}
+                    className="w-full sm:w-auto"
                   >
                     <TrashIcon className="h-5 w-5 mr-2" />
                     {deleting ? 'Removing...' : 'Remove'}
