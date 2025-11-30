@@ -98,3 +98,51 @@ export const getCurrentUserApi = async (jwtToken) => {
     return ['', `Server down: ${error}`];
   }
 }
+
+export const updateAvatarApi = async (jwtToken, file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  const requestOptions = {
+    method: 'PATCH',
+    headers: {
+      'Authorization': jwtToken
+    },
+    body: formData
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/user/avatar`, requestOptions);
+    if (response.ok) {
+      const data = await response.json();
+      return [data, ''];
+    }
+
+    const errorMessage = await response.json();
+    return ['', errorMessage.message || 'Failed to upload avatar'];
+  } catch (error) {
+    return ['', `Server down: ${error}`];
+  }
+}
+
+export const deleteAvatarApi = async (jwtToken) => {
+  const requestOptions = {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/user/avatar`, requestOptions);
+    if (response.ok) {
+      return [response, ''];
+    }
+
+    const errorMessage = await response.json();
+    return ['', errorMessage.message || 'Failed to delete avatar'];
+  } catch (error) {
+    return ['', `Server down: ${error}`];
+  }
+}

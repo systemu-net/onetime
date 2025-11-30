@@ -21,13 +21,14 @@ import {
   ShieldCheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import Jdenticon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
-import { logoutApi } from '../../apis/authentication';
+import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
 import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
+import { User } from '../../types';
+import { getCachedUser, setCachedUser, USER_CACHE_VERSION_KEY_EXPORT } from '../../utils/userCache';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -46,6 +47,62 @@ const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const [cookies, , removeCookie] = useCookies(['token', 'email']);
+  const [user, setUser] = useState<User | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
+
+  const fetchUser = useCallback(async () => {
+    if (!cookies.token) {
+      setUserLoading(false);
+      return;
+    }
+    
+    // Check cache first
+    const cachedUser = getCachedUser();
+    if (cachedUser) {
+      setUser(cachedUser);
+      setUserLoading(false);
+      return;
+    }
+    
+    // Fetch from API if not cached
+    setUserLoading(true);
+    const [response, error] = await getCurrentUserApi(cookies.token);
+    if (!error && response && typeof response !== 'string') {
+      const data = await response.json();
+      setUser(data.user);
+      setCachedUser(data.user);
+    }
+    setUserLoading(false);
+  }, [cookies.token]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // Listen for cache invalidation (e.g., after avatar upload/delete)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === USER_CACHE_VERSION_KEY_EXPORT) {
+        // Cache was invalidated, refetch user data
+        const fetchFreshUser = async () => {
+          if (!cookies.token) return;
+          
+          setUserLoading(true);
+          const [response, error] = await getCurrentUserApi(cookies.token);
+          if (!error && response && typeof response !== 'string') {
+            const data = await response.json();
+            setUser(data.user);
+            setCachedUser(data.user);
+          }
+          setUserLoading(false);
+        };
+        fetchFreshUser();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [cookies.token]);
 
   const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
@@ -276,7 +333,19 @@ const MainLayout = ({ children }) => {
                   <Menu as="div" className="relative">
                     <MenuButton className="-m-1.5 flex items-center p-1.5">
                       <span className="sr-only">Open user menu</span>
-                      <Jdenticon value={cookies.email} size={"32"} className="size-8 rounded-full bg-gray-50" />
+                      {userLoading ? (
+                        <div className="size-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                      ) : user?.avatar_url ? (
+                        <img 
+                          src={user.avatar_url} 
+                          alt="User avatar" 
+                          className="size-8 rounded-full bg-gray-50 object-cover"
+                        />
+                      ) : (
+                        <div className="size-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {cookies.email?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <span className="hidden lg:flex lg:items-center">
                         <span
                           aria-hidden="true"
