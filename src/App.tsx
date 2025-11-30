@@ -24,6 +24,7 @@ import RegisterPage from './pages/RegisterPage';
 import SettingsPage from './pages/Settings';
 import StatsPage from './pages/Stats';
 
+import PlansPage from './pages/Plans';
 import {
   ANALYTICS_ROUTE,
   COOKIES_ROUTE,
@@ -33,6 +34,7 @@ import {
   LINKS_ROUTE,
   LOGIN_ROUTE,
   PAGES_ROUTE,
+  PLANS_ROUTE,
   PRICING_ROUTE,
   PRIVACY_ROUTE,
   PROFILE_ROUTE,
@@ -55,7 +57,7 @@ export const App = () => {
             <Route path={PRICING_ROUTE} element={<PricingPage />}></Route>
             <Route path={REGISTER_ROUTE} element={<RegisterPage />}></Route>
             <Route path={LOGIN_ROUTE} element={<LoginPage />}></Route>
-            
+
             {/* Legal routes */}
             <Route path={TERMS_ROUTE} element={<TermsPage />}></Route>
             <Route path={PRIVACY_ROUTE} element={<PrivacyPage />}></Route>
@@ -149,6 +151,14 @@ export const App = () => {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <AnalyticsPage />
+                </ProtectedRoute>
+              }
+            ></Route>
+            <Route
+              path={PLANS_ROUTE}
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PlansPage />
                 </ProtectedRoute>
               }
             ></Route>

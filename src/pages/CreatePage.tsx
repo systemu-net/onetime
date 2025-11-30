@@ -44,7 +44,7 @@ const designTemplates = [
       button: 'rounded',
       buttonColor: '#fff',
       animation: 'Gradient 15s ease infinite',
-      textColor: 'green',
+      textColor: 'white',
       social: {
         fb: 'https://www.facebook.com/TaylorSwift/',
         ig: 'https://www.instagram.com/taylorswift/',
@@ -57,21 +57,21 @@ const designTemplates = [
     },
   },
 
-  // {
-  //   id: 3,
-  //   name: 'Bold Design',
-  //   description: 'Make a statement with this vibrant and colorful template.',
-  //   image: '/templates/pink-gradient.png',
-  //   content: {
-  //     button: 'rounded',
-  //     background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
-  //     animation: 'Gradient 15s ease infinite',
-  //     textColor: 'white',
-  //     social: {
-  //       fb: 'https://facebook.com/smariana',
-  //     },
-  //   },
-  // },
+  {
+    id: 3,
+    name: 'Bold Design',
+    description: 'Make a statement with this vibrant and colorful template.',
+    image: '/templates/pink-gradient.png',
+    content: {
+      button: 'rounded',
+      background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
+      animation: 'Gradient 15s ease infinite',
+      textColor: 'white',
+      social: {
+        fb: 'https://facebook.com/smariana',
+      },
+    },
+  },
 ];
 const CreatePage = () => {
   const [cookies] = useCookies(['token']);
@@ -135,7 +135,7 @@ const CreatePage = () => {
             <div
               className={`text-right ${step === 3 ? 'text-violet-600' : ''}`}
             >
-              Publishing page
+              Publishing Page
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ const CreatePage = () => {
             <Box>
               <section className="grid gap-x-8">
                 <div className="space-y-1">
-                  <Subheading>Create Your Page</Subheading>
+                  <Subheading>Choose Your Page Name</Subheading>
                   <div className="mt-4 flex max-w-xl gap-4">
                     <Input
                       className="flex-1"
@@ -250,7 +250,7 @@ const CreatePage = () => {
                                 className="mt-3 cursor-pointer"
                                 onClick={create}
                               >
-                                Use this design
+                                Use This Design
                               </Button>
                             )}
                           </div>

@@ -27,7 +27,7 @@ import Jdenticon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
 import { logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
+import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PLANS_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -35,7 +35,7 @@ const navigation = [
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
   { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
   { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
-  { name: 'Pricing', href: PRICING_ROUTE, icon: ShieldCheckIcon, current: false },
+  { name: 'Pricing', href: PLANS_ROUTE, icon: ShieldCheckIcon, current: false },
 ];
 
 function classNames(...classes) {
