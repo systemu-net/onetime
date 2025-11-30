@@ -57,7 +57,7 @@ export const ProfileSection = () => {
     setSuccess('');
     setUploading(true);
 
-    const [data, uploadError] = await updateAvatarApi(cookies.token, file);
+    const [, uploadError] = await updateAvatarApi(cookies.token, file);
     
     setUploading(false);
 

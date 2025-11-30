@@ -151,7 +151,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                       <div className="hover:underline underline-offset-2">
                         {item.title}
                       </div>
-                      {!!item.published_url ? (
+                      {item.published_url ? (
                         <span className="mt-1 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           <CheckCircleIcon className="w-3 h-3 mr-1" />
                           Published
@@ -161,7 +161,8 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                           <PencilIcon className="w-3 h-3 mr-1" />
                           Draft
                         </span>
-                      )}                    </div>
+                      )}
+                    </div>
                   </Link>
 
                   <div className="hidden lg:flex gap-4 items-center">
