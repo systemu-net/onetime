@@ -20,6 +20,7 @@ type Tier = {
   description: string;
   features: string[];
   mostPopular: boolean;
+  disabled?: boolean;
 };
 
 const frequencies: Frequency[] = [
@@ -34,8 +35,9 @@ const tiers: Tier[] = [
     href: '#',
     price: { monthly: '$0', annually: '$0' },
     description: 'Free plan:',
-    features: ['5 QR Codes/month', '50 links/month', '1 custom landing pages'],
+    features: ['50 QR Codes/month', '50 links/month', '1 custom landing pages'],
     mostPopular: false,
+    disabled: true,
   },
   {
     name: 'Creator',
@@ -44,12 +46,13 @@ const tiers: Tier[] = [
     price: { monthly: '$7', annually: '$70' },
     description: 'Everything in Free, plus:',
     features: [
-      '30 QR Codes/month',
+      '100 QR Codes/month',
       '100 links/month',
       '5 custom landing pages',
       '1 months of click & scan data'
     ],
     mostPopular: true,
+    disabled: true,
   },
   {
     name: 'Influencer',
@@ -58,7 +61,7 @@ const tiers: Tier[] = [
     price: { monthly: '$19', annually: '$190' },
     description: 'Everything in Creator, plus:',
     features: [
-      '200 QR Codes/month',
+      '1000 QR Codes/month',
       '1000 links/month',
       '10 custom landing pages',
       '1 year of click & scan data',
@@ -66,6 +69,7 @@ const tiers: Tier[] = [
       'City-level & device type click & scan data',
     ],
     mostPopular: false,
+    disabled: true,
   },
   // {
   //   name: 'Enterprise',
@@ -165,12 +169,17 @@ export default function Pricing({ inline }: { inline?: boolean }) {
           {tiers.map((tier) => (
             <div
               key={tier.id}
-              onClick={handleClick}
+              onClick={tier.disabled ? undefined : handleClick}
               className={classNames(
                 tier.mostPopular
                   ? 'ring-2 ring-accent shadow-2xl'
                   : 'ring-1 ring-gray-200 shadow-2xl',
-                'rounded-3xl p-8 hover:ring-2 hover:ring-accent transition-all duration-200 group'
+                tier.disabled
+                  ? tier.name === 'Free'
+                    ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950/20 cursor-default'
+                    : 'opacity-50 cursor-not-allowed'
+                  : 'hover:ring-2 hover:ring-accent group',
+                'rounded-3xl p-8 transition-all duration-200'
               )}
             >
               <h3
@@ -190,20 +199,27 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                   {frequency.priceSuffix}
                 </span>
               </p>
-              {tier.name !== 'Free' && (
-                <button
-                  value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
-                  aria-describedby={tier.id}
-                  className={classNames(
-                    tier.mostPopular
-                      ? 'bg-accent text-primary shadow-sm group-hover:bg-primary group-hover:text-white'
-                      : 'text-primary ring-1 ring-inset ring-accent group-hover:bg-primary group-hover:text-white group-hover:ring-0',
-                    'transition-all duration-200 w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
-                  )}
-                >
-                  Upgrade to {tier.name}
-                </button>
-              )}
+              <button
+                value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
+                aria-describedby={tier.id}
+                disabled={tier.disabled}
+                className={classNames(
+                  tier.disabled
+                    ? tier.name === 'Free'
+                      ? 'bg-green-600 text-white cursor-default font-bold'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : tier.mostPopular
+                    ? 'bg-accent text-primary shadow-sm group-hover:bg-primary group-hover:text-white'
+                    : 'text-primary ring-1 ring-inset ring-accent group-hover:bg-primary group-hover:text-white group-hover:ring-0',
+                  'transition-all duration-200 w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
+                )}
+              >
+                {tier.disabled 
+                  ? tier.name === 'Free' 
+                    ? '✓ Current Plan' 
+                    : 'Coming Soon' 
+                  : `Upgrade to ${tier.name}`}
+              </button>
               <p className="mt-8 font-bold text-sm/6 text-gray-600">{tier.description}</p>
               <ul
                 role="list"
