@@ -64,7 +64,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }, [cookies.token, navigate, removeCookie, setCookie]);
 
   if (loading) {
-    return <h1>Loading...</h1>; // Loading state while fetching user info
+    return ''; // Loading state while fetching user info
   }
 
   return user && allowedRoles.includes(user.role) ? (

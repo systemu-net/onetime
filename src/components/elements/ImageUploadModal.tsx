@@ -24,13 +24,13 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   const handleFileChange = useCallback((file: File) => {
     if (!file) return;
-    
+
     // Validate file type
     if (!file.type.match(/^image\/(png|jpg|jpeg|svg|gif)$/)) {
       alert('Please select a valid image file (PNG, JPG, SVG, or GIF)');
       return;
     }
-    
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('File size must be less than 5MB');
@@ -61,7 +61,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileChange(e.dataTransfer.files[0]);
     }
@@ -116,10 +116,11 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         <div className="p-6">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Preview and crop your image below. If there are any issues with your image content, we'll let you know after you hit submit.{' '}
-            <a href="#" className="text-blue-600 hover:underline">
+            {/*FUTURE*/}
+            {/* <a href="#" className="text-blue-600 hover:underline">
               Learn more
             </a>{' '}
-            about acceptable content.
+            about acceptable content. */}
           </p>
 
           {/* Preview/Upload Area */}
@@ -145,11 +146,10 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                dragActive
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-              }`}
+              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
             >
               <div className="space-y-4">
                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
@@ -172,7 +172,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Use PNG, JPG, SVG or GIF. (max. 5MB, 2500x2500px)
                 </p>
-                <a
+                {/*FUTURE*/}
+                {/* <a
                   href="#"
                   className="text-sm text-blue-600 hover:underline inline-flex items-center"
                 >
@@ -180,7 +181,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                </a>
+                </a> */}
               </div>
             </div>
           )}
@@ -192,7 +193,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               <span className="text-sm text-gray-500 dark:text-gray-400">or</span>
               <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Import from URL

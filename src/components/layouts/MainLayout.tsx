@@ -6,13 +6,12 @@ import {
   MenuButton,
   MenuItem,
   MenuItems,
-  TransitionChild,
+  TransitionChild
 } from '@headlessui/react';
 import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   Bars3Icon,
   BellIcon,
-  ChartBarIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
   HomeIcon,
@@ -26,7 +25,7 @@ import { useCookies } from 'react-cookie';
 import { Link, useLocation } from 'react-router-dom';
 import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
-import { ANALYTICS_ROUTE, DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PRICING_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
+import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PLANS_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
 import { User } from '../../types';
 import { getCachedUser, setCachedUser, USER_CACHE_VERSION_KEY_EXPORT } from '../../utils/userCache';
 
@@ -35,8 +34,8 @@ const navigation = [
   { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
   { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
-  { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
-  { name: 'Pricing', href: PRICING_ROUTE, icon: ShieldCheckIcon, current: false },
+  // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
+  { name: 'Pricing', href: PLANS_ROUTE, icon: ShieldCheckIcon, current: false },
 ];
 
 function classNames(...classes) {
@@ -281,6 +280,7 @@ const MainLayout = ({ children }) => {
             </nav>
           </div>
         </div>
+
         <div className="lg:pl-72">
           <div className="border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
             <div className="flex h-16 items-center gap-x-4 bg-white dark:bg-zinc-950 shadow-sm sm:gap-x-6 sm:px-6 px-4 lg:shadow-none">

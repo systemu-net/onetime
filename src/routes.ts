@@ -12,6 +12,7 @@ export const CREATE_PAGES_ROUTE = '/pages/create';
 export const PROFILE_ROUTE = '/profile';
 export const PAGES_ROUTE = '/pages';
 export const ANALYTICS_ROUTE = '/analytics';
+export const PLANS_ROUTE = '/plans';
 export const SETTINGS_ROUTE = '/settings';
 export const STATS_ROUTE = '/stats';
 
