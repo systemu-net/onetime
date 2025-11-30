@@ -1,6 +1,6 @@
 import { getLinks } from "@/apis/shorten";
 import { Link } from "@/types";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { useCookies } from "react-cookie";
 
 type LinksContextType = {
@@ -16,7 +16,7 @@ export const LinksProvider = ({ children }: { children: React.ReactNode }) => {
     const [shortenedUrls, setShortenedUrls] = useState<Link[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const fetchLinks = async () => {
+    const fetchLinks = useCallback(async () => {
         try {
             const links: Link[] = await getLinks(cookies.token);
             setShortenedUrls(links);
@@ -30,7 +30,7 @@ export const LinksProvider = ({ children }: { children: React.ReactNode }) => {
                 setErrorMessage("Something went wrong, please reload the page or try again later.");
             }
         }
-    };
+    }, [cookies.token]);
 
     // useEffect(() => {
     //     if (cookies.token) {
