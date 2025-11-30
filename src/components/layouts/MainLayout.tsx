@@ -6,11 +6,12 @@ import {
   MenuButton,
   MenuItem,
   MenuItems,
-  TransitionChild,
+  TransitionChild
 } from '@headlessui/react';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
+import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import {
   Bars3Icon,
+  BellIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
   HomeIcon,
@@ -19,13 +20,14 @@ import {
   ShieldCheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import Jdenticon from 'react-jdenticon';
 import { Link, useLocation } from 'react-router-dom';
-import { logoutApi } from '../../apis/authentication';
+import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
 import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PLANS_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
+import { User } from '../../types';
+import { getCachedUser, setCachedUser, USER_CACHE_VERSION_KEY_EXPORT } from '../../utils/userCache';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -44,6 +46,62 @@ const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const [cookies, , removeCookie] = useCookies(['token', 'email']);
+  const [user, setUser] = useState<User | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
+
+  const fetchUser = useCallback(async () => {
+    if (!cookies.token) {
+      setUserLoading(false);
+      return;
+    }
+    
+    // Check cache first
+    const cachedUser = getCachedUser();
+    if (cachedUser) {
+      setUser(cachedUser);
+      setUserLoading(false);
+      return;
+    }
+    
+    // Fetch from API if not cached
+    setUserLoading(true);
+    const [response, error] = await getCurrentUserApi(cookies.token);
+    if (!error && response && typeof response !== 'string') {
+      const data = await response.json();
+      setUser(data.user);
+      setCachedUser(data.user);
+    }
+    setUserLoading(false);
+  }, [cookies.token]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  // Listen for cache invalidation (e.g., after avatar upload/delete)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === USER_CACHE_VERSION_KEY_EXPORT) {
+        // Cache was invalidated, refetch user data
+        const fetchFreshUser = async () => {
+          if (!cookies.token) return;
+          
+          setUserLoading(true);
+          const [response, error] = await getCurrentUserApi(cookies.token);
+          if (!error && response && typeof response !== 'string') {
+            const data = await response.json();
+            setUser(data.user);
+            setCachedUser(data.user);
+          }
+          setUserLoading(false);
+        };
+        fetchFreshUser();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [cookies.token]);
 
   const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
@@ -220,53 +278,11 @@ const MainLayout = ({ children }) => {
                 </li>
               </ul>
             </nav>
-            {/* Profile dropdown */}
-            <Menu as="div" className="relative">
-              <MenuButton className="-m-1.5 flex items-center p-1.5">
-                <span className="sr-only">Open user menu</span>
-                <Jdenticon value={cookies.email} size={"32"} className="size-8 rounded-full bg-gray-50" />
-                <span className="hidden lg:flex lg:items-center">
-                  <span
-                    aria-hidden="true"
-                    className="ml-4 text-sm/6 font-semibold"
-                  >
-                    {cookies.email}
-                  </span>
-                  <ChevronUpIcon
-                    aria-hidden="true"
-                    className="ml-2 size-5 text-gray-400"
-                  />
-                </span>
-              </MenuButton>
-              <MenuItems
-                transition
-                className="absolute right-0 bottom-10 z-10 mt-2.5 w-32 origin-bottom-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-              >
-                <MenuItem key={`Your profile`}>
-                  <Link
-                    to={PROFILE_ROUTE}
-                    className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                  >
-                    Your profile
-                  </Link>
-                </MenuItem>
-                <MenuItem key={`Sign out`}>
-                  <Link
-                    to={LANDING_ROUTE}
-                    className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                    onClick={handleLogout}
-                  >
-                    Sign out
-                  </Link>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
           </div>
         </div>
 
         <div className="lg:pl-72">
-          {/*FUTURE*/}
-          <div className="border-b border-gray-200 dark:border-zinc-700 sticky lg:hidden top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
+          <div className="border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
             <div className="flex h-16 items-center gap-x-4 bg-white dark:bg-zinc-950 shadow-sm sm:gap-x-6 sm:px-6 px-4 lg:shadow-none">
               <button
                 type="button"
@@ -276,12 +292,12 @@ const MainLayout = ({ children }) => {
                 <span className="sr-only">Open sidebar</span>
                 <Bars3Icon aria-hidden="true" className="size-6" />
               </button>
-
+              {/* Separator */}
               <div
                 aria-hidden="true"
                 className="h-6 w-px bg-gray-200 lg:hidden"
               />
-              {/* <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+              <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
                 <form
                   action="#"
                   method="GET"
@@ -308,54 +324,66 @@ const MainLayout = ({ children }) => {
                     <span className="sr-only">View notifications</span>
                     <BellIcon aria-hidden="true" className="size-6" />
                   </button>
-
+                  {/* Separator */}
                   <div
                     aria-hidden="true"
                     className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
                   />
+                  {/* Profile dropdown */}
+                  <Menu as="div" className="relative">
+                    <MenuButton className="-m-1.5 flex items-center p-1.5">
+                      <span className="sr-only">Open user menu</span>
+                      {userLoading ? (
+                        <div className="size-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                      ) : user?.avatar_url ? (
+                        <img 
+                          src={user.avatar_url} 
+                          alt="User avatar" 
+                          className="size-8 rounded-full bg-gray-50 object-cover"
+                        />
+                      ) : (
+                        <div className="size-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {cookies.email?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                      <span className="hidden lg:flex lg:items-center">
+                        <span
+                          aria-hidden="true"
+                          className="ml-4 text-sm/6 font-semibold"
+                        >
+                          {cookies.email}
+                        </span>
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="ml-2 size-5 text-gray-400"
+                        />
+                      </span>
+                    </MenuButton>
+                    <MenuItems
+                      transition
+                      className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                    >
+                      <MenuItem key={`Your profile`}>
+                        <Link
+                          to={PROFILE_ROUTE}
+                          className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                        >
+                          Your profile
+                        </Link>
+                      </MenuItem>
+                      <MenuItem key={`Sign out`}>
+                        <Link
+                          to={LANDING_ROUTE}
+                          className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
+                          onClick={handleLogout}
+                        >
+                          Sign out
+                        </Link>
+                      </MenuItem>
+                    </MenuItems>
+                  </Menu>
                 </div>
-              </div> */}
-              {/* Profile dropdown */}
-              <Menu as="div" className="relative">
-                <MenuButton className="-m-1.5 flex items-center p-1.5">
-                  <span className="sr-only">Open user menu</span>
-                  <Jdenticon value={cookies.email} size={"32"} className="size-8 rounded-full bg-gray-50" />
-                  <span className="hidden md:flex md:items-center">
-                    <span
-                      aria-hidden="true"
-                      className="ml-4 text-sm/6 font-semibold"
-                    >
-                      {cookies.email}
-                    </span>
-                    <ChevronDownIcon
-                      aria-hidden="true"
-                      className="ml-2 size-5 text-gray-400"
-                    />
-                  </span>
-                </MenuButton>
-                <MenuItems
-                  transition
-                  className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                >
-                  <MenuItem key={`Your profile`}>
-                    <Link
-                      to={PROFILE_ROUTE}
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                    >
-                      Your profile
-                    </Link>
-                  </MenuItem>
-                  <MenuItem key={`Sign out`}>
-                    <Link
-                      to={LANDING_ROUTE}
-                      className="block px-3 py-1 text-sm/6 text-gray-900 data-[focus]:bg-gray-50 data-[focus]:outline-none"
-                      onClick={handleLogout}
-                    >
-                      Sign out
-                    </Link>
-                  </MenuItem>
-                </MenuItems>
-              </Menu>
+              </div>
             </div>
           </div>
           <main className="pt-6 flex flex-1 h-full overflow-x-hidden">

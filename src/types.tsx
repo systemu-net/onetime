@@ -1,3 +1,17 @@
+export type User = {
+    id: number;
+    email: string;
+    avatar_url: string | null;
+    role: string;
+    plan: {
+        name: string;
+        features: string[];
+    };
+    created_at: string;
+    updated_at: string;
+    jti: string;
+};
+
 export type QrCode = {
     id: number;
     image_url: string;

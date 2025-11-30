@@ -10,7 +10,7 @@ import MainLayout from '../components/layouts/MainLayout';
 import { LINKS_ROUTE, PAGES_ROUTE, QR_ROUTE } from '../routes';
 
 const tools = [
-  { path: LINKS_ROUTE, label: 'Thinlify', descr: 'Create new short link', image: shortenBase64Image },
+  { path: LINKS_ROUTE, label: 'Create Short Link', descr: 'Create new short link', image: shortenBase64Image },
   { path: QR_ROUTE, label: 'Make it scannable!', descr: 'Go to QR codes', image: qrCodeBase64Image },
   {
     path: PAGES_ROUTE,
