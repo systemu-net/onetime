@@ -165,11 +165,12 @@ export default function Pricing({ inline }: { inline?: boolean }) {
           {tiers.map((tier) => (
             <div
               key={tier.id}
+              onClick={handleClick}
               className={classNames(
                 tier.mostPopular
                   ? 'ring-2 ring-accent shadow-2xl'
                   : 'ring-1 ring-gray-200 shadow-2xl',
-                'rounded-3xl p-8'
+                'rounded-3xl p-8 hover:ring-2 hover:ring-accent transition-all duration-200 group'
               )}
             >
               <h3
@@ -191,14 +192,13 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               </p>
               {tier.name !== 'Free' && (
                 <button
-                  onClick={handleClick}
                   value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
                   aria-describedby={tier.id}
                   className={classNames(
                     tier.mostPopular
-                      ? 'bg-accent text-primary shadow-sm hover:bg-primary hover:text-white'
-                      : 'text-primary ring-1 ring-inset ring-accent hover:bg-primary hover:text-white hover:ring-0',
-                    'w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
+                      ? 'bg-accent text-primary shadow-sm group-hover:bg-primary group-hover:text-white'
+                      : 'text-primary ring-1 ring-inset ring-accent group-hover:bg-primary group-hover:text-white group-hover:ring-0',
+                    'transition-all duration-200 w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600'
                   )}
                 >
                   Upgrade to {tier.name}
