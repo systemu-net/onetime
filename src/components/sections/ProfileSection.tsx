@@ -26,7 +26,7 @@ export const ProfileSection = () => {
     // Always fetch fresh data on profile page for accuracy
     setLoading(true);
     const [response, error] = await getCurrentUserApi(cookies.token);
-    if (!error && response) {
+    if (!error && response && typeof response !== 'string') {
       const data = await response.json();
       setUser(data.user);
     }
