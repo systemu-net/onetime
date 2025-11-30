@@ -33,7 +33,14 @@ const PrivacyPage = () => {
               <li><a href="#data-security" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">6. Data Security</a></li>
               <li><a href="#your-rights" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">7. Your Privacy Rights</a></li>
               <li><a href="#children-privacy" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">8. Children's Privacy</a></li>
+              <li><a href="#international-transfers" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">9. International Data Transfers</a></li>
+              <li><a href="#regional-rights" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">10. Regional Privacy Rights</a></li>
+              <li><a href="#marketing" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">11. Marketing Communications</a></li>
+              <li><a href="#third-party-links" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">12. Third-Party Links</a></li>
+              <li><a href="#policy-changes" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">13. Changes to This Privacy Policy</a></li>
               <li><a href="#contact" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">14. Contact Us</a></li>
+              <li><a href="#definitions" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">15. Definitions</a></li>
+              <li><a href="#acknowledgment" className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">16. Acknowledgment</a></li>
             </ul>
           </div>
 
@@ -141,6 +148,48 @@ const PrivacyPage = () => {
               </p>
             </section>
 
+            <section id="international-transfers" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">9. International Data Transfers</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Your information may be transferred to and stored on servers located in the United States or other countries where our service providers operate. We ensure appropriate safeguards are in place when transferring data internationally.
+              </p>
+            </section>
+
+            <section id="regional-rights" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">10. Regional Privacy Rights</h2>
+              
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">10.1 European Economic Area (EEA) / UK - GDPR</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                If you are located in the EEA or UK, you have additional rights under GDPR, including the right to access, rectification, erasure, data portability, and the right to lodge a complaint with a supervisory authority.
+              </p>
+              
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">10.2 California - CCPA/CPRA</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                California residents have rights under the California Consumer Privacy Act (CCPA), including the right to know what personal information is collected, the right to deletion, and the right to opt-out of sale of personal information. <strong className="text-gray-900 dark:text-white">We do not sell personal information.</strong>
+              </p>
+            </section>
+
+            <section id="marketing" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">11. Marketing Communications</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                We will only send marketing communications if you have opted in or where permitted by law. You can opt out of marketing emails by clicking "unsubscribe" in any marketing email or adjusting preferences in your account settings.
+              </p>
+            </section>
+
+            <section id="third-party-links" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">12. Third-Party Links</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                Our Service contains links to third-party websites. We are not responsible for their privacy practices. When you use a shortened link, you will be redirected to the destination URL, and we are not responsible for the privacy practices of destination websites.
+              </p>
+            </section>
+
+            <section id="policy-changes" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">13. Changes to This Privacy Policy</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last Updated" date. For material changes, we will notify you by email, prominent notice on the Service, or in-app notification.
+              </p>
+            </section>
+
             <section id="contact" className="mb-8 scroll-mt-20">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">14. Contact Us</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -152,6 +201,53 @@ const PrivacyPage = () => {
                   privacy@thin.ly
                 </a>
               </p>
+            </section>
+
+            <section id="definitions" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">15. Definitions</h2>
+              <dl className="space-y-4">
+                <div>
+                  <dt className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Personal Information:</dt>
+                  <dd className="text-gray-700 dark:text-gray-300 ml-4">
+                    Information that identifies, relates to, or could reasonably be linked to you.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Processing:</dt>
+                  <dd className="text-gray-700 dark:text-gray-300 ml-4">
+                    Any operation performed on personal information, including collection, use, storage, and disclosure.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Service:</dt>
+                  <dd className="text-gray-700 dark:text-gray-300 ml-4">
+                    thin.ly's URL shortening platform, including website and applications.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-lg font-semibold text-gray-900 dark:text-white mb-1">You/User:</dt>
+                  <dd className="text-gray-700 dark:text-gray-300 ml-4">
+                    The individual or entity using our Service.
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
+            <section id="acknowledgment" className="mb-8 scroll-mt-20">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">16. Acknowledgment</h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                <strong className="text-gray-900 dark:text-white">
+                  By using thin.ly, you acknowledge that you have read and understood this Privacy Policy.
+                </strong>
+              </p>
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mt-6">
+                <p className="text-gray-700 dark:text-gray-300 mb-1">
+                  <strong className="text-gray-900 dark:text-white">Version 1.0</strong>
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <strong className="text-gray-900 dark:text-white">Effective Date:</strong> November 29, 2024
+                </p>
+              </div>
             </section>
           </div>
 
