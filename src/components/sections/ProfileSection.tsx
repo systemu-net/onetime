@@ -66,11 +66,7 @@ export const ProfileSection = () => {
         <h1 className="text-4xl font-bold tracking-tight text-zinc-800 sm:text-5xl dark:text-zinc-100">
           Your place for exploring the world of then Next generation shortened links.
         </h1>
-        <p className="mt-6 text-base text-zinc-600 dark:text-zinc-400">
-          I'm Sergii CTO and entrepreneur based in North Carolina Cary City.
-          I'm the founder and CEO of Thin.ly, where we develop
-          technologies that empower regular people to explore the links of their interests.
-        </p>
+
         <div className="mt-6 flex gap-6">
           <SocialLink to="#" aria-label="Follow on X" icon={XIcon} />
           <SocialLink

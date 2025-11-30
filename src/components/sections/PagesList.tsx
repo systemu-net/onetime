@@ -2,7 +2,11 @@ import { API_URL } from '@/apis/config';
 import { deletePage } from '@/apis/pages';
 import { Page } from '@/types';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
-import { TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  PencilIcon,
+  TrashIcon, XMarkIcon
+} from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
@@ -78,12 +82,12 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isSliderOpen) return;
-    
+
     const touch = e.touches[0];
     const element = e.currentTarget as HTMLElement;
     const startX = parseFloat(element.dataset.startX || '0');
     const deltaX = touch.clientX - startX;
-    
+
     // Only allow rightward swipes and apply transform
     if (deltaX > 0) {
       element.style.transform = `translateX(${Math.min(deltaX, element.offsetWidth)}px)`;
@@ -97,10 +101,10 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
     const startY = parseFloat(element.dataset.startY || '0');
     const deltaX = touch.clientX - startX;
     const deltaY = Math.abs(touch.clientY - startY);
-    
+
     // Reset transform
     element.style.transform = '';
-    
+
     // If swipe right more than 1/3 of the width or swipe velocity is high, close the slider
     // Also ensure it's more horizontal than vertical movement
     if (deltaX > element.offsetWidth / 3 && deltaY < 100) {
@@ -115,7 +119,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -143,9 +147,21 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                         />
                       </div>
                     </div>
-                    <div className="hover:underline underline-offset-2">
-                      {item.title}
-                    </div>
+                    <div>
+                      <div className="hover:underline underline-offset-2">
+                        {item.title}
+                      </div>
+                      {!!item.published_url ? (
+                        <span className="mt-1 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <CheckCircleIcon className="w-3 h-3 mr-1" />
+                          Published
+                        </span>
+                      ) : (
+                        <span className="mt-1 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <PencilIcon className="w-3 h-3 mr-1" />
+                          Draft
+                        </span>
+                      )}                    </div>
                   </Link>
 
                   <div className="hidden lg:flex gap-4 items-center">
@@ -197,18 +213,16 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
       {selectedPage && (
         <>
           {/* Backdrop */}
-          <div 
-            className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 sm:hidden ${
-              isSliderOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+          <div
+            className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 sm:hidden ${isSliderOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             onClick={closePreviewSlider}
           />
-          
+
           {/* Slider */}
-          <div 
-            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${
-              isSliderOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
+          <div
+            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ease-in-out sm:hidden ${isSliderOpen ? 'translate-x-0' : 'translate-x-full'
+              }`}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -223,7 +237,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
-            
+
             {/* Preview Content */}
             <div className="flex-1 flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 min-h-0">
               <div className="w-full max-w-[280px]">
@@ -237,7 +251,7 @@ export const PagesList: React.FC<PagesListProps> = ({ fetchPages, pages }) => {
                 </div>
               </div>
             </div>
-            
+
             {/* Swipe indicator */}
             <div className="absolute top-1/2 left-2 transform -translate-y-1/2 text-gray-400">
               <div className="flex flex-col items-center">

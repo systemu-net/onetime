@@ -48,16 +48,16 @@ const Hero = () => {
           <div className="hero__content">
             <h1
               className={`transition-all duration-700 ease-out ${isVisible
-                  ? 'translate-x-0 opacity-100'
-                  : '-translate-x-12 opacity-0'
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-12 opacity-0'
                 }`}
             >
               More than just shorter links
             </h1>
             <p
-              className={`transition-all duration-700 ease-out delay-200 ${isVisible
-                  ? 'translate-x-0 opacity-100'
-                  : '-translate-x-12 opacity-0'
+              className={`text-gray-500 mb-4 transition-all duration-700 ease-out delay-200 ${isVisible
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-12 opacity-0'
                 }`}
             >
               Build your brand's recognition and get detailed insights on how
@@ -67,8 +67,8 @@ const Hero = () => {
               href="#"
               datatype="narrow"
               className={`btn transition-all duration-700 ease-out delay-300 inline-block ${isVisible
-                  ? 'translate-x-0 opacity-100'
-                  : '-translate-x-12 opacity-0'
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-12 opacity-0'
                 }`}
             >
               Get Started

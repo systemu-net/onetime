@@ -70,7 +70,7 @@ const Preview: React.FC<PreviewProps> = ({
             </div>
             {!previewIcon && (
                 <div className="flex gap-4 mt-6 content-center justify-center">
-                    {Object.entries(social).map(([key, link]) =>
+                    {social && Object.entries(social).map(([key, link]) =>
                         link ? (
                             <a
                                 key={key}
