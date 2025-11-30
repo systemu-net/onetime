@@ -10,7 +10,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   max-width: 100%;
 }
@@ -62,7 +63,7 @@ body {
   font-family: 'Poppins', sans-serif;
   line-height: 1.6;
   /* background-color: #f0f1f6; */
-  background-color: rgb(244 244 245 / var(--tw-bg-opacity, 1))
+  background-color: rgb(244 244 245 / var(--tw-bg-opacity, 1));
 }
 
 /* Utility classes */
@@ -333,6 +334,8 @@ input.error-input::placeholder {
 
 .statistics .statistics__cards {
   position: relative;
+  display: grid;
+  gap: 1rem;
 }
 
 .statistics .statistics__cards::after {
