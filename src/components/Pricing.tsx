@@ -151,13 +151,16 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               value={frequency}
               onChange={setFrequency}
               className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
-                         font-semibold ring-1 ring-inset ring-gray-200"
+                         font-semibold ring-1 ring-inset ring-gray-200 bg-gray-50 dark:bg-zinc-900"
             >
               {frequencies.map((option) => (
                 <Radio
                   key={option.value}
                   value={option}
-                  className="duration-500 cursor-pointer rounded-full px-3 py-2 text-primary data-[checked]:bg-accent data-[checked]:text-primary"
+                  className="duration-500 cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
+                             data-[checked]:bg-violet-600 dark:data-[checked]:bg-violet-600 
+                             data-[checked]:text-white dark:data-[checked]:text-white
+                             data-[checked]:shadow-sm"
                 >
                   {option.label}
                 </Radio>
@@ -176,7 +179,11 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                   : 'ring-1 ring-gray-200 shadow-2xl',
                 tier.disabled
                   ? tier.name === 'Free'
-                    ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950/20 cursor-default'
+                    ? 'ring-2 ring-accent bg-accent/10 dark:bg-accent/20 cursor-default'
+                    : tier.name === 'Creator'
+                    ? 'opacity-50 cursor-not-allowed ring-2 ring-green-500 bg-green-50/50 dark:bg-green-950/10'
+                    : tier.name === 'Influencer'
+                    ? 'opacity-50 cursor-not-allowed ring-2 ring-yellow-500 dark:ring-yellow-600 shadow-[0_0_30px_rgba(236,72,153,0.5)] dark:shadow-[0_0_30px_rgba(236,72,153,0.6)]'
                     : 'opacity-50 cursor-not-allowed'
                   : 'hover:ring-2 hover:ring-accent group',
                 'rounded-3xl p-8 transition-all duration-200'
@@ -206,7 +213,9 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                 className={classNames(
                   tier.disabled
                     ? tier.name === 'Free'
-                      ? 'bg-green-600 text-white cursor-default font-bold'
+                      ? 'bg-violet-600 text-white cursor-default font-bold'
+                      : tier.name === 'Creator'
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : tier.mostPopular
                     ? 'bg-accent text-primary shadow-sm group-hover:bg-primary group-hover:text-white'
