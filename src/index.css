@@ -210,11 +210,6 @@ h2 {
   margin-bottom: 1rem;
 }
 
-.hero__content p {
-  color: var(--clr-neutral-300);
-  margin-bottom: 1rem;
-}
-
 .hero__content .btn {
   display: none;
 }
@@ -419,7 +414,7 @@ input.error-input::placeholder {
 }
 
 .footer .footer__links .nav--links a {
-  color: var(--clr-neutral-300);
+  color: #59575f;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   transition: color 0.3s ease-in;
@@ -438,7 +433,7 @@ input.error-input::placeholder {
 
 .footer .footer__links .social--links a {
   font-size: 1.5rem;
-  color: var(--clr-neutral-300);
+  color: #59575f;
   transition: color 0.3s ease-in;
 }
 
@@ -490,7 +485,7 @@ input.error-input::placeholder {
   }
 
   .nav__link {
-    color: var(--clr-neutral-300);
+    color: #59575f;
     font-weight: 600;
     transition: 0.3s ease-in-out;
   }

@@ -178,7 +178,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       </div>
 
       {/* Right section - Clicks badge and Delete button */}
-      <div 
+      <div
         className="flex items-center gap-2 sm:gap-3 flex-shrink-0"
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -214,7 +214,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       </div>
     </div>
   );
-};const SinglePage = () => {
+}; const SinglePage = () => {
   const { lookup_code } = useParams();
   const [cookies] = useCookies(['token']);
   const [, setError] = useState<string>('');
@@ -231,17 +231,17 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
   const { fetchLinks, errorMessage } = useLinks();
-  
+
   // Preview slider drag state
   const [previewDragX, setPreviewDragX] = useState(0);
   const [previewDragStartX, setPreviewDragStartX] = useState(0);
   const [isPreviewDragging, setIsPreviewDragging] = useState(false);
-  
+
   // Use Resources API for managing page links
-  const { 
-    resources, 
-    loading: resourcesLoading, 
-    error: resourcesError, 
+  const {
+    resources,
+    loading: resourcesLoading,
+    error: resourcesError,
     remove: removeResource,
     update: updateResource,
     reorder: reorderResources,
@@ -278,7 +278,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
     }
-    
+
     return () => {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
@@ -293,7 +293,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   // Handle drag end event to reorder resources
   const handleDragEnd = async (event: DragEndEvent) => {
     setIsDragging(false);
-    
+
     const { active, over } = event;
 
     if (!over || active.id === over.id) {
@@ -306,7 +306,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
     if (oldIndex !== -1 && newIndex !== -1) {
       // Optimistically update UI
       const reorderedResources = arrayMove(resources, oldIndex, newIndex);
-      
+
       try {
         // Call the API to persist the new order with id and sort_order
         await reorderResources(
@@ -315,7 +315,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
             sort_order: index
           }))
         );
-        
+
         // Update the page's updated_at timestamp to mark as having unpublished changes
         // Note: We don't set hasUnsavedChanges because reordering is already saved via the API
         if (page) {
@@ -378,7 +378,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   // Function to check if page has actually changed
   const hasPageChanged = useCallback((currentPage: Page, savedPage: Page | null): boolean => {
     if (!savedPage) return true;
-    
+
     // Compare the relevant fields that we save
     return (
       currentPage.title !== savedPage.title ||
@@ -390,7 +390,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
 
   const handleSave = useCallback(async (showSuccessMessage = false) => {
     if (!page || !cookies.token) return;
-    
+
     // Check if there are actual changes before proceeding
     const actuallyChanged = hasPageChanged(page, lastSavedPageState);
     if (!actuallyChanged && !showSuccessMessage) return; // Don't auto-save if nothing changed
@@ -421,7 +421,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       setLastSavedPageState(updatedPage); // Update the saved state reference
       setHasUnsavedChanges(false);
       setLastSaveTime(new Date());
-      
+
       if (showSuccessMessage) {
         setSaveSuccess(true);
         // Clear success message after 3 seconds
@@ -439,7 +439,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   useEffect(() => {
     // Only set up auto-save timer if there are actual unsaved changes
     if (!hasUnsavedChanges || !page) return;
-    
+
     const autoSaveTimer = setTimeout(() => {
       handleSave(false); // Auto-save without showing success message
     }, 3000);
@@ -450,7 +450,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
   // Track changes to mark as unsaved
   const handlePageChange = useCallback((updatedPage: Page) => {
     setPage(updatedPage);
-    
+
     // Only mark as unsaved if there are actual changes compared to last saved state
     const hasChanges = hasPageChanged(updatedPage, lastSavedPageState);
     setHasUnsavedChanges(hasChanges);
@@ -480,9 +480,9 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
 
   const handlePreviewDragMove = (clientX: number) => {
     if (!isPreviewDragging) return;
-    
+
     const deltaX = clientX - previewDragStartX;
-    
+
     if (isPreviewSliderOpen) {
       // When open, only allow dragging right (closing)
       if (deltaX > 0) {
@@ -498,9 +498,9 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
 
   const handlePreviewDragEnd = () => {
     setIsPreviewDragging(false);
-    
+
     const threshold = 150; // Distance needed to trigger open/close
-    
+
     if (isPreviewSliderOpen) {
       // If dragged right more than threshold, close
       if (previewDragX > threshold) {
@@ -512,7 +512,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
         setIsPreviewSliderOpen(true);
       }
     }
-    
+
     setPreviewDragX(0);
     setPreviewDragStartX(0);
   };
@@ -528,7 +528,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -549,7 +549,7 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
         <div className="mt-4 flex justify-between gap-4">
           <div className="w-full">
             {/* Publishing Component */}
-            <PublishComponent 
+            <PublishComponent
               page={page}
               isSaving={isLoading}
               hasUnsavedChanges={hasUnsavedChanges}
@@ -1024,24 +1024,22 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
       {page && (
         <>
           {/* Backdrop */}
-          <div 
-            className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${
-              isPreviewSliderOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+          <div
+            className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${isPreviewSliderOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             onClick={closePreviewSlider}
           />
-          
+
           {/* Preview Panel */}
-          <div 
-            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transition-transform duration-300 ease-in-out md:hidden ${
-              isPreviewSliderOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
+          <div
+            className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 z-50 transition-transform duration-300 ease-in-out md:hidden ${isPreviewSliderOpen ? 'translate-x-0' : 'translate-x-full'
+              }`}
             style={{
-              transform: isPreviewDragging && !isPreviewSliderOpen 
-                ? `translateX(calc(100% + ${previewDragX}px))` 
+              transform: isPreviewDragging && !isPreviewSliderOpen
+                ? `translateX(calc(100% + ${previewDragX}px))`
                 : isPreviewDragging && isPreviewSliderOpen
-                ? `translateX(${previewDragX}px)`
-                : undefined
+                  ? `translateX(${previewDragX}px)`
+                  : undefined
             }}
           >
             {/* Preview Content */}
@@ -1063,11 +1061,10 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
 
           {/* Draggable Preview Button */}
           <div
-            className={`fixed top-1/2 -translate-y-1/2 z-50 md:hidden transition-all duration-300 ${
-              isPreviewSliderOpen ? 'left-0' : 'right-0'
-            }`}
+            className={`fixed top-1/2 -translate-y-1/2 z-50 md:hidden transition-all duration-300 ${isPreviewSliderOpen ? 'left-0' : 'right-0'
+              }`}
             style={{
-              transform: isPreviewDragging 
+              transform: isPreviewDragging
                 ? isPreviewSliderOpen
                   ? `translate(${previewDragX}px, -50%)`
                   : `translate(${previewDragX}px, -50%)`
@@ -1088,11 +1085,10 @@ const SortableResourceItem = ({ resource, onRemove, onEdit, onError }) => {
                   setIsPreviewSliderOpen(!isPreviewSliderOpen);
                 }
               }}
-              className={`flex items-center gap-2 px-3 py-6 text-sm font-semibold text-white shadow-lg transition-all touch-none ${
-                isPreviewSliderOpen 
-                  ? 'bg-blue-600 hover:bg-blue-700 rounded-r-lg' 
+              className={`flex items-center gap-2 px-3 py-6 text-sm font-semibold text-white shadow-lg transition-all touch-none ${isPreviewSliderOpen
+                  ? 'bg-blue-600 hover:bg-blue-700 rounded-r-lg'
                   : 'bg-blue-500 hover:bg-blue-600 rounded-l-lg'
-              }`}
+                }`}
               style={{ cursor: isPreviewDragging ? 'grabbing' : 'grab' }}
             >
               {isPreviewSliderOpen ? (

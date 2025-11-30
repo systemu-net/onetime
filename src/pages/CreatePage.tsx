@@ -5,7 +5,7 @@ import { Button } from '@/components/elements/button';
 import { Divider } from '@/components/elements/divider';
 import { Heading, Subheading } from '@/components/elements/heading';
 import { Input } from '@/components/elements/input';
-import { bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
+import { blankTemplateBase64, bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
 import { useNotification } from '@/Notifications';
 import { PAGES_ROUTE } from '@/routes';
 import { useState } from 'react';
@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
 
 const designTemplates = [
+
   {
     id: 1,
     name: 'Minimalist Design',
@@ -32,7 +33,6 @@ const designTemplates = [
       gradientEnd: '#d8b0c8',
       gradientDirection: 'to bottom',
       textColor: '#fff',
-      profileImage: 'https://www.sdemian.com/images/Sergii-Demianchuk.jpeg',
     },
   },
   {
@@ -53,32 +53,39 @@ const designTemplates = [
       gradientDirection: 'to bottom right',
       gradientStart: '#8f7aac',
       gradientEnd: '#e94975',
-      profileImage: 'https://www.sdemian.com/images/Sergii-Demianchuk.jpeg',
     },
   },
-
   {
-    id: 3,
-    name: 'Bold Design',
-    description: 'Make a statement with this vibrant and colorful template.',
-    image: '/templates/pink-gradient.png',
+    id: 0,
+    name: 'Blank',
+    image: blankTemplateBase64,
+    description: "Design your own page from scratch with a blank template.",
     content: {
       button: 'rounded',
-      background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
-      animation: 'Gradient 15s ease infinite',
-      textColor: 'white',
-      social: {
-        fb: 'https://facebook.com/smariana',
-      },
-    },
+    }
   },
+  // {
+  //   id: 3,
+  //   name: 'Bold Design',
+  //   description: 'Make a statement with this vibrant and colorful template.',
+  //   image: '/templates/pink-gradient.png',
+  //   content: {
+  //     button: 'rounded',
+  //     background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
+  //     animation: 'Gradient 15s ease infinite',
+  //     textColor: 'white',
+  //     social: {
+  //       fb: 'https://facebook.com/smariana',
+  //     },
+  //   },
+  // },
 ];
 const CreatePage = () => {
   const [cookies] = useCookies(['token']);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [title, setTitle] = useState('');
   const [step, setStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<number>(0);
   const { addNotification } = useNotification();
   const navigate = useNavigate();
 
@@ -90,7 +97,7 @@ const CreatePage = () => {
       setErrorMessage('');
       const page = await createPage(cookies.token, {
         brand_page: {
-          title: designTemplates.filter((template) => template.id === selectedTemplate)[0].name,
+          title: title,
           content: designTemplates.filter(
             (template) => template.id === selectedTemplate
           )[0].content,
@@ -258,14 +265,6 @@ const CreatePage = () => {
                       ))}
                     </div>
                   </div>
-                  or
-                  <Button
-                    outline
-                    className="cursor-pointer ml-2"
-                    onClick={create}
-                  >
-                    Design Your Own
-                  </Button>
                 </div>
               </section>
             </Box>
