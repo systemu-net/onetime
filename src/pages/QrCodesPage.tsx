@@ -1,19 +1,10 @@
-import { Button } from '@/components/elements/button';
 import { Heading } from '@/components/elements/heading';
 import { QrCodesList } from '@/components/sections/QrCodesList';
-import { CREATE_QR_ROUTE } from '@/routes';
+import { QrCode } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
-import { getQrCodes } from '../apis/qr_codes'; // Assuming you have a .ts file and not .js
+import { getQrCodes } from '../apis/qr_codes';
 import MainLayout from '../components/layouts/MainLayout';
-
-export type QrCode = {
-  id: number;
-  image_url: string;
-  link_id: number;
-  created_at: string;
-  updated_at: string;
-};
 
 const QrCodesPage = () => {
   const [cookies] = useCookies(['token']);
@@ -30,20 +21,18 @@ const QrCodesPage = () => {
     }
   }, [cookies.token]);
 
-  // Optionally, you can call fetchLinks when the component mounts (if needed)
   useEffect(() => {
     if (cookies.token) {
       retrieveQrCodes();
     }
-  }, [cookies.token, retrieveQrCodes]); // Runs when the token is available
+  }, [cookies.token, retrieveQrCodes]);
 
   return (
     <MainLayout>
-      <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-4 sm:px-6 lg:px-8">
         <Heading>
           QR Codes
         </Heading>
-        <Button to={CREATE_QR_ROUTE}>Create QR Code</Button>
       </div>
       <QrCodesList fetchQrCodes={retrieveQrCodes} qrCodes={qrCodes} />
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}

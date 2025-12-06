@@ -187,9 +187,17 @@ export const LinksList: React.FC<LinksListProps> = ({
                     {/* Destination URL */}
                     <div className="flex items-center gap-1 text-xs sm:text-sm">
                       <HiArrowUturnRight className="w-3 h-3 shrink-0 text-neutral-400 dark:text-neutral-500 scale-y-[-1]" />
-                      <span className={`truncate text-neutral-500 dark:text-neutral-400 group-hover/card:text-neutral-700 dark:group-hover/card:text-neutral-300 ${isUnsafe ? 'line-through opacity-60' : ''}`}>
+                      <a
+                        href={item.original_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className={`truncate text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 cursor-pointer hover:underline ${isUnsafe ? 'line-through opacity-60' : ''}`}
+                      >
                         {item.original_url}
-                      </span>
+                      </a>
                     </div>
                   </div>
                 </div>
