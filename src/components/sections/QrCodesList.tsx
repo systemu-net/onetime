@@ -82,7 +82,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
               key={item.id}
               className="w-full group/card border rounded-xl transition-all hover:shadow-md overflow-hidden border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
             >
-              <button 
+              <div 
                 onClick={() => setModalQrCode(item)}
                 className="w-full flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm text-left cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
               >
@@ -272,7 +272,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                     </Dropdown>
                   </div>
                 </div>
-              </button>
+              </div>
             </li>
           );
         })}
