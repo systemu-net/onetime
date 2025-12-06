@@ -15,9 +15,15 @@ export type User = {
 export type QrCode = {
     id: number;
     image_url: string;
-    link_id: number;
     created_at: string;
     updated_at: string;
+    link: {
+        lookup_code: string;
+        original_url: string;
+        title: string | null;
+        description: string | null;
+        scans_count: number;
+    };
 };
 
 export type Notification = {
