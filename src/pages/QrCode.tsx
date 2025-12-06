@@ -44,7 +44,7 @@ const QrCodePage = () => {
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
         {qrCode && <ItemDetails
           id={qrCode.id.toString()}
-          title={`Untitled QR Code ${qrCode.link_id}`}
+          title={`Untitled QR Code ${qrCode.link.lookup_code}`}
           image_url={qrCode.image_url}
           date={qrCode.created_at}
         />}
