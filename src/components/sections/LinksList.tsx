@@ -9,7 +9,7 @@ import { IoCopyOutline } from 'react-icons/io5';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { RiQrCodeLine } from 'react-icons/ri';
 import { TbWorld } from 'react-icons/tb';
-import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { API_URL, SHORT_URL } from '../../apis/config';
 import {
   Dropdown,
@@ -36,6 +36,7 @@ export const LinksList: React.FC<LinksListProps> = ({
   const [cookies] = useCookies(['token']);
   const [copied, setCopied] = useState<string | null>(null);
   const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   const handleDelete = async (lookup_code: string) => {
     try {
@@ -105,9 +106,9 @@ export const LinksList: React.FC<LinksListProps> = ({
                 </div>
               )}
               
-              <RouterLink 
-                to={item.lookup_code}
-                className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm no-underline cursor-default"
+              <div
+                onClick={() => navigate(item.lookup_code)}
+                className="flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm cursor-pointer"
               >
               {/* Left section - Link info */}
               <div className="min-w-0 grow">
@@ -274,7 +275,7 @@ export const LinksList: React.FC<LinksListProps> = ({
                   </Dropdown>
                 </div>
               </div>
-            </RouterLink>
+            </div>
           </li>
           );
         })}

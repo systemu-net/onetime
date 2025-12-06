@@ -110,7 +110,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
-                      className="text-xs sm:text-sm hover:underline text-violet-600 dark:text-violet-400"
+                      className="text-xs sm:text-sm hover:underline text-violet-600 dark:text-violet-400 truncate"
                     >
                       {SHORT_URL.replace(/^https?:\/\//, '')}/{item.link.lookup_code}
                     </a>
@@ -122,7 +122,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                         e.stopPropagation();
                         handleCopy(item.link.lookup_code, item.id);
                       }}
-                      className="group/copy rounded-full transition-all duration-75 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-700 active:bg-neutral-200 dark:active:bg-neutral-600 p-1.5 relative z-10"
+                      className="group/copy shrink-0 rounded-full transition-all duration-75 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-700 active:bg-neutral-200 dark:active:bg-neutral-600 p-1.5 relative z-10"
                       type="button"
                     >
                       <span className="sr-only">Copy short link</span>
@@ -175,35 +175,35 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                   </div>
 
                   {/* Bottom info row */}
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-neutral-500 dark:text-neutral-400">
                     {/* Created by */}
-                    <div className="flex items-center gap-1.5">
-                      <div className="size-4 rounded-full bg-violet-600 flex items-center justify-center text-white text-[10px] font-semibold">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className="w-4 h-4 rounded-full bg-violet-600 flex items-center justify-center text-white text-[10px] font-semibold shrink-0">
                         {cookies.email?.[0]?.toUpperCase() || 'U'}
                       </div>
-                      <span>Created by</span>
-                      <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                      <span className="shrink-0">Created by</span>
+                      <span className="font-semibold text-neutral-800 dark:text-neutral-200 truncate">
                         {cookies.email}
                       </span>
                     </div>
 
                     {/* Date */}
-                    <span className="hidden sm:inline">•</span>
-                    <span className="hidden sm:inline">{formatDate(item.created_at)}</span>
+                    <span className="hidden sm:inline shrink-0">•</span>
+                    <span className="hidden sm:inline shrink-0">{formatDate(item.created_at)}</span>
                   </div>
                 </div>
 
                 {/* Right section - Actions */}
                 <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                   {/* Scan statistics */}
-                  <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900">
+                  <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-md border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-4 h-4 text-violet-500"
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-violet-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -216,21 +216,21 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                         d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"
                       />
                     </svg>
-                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {item.link.scans_count}
                     </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="hidden sm:inline text-xs text-neutral-500 dark:text-neutral-400">
                       {item.link.scans_count === 1 ? 'scan' : 'scans'}
                     </span>
                   </div>
 
-                  {/* More menu */}
+                  {/* More menu - desktop only */}
                   <div
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                     }}
-                    className="relative z-50"
+                    className="relative z-50 hidden sm:block"
                   >
                     <Dropdown>
                       <DropdownButton
