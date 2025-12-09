@@ -1,2 +1,2 @@
-export const API_URL = 'https://thinly.ngrok.app';
+export const API_URL = import.meta.env.DEV ? 'https://thinly.ngrok.app' : 'https://thin.ly';
 export const SHORT_URL = 'https://thin.ly';
