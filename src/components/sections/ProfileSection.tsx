@@ -196,10 +196,6 @@ export const ProfileSection = () => {
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">{user.email}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 capitalize">{user.role}</dd>
-              </div>
-              <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Plan</dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 capitalize">{user.plan.name}</dd>
               </div>
