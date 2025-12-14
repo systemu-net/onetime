@@ -68,22 +68,33 @@ const getDateRange = (period: StatsPeriod): { startDate: string; endDate: string
 };
 
 // Simple chart components
-const ProgressBar: React.FC<{ value: number; maxValue: number; label: string; count: number }> = ({ 
+const ProgressBar: React.FC<{ 
+  value: number; 
+  maxValue: number; 
+  label: string; 
+  count: number;
+  countColor?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
+}> = ({ 
   value, 
   maxValue, 
   label, 
-  count 
+  count,
+  countColor = 'text-emerald-600',
+  gradientFrom = 'from-emerald-400',
+  gradientTo = 'to-green-500'
 }) => {
   const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
   return (
     <div className="mb-3">
       <div className="flex justify-between items-center mb-1">
         <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
-        <span className="text-sm font-semibold text-violet-600">{count}</span>
+        <span className={`text-sm font-semibold ${countColor}`}>{count}</span>
       </div>
       <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
         <div 
-          className="bg-gradient-to-r from-violet-500 to-purple-600 h-2 rounded-full transition-all duration-300" 
+          className={`bg-gradient-to-r ${gradientFrom} ${gradientTo} h-2 rounded-full transition-all duration-300`}
           style={{ width: `${Math.max(percentage, 2)}%` }}
         />
       </div>
@@ -113,6 +124,43 @@ const SimpleChart: React.FC<{ data: SimpleChartData[]; title: string; beautifyNa
 
   const maxValue = Math.max(...data.map(d => d.value));
   
+  // Custom colors for different chart types
+  const getCustomColors = (name: string, index: number) => {
+    // Traffic Sources - distinct colors for each source
+    if (title === 'Traffic Sources') {
+      if (name === 'QR Scans') {
+        return {
+          countColor: 'text-blue-600',
+          gradientFrom: 'from-blue-400',
+          gradientTo: 'to-cyan-500'
+        };
+      } else if (name === 'Direct Clicks') {
+        return {
+          countColor: 'text-emerald-600',
+          gradientFrom: 'from-emerald-400',
+          gradientTo: 'to-green-500'
+        };
+      }
+    }
+    
+    // Device Types, Top Cities, Operating Systems - natural color palette
+    if (title === 'Device Types' || title === 'Top Cities' || title === 'Operating Systems') {
+      const naturalColors = [
+        { countColor: 'text-sky-600', gradientFrom: 'from-sky-400', gradientTo: 'to-blue-500' },
+        { countColor: 'text-teal-600', gradientFrom: 'from-teal-400', gradientTo: 'to-emerald-500' },
+        { countColor: 'text-amber-600', gradientFrom: 'from-amber-400', gradientTo: 'to-orange-500' },
+        { countColor: 'text-violet-600', gradientFrom: 'from-violet-400', gradientTo: 'to-purple-500' },
+        { countColor: 'text-rose-600', gradientFrom: 'from-rose-400', gradientTo: 'to-pink-500' },
+        { countColor: 'text-cyan-600', gradientFrom: 'from-cyan-400', gradientTo: 'to-teal-500' },
+        { countColor: 'text-lime-600', gradientFrom: 'from-lime-400', gradientTo: 'to-green-500' },
+        { countColor: 'text-indigo-600', gradientFrom: 'from-indigo-400', gradientTo: 'to-blue-500' },
+      ];
+      return naturalColors[index % naturalColors.length];
+    }
+    
+    return {};
+  };
+  
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
@@ -124,6 +172,7 @@ const SimpleChart: React.FC<{ data: SimpleChartData[]; title: string; beautifyNa
             maxValue={maxValue}
             label={beautifyName ? beautifyName(item.name) : (item.details || item.name)}
             count={item.value}
+            {...getCustomColors(item.name, index)}
           />
         ))}
       </div>
@@ -310,14 +359,14 @@ const BrowsersPieChart: React.FC<{ data: SimpleChartData[] }> = ({ data }) => {
 
   const chartData = useMemo(() => {
     const colors = [
-      'rgba(139, 92, 246, 0.8)',  // violet
-      'rgba(168, 85, 247, 0.8)',  // purple
-      'rgba(59, 130, 246, 0.8)',  // blue
-      'rgba(16, 185, 129, 0.8)',  // green
-      'rgba(245, 158, 11, 0.8)',  // amber
-      'rgba(239, 68, 68, 0.8)',   // red
-      'rgba(236, 72, 153, 0.8)',  // pink
-      'rgba(6, 182, 212, 0.8)',   // cyan
+      'rgba(96, 165, 250, 0.85)',   // soft blue
+      'rgba(134, 239, 172, 0.85)',  // soft green
+      'rgba(253, 186, 116, 0.85)',  // soft orange
+      'rgba(196, 181, 253, 0.85)',  // soft purple
+      'rgba(252, 165, 165, 0.85)',  // soft red
+      'rgba(165, 243, 252, 0.85)',  // soft cyan
+      'rgba(254, 202, 202, 0.85)',  // soft pink
+      'rgba(190, 242, 100, 0.85)',  // soft lime
     ];
 
     return {
