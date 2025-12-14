@@ -231,6 +231,10 @@ const getColorIntensity = (value: number, maxValue: number): string => {
 const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState<number>(0.5);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Process data for mapping
   const countryData = useMemo(() => {
@@ -251,11 +255,11 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
     setTooltipPosition({ x: event.clientX, y: event.clientY });
   };
 
-  const handleMouseMove = (event: React.MouseEvent) => {
+  const handleCountryMouseMove = (event: React.MouseEvent) => {
     setTooltipPosition({ x: event.clientX, y: event.clientY });
   };
 
-  const handleMouseLeave = () => {
+  const handleCountryMouseLeave = () => {
     setHoveredCountry(null);
   };
 
@@ -275,14 +279,102 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
     );
   }
 
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.25, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.25, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoom(0.5);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 0.5) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeaveContainer = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className="relative">
+      {/* Zoom Controls */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        <button
+          onClick={handleZoomIn}
+          disabled={zoom >= 3}
+          className="bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg p-2 hover:bg-zinc-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          title="Zoom in"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+        <button
+          onClick={handleResetZoom}
+          disabled={zoom === 0.5}
+          className="bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg p-2 hover:bg-zinc-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          title="Reset zoom"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+          </svg>
+        </button>
+        <button
+          onClick={handleZoomOut}
+          disabled={zoom <= 0.5}
+          className="bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg p-2 hover:bg-zinc-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          title="Zoom out"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+          </svg>
+        </button>
+      </div>
+
       {/* SVG Map */}
-      <div className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4">
+      <div 
+        className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 flex items-center justify-center" 
+        style={{ 
+          maxHeight: '600px',
+          overflow: zoom > 0.5 ? 'auto' : 'hidden',
+          cursor: isDragging ? 'grabbing' : (zoom > 0.5 ? 'grab' : 'default')
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeaveContainer}
+      >
         <svg
           viewBox={mapData.viewBox}
-          className="w-full h-auto"
-          style={{ maxWidth: '100%', height: 'auto' }}
+          className="transition-transform"
+          style={{ 
+            maxWidth: '100%', 
+            height: 'auto',
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: 'center center',
+            transitionDuration: isDragging ? '0ms' : '300ms'
+          }}
         >
           {mapData.layers.map((country) => {
             const visits = getCountryVisits(country.id);
@@ -301,8 +393,8 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
                   filter: isHovered ? 'brightness(1.1)' : 'none'
                 }}
                 onMouseEnter={(e) => handleMouseEnter(e, country.id)}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
+                onMouseMove={handleCountryMouseMove}
+                onMouseLeave={handleCountryMouseLeave}
               />
             );
           })}

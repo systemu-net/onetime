@@ -77,6 +77,36 @@ export const getLink = async (jwtToken, lookup_code) => {
   }
 }
 
+export const getLinkAnalytics = async (jwtToken, lookup_code, startDate, endDate) => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': jwtToken
+    }
+  };
+
+  const params = new URLSearchParams();
+  if (startDate) params.append('start_date', startDate);
+  if (endDate) params.append('end_date', endDate);
+  const queryString = params.toString() ? `?${params.toString()}` : '';
+
+  try {
+    const response = await fetch(`${API_URL}/api/v1/links/${lookup_code}/analytics${queryString}`, requestOptions);
+
+    if (response.ok) {
+      const res = await response.json();
+      return res.analytics;
+    }
+    else {
+      const errorData = await response.json();
+      throw new Error(errorData.message);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
 export const deleteLink = async (jwtToken, lookup_code) => {
   const requestOptions = {
     method: 'DELETE',

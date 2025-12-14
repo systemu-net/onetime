@@ -1,11 +1,69 @@
+import { getLinkAnalytics } from '@/apis/shorten';
 import { Subheading } from '@/components/elements/heading';
-import { Link, StatsData, StatsPeriod } from '@/types';
-import { useMemo, useState } from 'react';
+import { Link, LinkAnalytics, StatsPeriod } from '@/types';
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  ChartOptions,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip
+} from 'chart.js';
+import { useEffect, useMemo, useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import { useCookies } from 'react-cookie';
 import WorldMapComponent from './WorldMapComponent';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Filler,
+  Legend
+);
 
 interface LinkStatsComponentProps {
   link: Link;
 }
+
+// Helper function to format dates for API
+const formatDate = (date: Date): string => {
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+};
+
+// Helper function to get date range based on period
+const getDateRange = (period: StatsPeriod): { startDate: string; endDate: string } => {
+  const endDate = new Date();
+  const startDate = new Date();
+  
+  switch (period) {
+    case 'day':
+      startDate.setDate(startDate.getDate() - 1);
+      break;
+    case 'week':
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+    case 'month':
+      startDate.setDate(startDate.getDate() - 30);
+      break;
+    case 'year':
+      startDate.setFullYear(startDate.getFullYear() - 1);
+      break;
+  }
+  
+  return {
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate)
+  };
+};
 
 // Simple chart components
 const ProgressBar: React.FC<{ value: number; maxValue: number; label: string; count: number }> = ({ 
@@ -31,7 +89,13 @@ const ProgressBar: React.FC<{ value: number; maxValue: number; label: string; co
   );
 };
 
-const SimpleChart: React.FC<{ data: StatsData[]; title: string; beautifyName?: (name: string) => string }> = ({ 
+type SimpleChartData = { 
+  name: string; 
+  value: number;
+  details?: string;
+};
+
+const SimpleChart: React.FC<{ data: SimpleChartData[]; title: string; beautifyName?: (name: string) => string }> = ({ 
   data, 
   title,
   beautifyName 
@@ -56,7 +120,7 @@ const SimpleChart: React.FC<{ data: StatsData[]; title: string; beautifyName?: (
             key={index}
             value={item.value}
             maxValue={maxValue}
-            label={beautifyName ? beautifyName(item.name) : item.name}
+            label={beautifyName ? beautifyName(item.name) : (item.details || item.name)}
             count={item.value}
           />
         ))}
@@ -65,254 +129,219 @@ const SimpleChart: React.FC<{ data: StatsData[]; title: string; beautifyName?: (
   );
 };
 
-const ViewsChart: React.FC<{ data: number[]; labels: string[]; period: StatsPeriod }> = ({ data, labels, period }) => {
+type DailyData = {
+  date: string;
+  clicks: number;
+};
+
+const ViewsChart: React.FC<{ data: DailyData[]; period: StatsPeriod }> = ({ data, period }) => {
+  // Detect dark mode
+  const [isDark, setIsDark] = useState(() => 
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const chartData = useMemo(() => {
+    // Format date labels based on period
+    const formatLabel = (dateStr: string) => {
+      const date = new Date(dateStr);
+      
+      switch (period) {
+        case 'day':
+          return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+        case 'week':
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        case 'month':
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        case 'year':
+          return date.toLocaleDateString('en-US', { month: 'short' });
+        default:
+          return dateStr;
+      }
+    };
+
+    return {
+    labels: data.map(d => formatLabel(d.date)),
+    datasets: [
+      {
+        label: 'Clicks',
+        data: data.map(d => d.clicks),
+        fill: true,
+        borderColor: 'rgb(139, 92, 246)', // violet-500
+        backgroundColor: (context: { chart: { ctx: CanvasRenderingContext2D } }) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+          gradient.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
+          gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.15)');
+          gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
+          return gradient;
+        },
+        tension: 0.4, // Smooth curves
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: 'rgb(139, 92, 246)',
+        pointBorderColor: isDark ? 'rgb(39, 39, 42)' : '#fff', // zinc-800 : white
+        pointBorderWidth: 2,
+        pointHoverBackgroundColor: 'rgb(139, 92, 246)',
+        pointHoverBorderColor: isDark ? 'rgb(39, 39, 42)' : '#fff',
+        pointHoverBorderWidth: 3,
+        borderWidth: 3,
+      }
+    ]
+    };
+  }, [data, period, isDark]);
+  
+  const options: ChartOptions<'line'> = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: isDark ? 'rgba(39, 39, 42, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+        padding: 12,
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'rgba(139, 92, 246, 0.5)',
+        borderWidth: 1,
+        displayColors: false,
+        callbacks: {
+          title: (context) => {
+            return context[0].label;
+          },
+          label: (context) => {
+            return `${context.parsed.y} click${context.parsed.y !== 1 ? 's' : ''}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: {
+          color: isDark ? 'rgb(161, 161, 170)' : 'rgb(113, 113, 122)', // zinc-400 : zinc-500
+          maxRotation: 0,
+          autoSkipPadding: 20,
+          font: {
+            size: 11
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: isDark ? 'rgba(161, 161, 170, 0.1)' : 'rgba(113, 113, 122, 0.1)',
+          drawBorder: false
+        },
+        ticks: {
+          color: isDark ? 'rgb(161, 161, 170)' : 'rgb(113, 113, 122)',
+          precision: 0,
+          font: {
+            size: 11
+          }
+        }
+      }
+    },
+    animation: {
+      duration: 750,
+      easing: 'easeInOutQuart'
+    }
+  }), [isDark]);
+  
   if (data.length === 0) {
     return (
       <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-        <h3 className="text-lg font-semibold mb-4">Views over time</h3>
+        <h3 className="text-lg font-semibold mb-4">Clicks over time</h3>
         <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">No data available</p>
       </div>
     );
   }
-
-  const maxValue = Math.max(...data);
   
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-      <h3 className="text-lg font-semibold mb-4">Views over time ({period})</h3>
-      <div className="grid gap-2 h-48" style={{ gridTemplateColumns: `repeat(${data.length}, 1fr)` }}>
-        {data.map((value, index) => {
-          const height = maxValue > 0 ? (value / maxValue) * 100 : 0;
-          const label = labels[index];
-          
-          return (
-            <div key={index} className="flex flex-col items-center justify-end group">
-              <div 
-                className="w-full bg-gradient-to-t from-violet-500 to-purple-400 rounded-t-sm transition-all duration-300 hover:from-violet-600 hover:to-purple-500 min-h-[2px] relative"
-                style={{ height: `${Math.max(height, 2)}%` }}
-              >
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-zinc-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  {value} views
-                </div>
-              </div>
-              <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 text-center">
-                {label}
-              </div>
-            </div>
-          );
-        })}
+      <h3 className="text-lg font-semibold mb-4">Clicks over time</h3>
+      <div style={{ height: '350px' }}>
+        <Line data={chartData} options={options} />
       </div>
     </div>
   );
 };
 
 const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
-  const [activePeriod, setActivePeriod] = useState<StatsPeriod>('week');
+  const [activePeriod, setActivePeriod] = useState<StatsPeriod>('month');
+  const [cookies] = useCookies(['token']);
+  const [analytics, setAnalytics] = useState<LinkAnalytics | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
-  // Process clicks data to generate stats
-  const processedStats = useMemo(() => {
-    const now = new Date();
-    const clicks = link.clicks || [];
-    
-    // Filter clicks by period
-    const getClicksForPeriod = (period: StatsPeriod) => {
-      const startDate = new Date(now);
-      
-      switch (period) {
-        case 'day':
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'week':
-          startDate.setDate(startDate.getDate() - 7);
-          break;
-        case 'month':
-          startDate.setMonth(startDate.getMonth() - 1);
-          break;
-        case 'year':
-          startDate.setFullYear(startDate.getFullYear() - 1);
-          break;
+  // Fetch analytics data when period changes
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const { startDate, endDate } = getDateRange(activePeriod);
+        const data = await getLinkAnalytics(cookies.token, link.lookup_code, startDate, endDate);
+        setAnalytics(data);
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+        setError('Failed to load analytics data');
+      } finally {
+        setLoading(false);
       }
-      
-      return clicks.filter(click => new Date(click.created_at) >= startDate);
     };
 
-    const periodClicks = getClicksForPeriod(activePeriod);
-    
-    // Generate country stats
-    const countryStats: Record<string, number> = {};
-    periodClicks.forEach(click => {
-      const country = click.country || 'Unknown';
-      countryStats[country] = (countryStats[country] || 0) + 1;
-    });
-    
-    const countriesData: StatsData[] = Object.entries(countryStats)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
-    // Generate referrer stats (extract domain from referrer)
-    const referrerStats: Record<string, number> = {};
-    periodClicks.forEach(click => {
-      let referrer = 'Direct';
-      if (click.referrer && click.referrer !== '') {
-        try {
-          const url = new URL(click.referrer);
-          referrer = url.hostname.replace('www.', '');
-        } catch {
-          referrer = 'Other';
-        }
-      }
-      referrerStats[referrer] = (referrerStats[referrer] || 0) + 1;
-    });
-    
-    const referrersData: StatsData[] = Object.entries(referrerStats)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
-    // Generate browser stats (extract from user agent)
-    const browserStats: Record<string, number> = {};
-    periodClicks.forEach(click => {
-      const userAgent = click.user_agent.toLowerCase();
-      let browser = 'Other';
-      
-      if (userAgent.includes('chrome') && !userAgent.includes('edg')) {
-        browser = 'Chrome';
-      } else if (userAgent.includes('firefox')) {
-        browser = 'Firefox';
-      } else if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
-        browser = 'Safari';
-      } else if (userAgent.includes('edg')) {
-        browser = 'Edge';
-      } else if (userAgent.includes('opera')) {
-        browser = 'Opera';
-      }
-      
-      browserStats[browser] = (browserStats[browser] || 0) + 1;
-    });
-    
-    const browsersData: StatsData[] = Object.entries(browserStats)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
-    // Generate OS stats (extract from user agent)
-    const osStats: Record<string, number> = {};
-    periodClicks.forEach(click => {
-      const userAgent = click.user_agent.toLowerCase();
-      let os = 'Other';
-      
-      if (userAgent.includes('windows')) {
-        os = 'Windows';
-      } else if (userAgent.includes('mac os')) {
-        os = 'macOS';
-      } else if (userAgent.includes('linux')) {
-        os = 'Linux';
-      } else if (userAgent.includes('android')) {
-        os = 'Android';
-      } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
-        os = 'iOS';
-      }
-      
-      osStats[os] = (osStats[os] || 0) + 1;
-    });
-    
-    const osData: StatsData[] = Object.entries(osStats)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-
-    // Generate views over time
-    const viewsData: number[] = [];
-    const labelsData: string[] = [];
-    
-    switch (activePeriod) {
-      case 'day': {
-        // Group by hour
-        for (let i = 23; i >= 0; i--) {
-          const hourStart = new Date(now);
-          hourStart.setHours(hourStart.getHours() - i, 0, 0, 0);
-          const hourEnd = new Date(hourStart);
-          hourEnd.setHours(hourEnd.getHours() + 1);
-          
-          const hourClicks = clicks.filter(click => {
-            const clickDate = new Date(click.created_at);
-            return clickDate >= hourStart && clickDate < hourEnd;
-          });
-          
-          viewsData.push(hourClicks.length);
-          labelsData.push(`${hourStart.getHours()}:00`);
-        }
-        break;
-      }
-      case 'week': {
-        // Group by day
-        for (let i = 6; i >= 0; i--) {
-          const dayStart = new Date(now);
-          dayStart.setDate(dayStart.getDate() - i);
-          dayStart.setHours(0, 0, 0, 0);
-          const dayEnd = new Date(dayStart);
-          dayEnd.setHours(23, 59, 59, 999);
-          
-          const dayClicks = clicks.filter(click => {
-            const clickDate = new Date(click.created_at);
-            return clickDate >= dayStart && clickDate <= dayEnd;
-          });
-          
-          viewsData.push(dayClicks.length);
-          labelsData.push(`${dayStart.getDate()}/${dayStart.getMonth() + 1}`);
-        }
-        break;
-      }
-      case 'month': {
-        // Group by day for the last 30 days
-        for (let i = 29; i >= 0; i--) {
-          const dayStart = new Date(now);
-          dayStart.setDate(dayStart.getDate() - i);
-          dayStart.setHours(0, 0, 0, 0);
-          const dayEnd = new Date(dayStart);
-          dayEnd.setHours(23, 59, 59, 999);
-          
-          const dayClicks = clicks.filter(click => {
-            const clickDate = new Date(click.created_at);
-            return clickDate >= dayStart && clickDate <= dayEnd;
-          });
-          
-          viewsData.push(dayClicks.length);
-          labelsData.push(`${dayStart.getDate()}`);
-        }
-        break;
-      }
-      case 'year': {
-        // Group by month
-        for (let i = 11; i >= 0; i--) {
-          const monthStart = new Date(now);
-          monthStart.setMonth(monthStart.getMonth() - i, 1);
-          monthStart.setHours(0, 0, 0, 0);
-          const monthEnd = new Date(monthStart);
-          monthEnd.setMonth(monthEnd.getMonth() + 1, 0);
-          monthEnd.setHours(23, 59, 59, 999);
-          
-          const monthClicks = clicks.filter(click => {
-            const clickDate = new Date(click.created_at);
-            return clickDate >= monthStart && clickDate <= monthEnd;
-          });
-          
-          viewsData.push(monthClicks.length);
-          labelsData.push(monthStart.toLocaleString('default', { month: 'short' }));
-        }
-        break;
-      }
+    if (cookies.token && link.lookup_code) {
+      fetchAnalytics();
     }
+  }, [activePeriod, cookies.token, link.lookup_code]);
 
-    return {
-      total: periodClicks.length,
-      countries: countriesData,
-      referrers: referrersData,
-      browsers: browsersData,
-      os: osData,
-      views: viewsData,
-      labels: labelsData
-    };
-  }, [link.clicks, activePeriod]);
+  // Loading state
+  if (loading) {
+    return (
+      <>
+        <Subheading className="mt-4">Statistics</Subheading>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-8 text-center">
+          <p className="text-zinc-500 dark:text-zinc-400">Loading analytics...</p>
+        </div>
+      </>
+    );
+  }
 
-  if (!link.clicks || link.clicks.length === 0) {
+  // Error state
+  if (error || !analytics) {
+    return (
+      <>
+        <Subheading className="mt-4">Statistics</Subheading>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-8 text-center">
+          <p className="text-red-500 dark:text-red-400">{error || 'Failed to load analytics'}</p>
+        </div>
+      </>
+    );
+  }
+
+  // No data state
+  if (analytics.summary.total_clicks === 0) {
     return (
       <>
         <Subheading className="mt-4">Statistics</Subheading>
@@ -324,6 +353,39 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
       </>
     );
   }
+
+  // Prepare data for charts
+  const cityData = analytics.top_cities.map(city => ({
+    name: city.city || 'Unknown',
+    value: city.clicks,
+    details: `${city.city}, ${city.region} (${city.country})`
+  }));
+
+  const countryData = analytics.countries.map(country => ({
+    name: country.country,
+    value: country.clicks
+  }));
+
+  const browserData = analytics.browsers.map(browser => ({
+    name: browser.browser,
+    value: browser.clicks
+  }));
+
+  const osData = analytics.operating_systems.map(os => ({
+    name: os.os,
+    value: os.clicks
+  }));
+
+  const deviceData = [
+    { name: 'Mobile', value: analytics.devices.mobile },
+    { name: 'Desktop', value: analytics.devices.desktop },
+    { name: 'Tablet', value: analytics.devices.tablet }
+  ].filter(d => d.value > 0);
+
+  const sourceData = [
+    { name: 'QR Scans', value: analytics.summary.qr_scans },
+    { name: 'Direct Clicks', value: analytics.summary.direct_clicks }
+  ].filter(d => d.value > 0);
 
   return (
     <>
@@ -349,47 +411,72 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
         </div>
       </div>
 
-      {/* Summary */}
-      <div className="mb-6 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800">
-        <p className="text-lg">
-          <span className="font-bold text-2xl text-violet-600">
-            {processedStats.total}
-          </span>{' '}
-          tracked visits in the last {activePeriod}.
-        </p>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Total Clicks</p>
+          <p className="text-2xl font-bold text-violet-600">{analytics.summary.total_clicks}</p>
+        </div>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Human Clicks</p>
+          <p className="text-2xl font-bold text-green-600">{analytics.summary.human_clicks}</p>
+        </div>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">QR Scans</p>
+          <p className="text-2xl font-bold text-blue-600">{analytics.summary.qr_scans}</p>
+        </div>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Bot Clicks</p>
+          <p className="text-2xl font-bold text-orange-600">{analytics.summary.bot_clicks}</p>
+        </div>
       </div>
 
-      {/* Views Chart */}
+      {/* Clicks Chart */}
       <div className="mb-8">
         <ViewsChart 
-          data={processedStats.views} 
-          labels={processedStats.labels} 
+          data={analytics.daily_clicks} 
           period={activePeriod}
         />
       </div>
 
-      {/* Stats Grid */}
+      {/* Device & Source Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <SimpleChart 
-          data={processedStats.referrers} 
-          title="Referrers" 
+          data={deviceData} 
+          title="Device Types" 
         />
         <SimpleChart 
-          data={processedStats.browsers} 
+          data={sourceData} 
+          title="Traffic Sources" 
+        />
+      </div>
+
+      {/* City & Browser Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <SimpleChart 
+          data={cityData} 
+          title="Top Cities" 
+        />
+        <SimpleChart 
+          data={browserData} 
           title="Browsers" 
         />
       </div>
 
-      {/* World Map and OS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold mb-4">Countries</h3>
-          <WorldMapComponent data={processedStats.countries} />
-        </div>
+      {/* Operating Systems - Full Width */}
+      <div className="mb-8">
         <SimpleChart 
-          data={processedStats.os} 
+          data={osData} 
           title="Operating Systems" 
         />
+      </div>
+
+      {/* World Map - Full Width with Zoom */}
+      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Countries</h3>
+        </div>
+        <WorldMapComponent data={countryData} />
       </div>
     </>
   );

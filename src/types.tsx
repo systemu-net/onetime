@@ -49,6 +49,24 @@ export type Click = {
     user_agent: string;
     created_at: string;
     updated_at: string;
+    // Enhanced analytics fields
+    city: string | null;
+    region: string | null;
+    country_name: string | null;
+    postal_code: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    timezone: string | null;
+    device_type: string | null;
+    browser: string | null;
+    browser_version: string | null;
+    os: string | null;
+    os_version: string | null;
+    is_mobile: boolean | null;
+    is_tablet: boolean | null;
+    is_desktop: boolean | null;
+    is_bot: boolean | null;
+    source: string | null;
 };
 
 export type StatsPeriod = 'day' | 'week' | 'month' | 'year';
@@ -75,6 +93,72 @@ export type LinkStats = {
     lastMonth: PeriodStats;
     lastYear: PeriodStats;
     updatedAt: string;
+};
+
+// Enhanced Analytics Types
+export type CityStats = {
+    city: string;
+    region: string;
+    country: string;
+    clicks: number;
+};
+
+export type CountryStats = {
+    country: string;
+    clicks: number;
+};
+
+export type BrowserStats = {
+    browser: string;
+    clicks: number;
+};
+
+export type OSStats = {
+    os: string;
+    clicks: number;
+};
+
+export type DailyClickStats = {
+    date: string;
+    clicks: number;
+};
+
+export type RecentClick = {
+    id: number;
+    city: string | null;
+    region: string | null;
+    country: string | null;
+    device_type: string | null;
+    browser: string | null;
+    os: string | null;
+    is_bot: boolean;
+    source: string | null;
+    created_at: string;
+};
+
+export type LinkAnalytics = {
+    date_range: {
+        start_date: string;
+        end_date: string;
+    };
+    summary: {
+        total_clicks: number;
+        human_clicks: number;
+        bot_clicks: number;
+        qr_scans: number;
+        direct_clicks: number;
+    };
+    devices: {
+        mobile: number;
+        desktop: number;
+        tablet: number;
+    };
+    top_cities: CityStats[];
+    countries: CountryStats[];
+    browsers: BrowserStats[];
+    operating_systems: OSStats[];
+    daily_clicks: DailyClickStats[];
+    recent_clicks: RecentClick[];
 };
 
 export type Link = {
