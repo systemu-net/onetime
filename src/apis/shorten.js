@@ -27,7 +27,7 @@ export const shortenApi = async (jwtToken, bodyObject) => {
   }
 }
 
-export const getLinks = async (jwtToken) => {
+export const getLinks = async (jwtToken, sortBy = 'created_at', order = 'desc') => {
   const requestOptions = {
     method: 'GET',
     headers: {
@@ -37,7 +37,7 @@ export const getLinks = async (jwtToken) => {
   };
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/links`, requestOptions);
+    const response = await fetch(`${API_URL}/api/v1/links?sort_by=${sortBy}&order=${order}`, requestOptions);
 
     if (response.ok) {
       const res = await response.json();

@@ -5,7 +5,7 @@ import { useCookies } from "react-cookie";
 
 type LinksContextType = {
     shortenedUrls: Link[];
-    fetchLinks: () => Promise<void>;
+    fetchLinks: (sortBy?: string, order?: string) => Promise<void>;
     errorMessage: string;
 };
 
@@ -16,9 +16,9 @@ export const LinksProvider = ({ children }: { children: React.ReactNode }) => {
     const [shortenedUrls, setShortenedUrls] = useState<Link[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const fetchLinks = useCallback(async () => {
+    const fetchLinks = useCallback(async (sortBy: string = 'created_at', order: string = 'desc') => {
         try {
-            const links: Link[] = await getLinks(cookies.token);
+            const links: Link[] = await getLinks(cookies.token, sortBy, order);
             setShortenedUrls(links);
         } catch (error: unknown) {
             console.error("Error fetching links:", error);
