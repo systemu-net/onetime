@@ -451,6 +451,7 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
   const [analytics, setAnalytics] = useState<LinkAnalytics | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  const [hasHistoricalData, setHasHistoricalData] = useState<boolean>(false);
 
   // Fetch analytics data when period changes
   useEffect(() => {
@@ -461,6 +462,11 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
         const { startDate, endDate } = getDateRange(activePeriod);
         const data = await getLinkAnalytics(cookies.token, link.lookup_code, startDate, endDate);
         setAnalytics(data);
+        
+        // Track if there's any historical data (check on first load with month period)
+        if (activePeriod === 'month' && data.summary.total_clicks > 0) {
+          setHasHistoricalData(true);
+        }
       } catch (err) {
         console.error('Error fetching analytics:', err);
         setError('Failed to load analytics data');
@@ -498,21 +504,7 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
     );
   }
 
-  // No data state
-  if (analytics.summary.total_clicks === 0) {
-    return (
-      <>
-        <Subheading className="mt-4">Statistics</Subheading>
-        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-8 text-center">
-          <p className="text-zinc-500 dark:text-zinc-400">
-            No click data available yet. Share your link to start collecting statistics!
-          </p>
-        </div>
-      </>
-    );
-  }
-
-  // Prepare data for charts
+  // Prepare data for charts (even if current period has no data)
   const cityData = analytics.top_cities.map(city => ({
     name: city.city || 'Unknown',
     value: city.clicks,
@@ -544,6 +536,20 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
     { name: 'QR Scans', value: analytics.summary.qr_scans },
     { name: 'Direct Clicks', value: analytics.summary.direct_clicks }
   ].filter(d => d.value > 0);
+
+  // If no historical data at all (first time, no clicks ever), show the empty state
+  if (!hasHistoricalData && analytics.summary.total_clicks === 0) {
+    return (
+      <>
+        <Subheading className="mt-4">Statistics</Subheading>
+        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-8 text-center">
+          <p className="text-zinc-500 dark:text-zinc-400">
+            No click data available yet. Share your link to start collecting statistics!
+          </p>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
