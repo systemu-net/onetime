@@ -2,6 +2,7 @@ import { getLinkAnalytics } from '@/apis/shorten';
 import { Subheading } from '@/components/elements/heading';
 import { Link, LinkAnalytics, StatsPeriod } from '@/types';
 import {
+  ArcElement,
   CategoryScale,
   Chart as ChartJS,
   ChartOptions,
@@ -14,7 +15,7 @@ import {
   Tooltip
 } from 'chart.js';
 import { useEffect, useMemo, useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import { useCookies } from 'react-cookie';
 import WorldMapComponent from './WorldMapComponent';
 
@@ -27,7 +28,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Filler,
-  Legend
+  Legend,
+  ArcElement
 );
 
 interface LinkStatsComponentProps {
@@ -287,6 +289,113 @@ const ViewsChart: React.FC<{ data: DailyData[]; period: StatsPeriod }> = ({ data
   );
 };
 
+const BrowsersPieChart: React.FC<{ data: SimpleChartData[] }> = ({ data }) => {
+  // Detect dark mode
+  const [isDark, setIsDark] = useState(() => 
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const chartData = useMemo(() => {
+    const colors = [
+      'rgba(139, 92, 246, 0.8)',  // violet
+      'rgba(168, 85, 247, 0.8)',  // purple
+      'rgba(59, 130, 246, 0.8)',  // blue
+      'rgba(16, 185, 129, 0.8)',  // green
+      'rgba(245, 158, 11, 0.8)',  // amber
+      'rgba(239, 68, 68, 0.8)',   // red
+      'rgba(236, 72, 153, 0.8)',  // pink
+      'rgba(6, 182, 212, 0.8)',   // cyan
+    ];
+
+    return {
+      labels: data.map(d => d.name),
+      datasets: [
+        {
+          label: 'Clicks',
+          data: data.map(d => d.value),
+          backgroundColor: colors.slice(0, data.length),
+          borderColor: isDark ? 'rgb(39, 39, 42)' : '#fff',
+          borderWidth: 2,
+        }
+      ]
+    };
+  }, [data, isDark]);
+
+  const options: ChartOptions<'pie'> = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        labels: {
+          color: isDark ? 'rgb(161, 161, 170)' : 'rgb(113, 113, 122)',
+          padding: 15,
+          font: {
+            size: 12
+          },
+          generateLabels: (chart) => {
+            const datasets = chart.data.datasets;
+            return chart.data.labels?.map((label, i) => ({
+              text: `${label}: ${datasets[0].data[i]}`,
+              fillStyle: datasets[0].backgroundColor?.[i] as string,
+              hidden: false,
+              index: i
+            })) || [];
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: isDark ? 'rgba(39, 39, 42, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+        padding: 12,
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'rgba(139, 92, 246, 0.5)',
+        borderWidth: 1,
+        callbacks: {
+          label: (context) => {
+            const label = context.label || '';
+            const value = context.parsed;
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  }), [isDark]);
+
+  if (data.length === 0) {
+    return (
+      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
+        <h3 className="text-lg font-semibold mb-4">Browsers</h3>
+        <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">No data available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
+      <h3 className="text-lg font-semibold mb-4">Browsers</h3>
+      <div style={{ height: '300px' }}>
+        <Pie data={chartData} options={options} />
+      </div>
+    </div>
+  );
+};
+
 const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
   const [activePeriod, setActivePeriod] = useState<StatsPeriod>('month');
   const [cookies] = useCookies(['token']);
@@ -457,9 +566,8 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
           data={cityData} 
           title="Top Cities" 
         />
-        <SimpleChart 
-          data={browserData} 
-          title="Browsers" 
+        <BrowsersPieChart 
+          data={browserData}
         />
       </div>
 
