@@ -231,7 +231,7 @@ const getColorIntensity = (value: number, maxValue: number): string => {
 const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState<number>(0.5);
+  const [zoom, setZoom] = useState<number>(0.75);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -284,16 +284,16 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
   };
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.25, 0.5));
+    setZoom(prev => Math.max(prev - 0.25, 0.75));
   };
 
   const handleResetZoom = () => {
-    setZoom(0.5);
+    setZoom(0.75);
     setPan({ x: 0, y: 0 });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (zoom > 0.5) {
+    if (zoom > 0.75) {
       setIsDragging(true);
       setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     }
@@ -332,7 +332,7 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
         </button>
         <button
           onClick={handleResetZoom}
-          disabled={zoom === 0.5}
+          disabled={zoom === 0.75}
           className="bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg p-2 hover:bg-zinc-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           title="Reset zoom"
         >
@@ -342,7 +342,7 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
         </button>
         <button
           onClick={handleZoomOut}
-          disabled={zoom <= 0.5}
+          disabled={zoom <= 0.75}
           className="bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-lg p-2 hover:bg-zinc-50 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           title="Zoom out"
         >
@@ -357,8 +357,8 @@ const WorldMapComponent: React.FC<WorldMapComponentProps> = ({ data }) => {
         className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-900 p-4 flex items-center justify-center" 
         style={{ 
           maxHeight: '600px',
-          overflow: zoom > 0.5 ? 'auto' : 'hidden',
-          cursor: isDragging ? 'grabbing' : (zoom > 0.5 ? 'grab' : 'default')
+          overflow: zoom > 0.75 ? 'auto' : 'hidden',
+          cursor: isDragging ? 'grabbing' : (zoom > 0.75 ? 'grab' : 'default')
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
