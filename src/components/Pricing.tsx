@@ -182,19 +182,24 @@ export default function Pricing({ inline }: { inline?: boolean }) {
             <RadioGroup
               value={frequency}
               onChange={setFrequency}
-              className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
+              className="relative grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
                          font-semibold ring-1 ring-inset ring-gray-200 bg-gray-50 dark:bg-zinc-900"
             >
+              <div 
+                className="absolute inset-1 rounded-full bg-violet-600 transition-transform duration-300 ease-in-out"
+                style={{
+                  width: 'calc(50% - 4px)',
+                  transform: frequency === 'monthly' ? 'translateX(0)' : 'translateX(100%)'
+                }}
+              />
               {frequencies.map((option) => (
                 <Radio
                   key={option.value}
                   value={option.value}
-                  className="cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
-                             transition-all duration-200
-                             data-[checked]:bg-violet-600 data-[checked]:text-white
-                             data-[checked]:shadow-sm
-                             hover:bg-gray-100 dark:hover:bg-zinc-800
-                             data-[checked]:hover:bg-violet-700"
+                  className="relative z-10 cursor-pointer rounded-full px-3 py-2
+                             transition-colors duration-300
+                             text-gray-600 dark:text-gray-400
+                             data-[checked]:text-white"
                 >
                   {option.label}
                 </Radio>
@@ -288,19 +293,24 @@ export default function Pricing({ inline }: { inline?: boolean }) {
             <RadioGroup
               value={frequency}
               onChange={setFrequency}
-              className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
+              className="relative grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
                          font-semibold ring-1 ring-inset ring-gray-200 bg-gray-50 dark:bg-zinc-900"
             >
+              <div 
+                className="absolute inset-1 rounded-full bg-violet-600 transition-transform duration-300 ease-in-out"
+                style={{
+                  width: 'calc(50% - 4px)',
+                  transform: frequency === 'monthly' ? 'translateX(0)' : 'translateX(100%)'
+                }}
+              />
               {frequencies.map((option) => (
                 <Radio
                   key={option.value}
                   value={option.value}
-                  className="cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
-                             transition-all duration-200
-                             data-[checked]:bg-violet-600 data-[checked]:text-white
-                             data-[checked]:shadow-sm
-                             hover:bg-gray-100 dark:hover:bg-zinc-800
-                             data-[checked]:hover:bg-violet-700"
+                  className="relative z-10 cursor-pointer rounded-full px-3 py-2
+                             transition-colors duration-300
+                             text-gray-600 dark:text-gray-400
+                             data-[checked]:text-white"
                 >
                   {option.label}
                 </Radio>
