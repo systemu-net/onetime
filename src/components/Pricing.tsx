@@ -35,7 +35,13 @@ const tiers: Tier[] = [
     href: '#',
     price: { monthly: '$0', annually: '$0' },
     description: 'Free plan:',
-    features: ['50 QR Codes/month', '50 links/month', '1 custom landing pages'],
+    features: [
+      '30 links/month',
+      '30 QR Codes/month',
+      '1 custom landing pages',
+      '7 days of click & scan data',
+      'Google Safe Browsing API protection'
+    ],
     mostPopular: false,
     disabled: true,
   },
@@ -43,13 +49,16 @@ const tiers: Tier[] = [
     name: 'Creator',
     id: 'creator',
     href: '#',
-    price: { monthly: '$7', annually: '$70' },
+    price: { monthly: '$19', annually: '$190' },
     description: 'Everything in Free, plus:',
     features: [
-      '100 QR Codes/month',
-      '100 links/month',
-      '5 custom landing pages',
-      '1 months of click & scan data'
+      '300 links/month',
+      '300 QR Codes/month',
+      '3 custom landing pages',
+      '30 days of click & scan data',
+      'City-level & device type click & scan data',
+      'Post-click analytics: see what users do after clicking',
+      'Google Safe Browsing API protection',
     ],
     mostPopular: true,
     disabled: true,
@@ -58,15 +67,38 @@ const tiers: Tier[] = [
     name: 'Influencer',
     id: 'influencer',
     href: '#',
-    price: { monthly: '$19', annually: '$190' },
+    price: { monthly: '$49', annually: '$490' },
     description: 'Everything in Creator, plus:',
     features: [
-      '1000 QR Codes/month',
       '1000 links/month',
+      '1000 QR Codes/month',
       '10 custom landing pages',
-      '1 year of click & scan data',
+      '90 days of click & scan data',
       // 'Bulk link shortening',
       'City-level & device type click & scan data',
+      'Post-click analytics: see what users do after clicking',
+      'Google Safe Browsing API protection',
+    ],
+    mostPopular: false,
+    disabled: true,
+  },
+  {
+    name: 'Business',
+    id: 'business',
+    href: '#',
+    price: { monthly: '$99', annually: '$990' },
+    description: 'Everything in Influencer, plus:',
+    features: [
+      '3000 links/month',
+      '3000 QR Codes/month',
+      '25 custom landing pages',
+      '6 months of click & scan data',
+      'API access for integrations',
+      'Custom branded domains',
+      'Advanced reporting & data exports',
+      'Priority support',
+      'Post-click analytics: see what users do after clicking',
+      'Google Safe Browsing API protection',
     ],
     mostPopular: false,
     disabled: true,
@@ -97,7 +129,7 @@ function classNames(...classes: string[]) {
 
 export default function Pricing({ inline }: { inline?: boolean }) {
 
-  const [frequency, setFrequency] = useState<Frequency>(frequencies[0]);
+  const [frequency, setFrequency] = useState<'monthly' | 'annually'>('monthly');
   const [cookies] = useCookies(['token']);
   const navigate = useNavigate();
 
@@ -133,7 +165,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
 
   return (
     <div className={`bg-white ${inline ? 'py-4' : 'py-24 sm:py-32'}`}>
-      <div className="mx-auto max-w-7xl px-6 lg:px-2">
+      <div className="mx-auto max-w-7xl px-6 lg:px-2 mb-12">
         {!inline && (
           < div className="mx-auto max-w-4xl text-center">
             {/* <h2 className="text-base/7 font-semibold text-violet-600">Pricing</h2> */}
@@ -156,11 +188,13 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               {frequencies.map((option) => (
                 <Radio
                   key={option.value}
-                  value={option}
-                  className="duration-500 cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
-                             data-[checked]:bg-violet-600 dark:data-[checked]:bg-violet-600 
-                             data-[checked]:text-white dark:data-[checked]:text-white
-                             data-[checked]:shadow-sm"
+                  value={option.value}
+                  className="cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
+                             transition-all duration-200
+                             data-[checked]:bg-violet-600 data-[checked]:text-white
+                             data-[checked]:shadow-sm
+                             hover:bg-gray-100 dark:hover:bg-zinc-800
+                             data-[checked]:hover:bg-violet-700"
                 >
                   {option.label}
                 </Radio>
@@ -168,7 +202,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
             </RadioGroup>
           </fieldset>
         </div>
-        <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 md:max-w-2xl md:grid-cols-3 lg:max-w-4xl xl:mx-0 xl:max-w-none">
+        <div className="isolate mx-auto mt-10 grid max-w-md grid-cols-1 gap-8 md:max-w-4xl md:grid-cols-2 lg:max-w-7xl lg:grid-cols-4 xl:mx-0 xl:max-w-none">
           {tiers.map((tier) => (
             <div
               key={tier.id}
@@ -184,6 +218,8 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     ? 'opacity-50 cursor-not-allowed ring-2 ring-green-500 bg-green-50/50 dark:bg-green-950/10'
                     : tier.name === 'Influencer'
                     ? 'opacity-50 cursor-not-allowed ring-2 ring-yellow-500 dark:ring-yellow-600 shadow-[0_0_30px_rgba(236,72,153,0.5)] dark:shadow-[0_0_30px_rgba(236,72,153,0.6)]'
+                    : tier.name === 'Business'
+                    ? 'opacity-50 cursor-not-allowed ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-950/10'
                     : 'opacity-50 cursor-not-allowed'
                   : 'hover:ring-2 hover:ring-accent group',
                 'rounded-3xl p-8 transition-all duration-200'
@@ -200,14 +236,14 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               </h3>
               <p className="mt-6 flex items-baseline gap-x-1">
                 <span className="text-4xl font-semibold tracking-tight text-gray-900">
-                  {tier.price[frequency.value]}
+                  {tier.price[frequency]}
                 </span>
                 <span className="text-sm/6 font-semibold text-gray-600">
-                  {frequency.priceSuffix}
+                  {frequencies.find(f => f.value === frequency)?.priceSuffix}
                 </span>
               </p>
               <button
-                value={`${tier.id}${frequency.value === 'monthly' ? '' : '_year'}`}
+                value={`${tier.id}${frequency === 'monthly' ? '' : '_year'}`}
                 aria-describedby={tier.id}
                 disabled={tier.disabled}
                 className={classNames(
@@ -246,6 +282,31 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               </ul>
             </div>
           ))}
+        </div>
+        <div className="mt-16 flex justify-center">
+          <fieldset aria-label="Payment frequency">
+            <RadioGroup
+              value={frequency}
+              onChange={setFrequency}
+              className="grid grid-cols-2 gap-x-2 rounded-full p-1 text-center text-sm/6
+                         font-semibold ring-1 ring-inset ring-gray-200 bg-gray-50 dark:bg-zinc-900"
+            >
+              {frequencies.map((option) => (
+                <Radio
+                  key={option.value}
+                  value={option.value}
+                  className="cursor-pointer rounded-full px-3 py-2 text-gray-600 dark:text-gray-400
+                             transition-all duration-200
+                             data-[checked]:bg-violet-600 data-[checked]:text-white
+                             data-[checked]:shadow-sm
+                             hover:bg-gray-100 dark:hover:bg-zinc-800
+                             data-[checked]:hover:bg-violet-700"
+                >
+                  {option.label}
+                </Radio>
+              ))}
+            </RadioGroup>
+          </fieldset>
         </div>
       </div>
     </div >

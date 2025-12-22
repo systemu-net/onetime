@@ -201,6 +201,7 @@ const getCountryCode = (countryName: string): string => {
     'Laos': 'la',
     'Palestine': 'ps',
     'East Timor': 'tl',
+    'Czechia': 'cz',
   };
 
   if (directMap[countryName]) {
