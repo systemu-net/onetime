@@ -1,4 +1,6 @@
-export const PRICING_ROUTE = '/_pricing';
+export const PRICING_ROUTE = '/plans';
+export const FEATURES_ROUTE = '/features';
+export const RESOURCES_ROUTE = '/resources';
 export const REGISTER_ROUTE = '/register';
 export const LOGIN_ROUTE = '/login';
 export const DASHBOARD_ROUTE = '/';

@@ -6,6 +6,7 @@ import AnalyticsPage from './pages/Analytics';
 import CreatePage from './pages/CreatePage';
 import CreateQrCode from './pages/CreateQrCode';
 import DashboardPage from './pages/Dashboard';
+import FeaturesPage from './pages/FeaturesPage';
 import HomePage from './pages/HomePage';
 import CookiesPage from './pages/legal/CookiesPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
@@ -21,29 +22,32 @@ import ProfilePage from './pages/ProfilePage';
 import QrCodePage from './pages/QrCode';
 import QrCodesPage from './pages/QrCodesPage';
 import RegisterPage from './pages/RegisterPage';
+import ResourcesPage from './pages/ResourcesPage';
 import SettingsPage from './pages/Settings';
 import StatsPage from './pages/Stats';
 
 import PlansPage from './pages/Plans';
 import {
-  ANALYTICS_ROUTE,
-  COOKIES_ROUTE,
-  CREATE_PAGES_ROUTE,
-  CREATE_QR_ROUTE,
-  DASHBOARD_ROUTE,
-  LINKS_ROUTE,
-  LOGIN_ROUTE,
-  PAGES_ROUTE,
-  PLANS_ROUTE,
-  PRICING_ROUTE,
-  PRIVACY_ROUTE,
-  PROFILE_ROUTE,
-  QR_ROUTE,
-  REGISTER_ROUTE,
-  SETTINGS_ROUTE,
-  STATS_ROUTE,
-  TERMS_ROUTE,
-  USER_POLICY_ROUTE
+    ANALYTICS_ROUTE,
+    COOKIES_ROUTE,
+    CREATE_PAGES_ROUTE,
+    CREATE_QR_ROUTE,
+    DASHBOARD_ROUTE,
+    FEATURES_ROUTE,
+    LINKS_ROUTE,
+    LOGIN_ROUTE,
+    PAGES_ROUTE,
+    PLANS_ROUTE,
+    PRICING_ROUTE,
+    PRIVACY_ROUTE,
+    PROFILE_ROUTE,
+    QR_ROUTE,
+    REGISTER_ROUTE,
+    RESOURCES_ROUTE,
+    SETTINGS_ROUTE,
+    STATS_ROUTE,
+    TERMS_ROUTE,
+    USER_POLICY_ROUTE
 } from './routes';
 
 export const App = () => {
@@ -54,7 +58,9 @@ export const App = () => {
         <Router>
           <Routes>
             {/* Public routes */}
+            <Route path={FEATURES_ROUTE} element={<FeaturesPage />}></Route>
             <Route path={PRICING_ROUTE} element={<PricingPage />}></Route>
+            <Route path={RESOURCES_ROUTE} element={<ResourcesPage />}></Route>
             <Route path={REGISTER_ROUTE} element={<RegisterPage />}></Route>
             <Route path={LOGIN_ROUTE} element={<LoginPage />}></Route>
 

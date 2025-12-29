@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
 import { logoutApi } from '../apis/authentication';
 import Logo from '../assets/thinly.svg';
-import { LOGIN_ROUTE, PRICING_ROUTE, REGISTER_ROUTE } from '../routes';
+import { FEATURES_ROUTE, LOGIN_ROUTE, PRICING_ROUTE, REGISTER_ROUTE, RESOURCES_ROUTE } from '../routes';
 
 const Header = () => {
   const [click, setClick] = useState(false);
@@ -40,9 +40,9 @@ const Header = () => {
             { /* Nav links */}
             <ul className="nav__links | hide">
               {cookies.token && (<li><a className="nav__link" href="/">Dashboard</a></li>)}
-              <li><a className="nav__link" href="/">Features</a></li>
+              <li><Link to={FEATURES_ROUTE} className="nav__link">Features</Link></li>
               <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
-              <li><a className="nav__link" href="/">Resources</a></li>
+              <li><Link to={RESOURCES_ROUTE} className="nav__link">Resources</Link></li>
             </ul>
           </div>
 
@@ -62,9 +62,9 @@ const Header = () => {
         <nav className={`mobile-nav ${click ? 'show' : ''}`}>
           <ul className="nav__links | primary">
             {cookies.token && (<li><a className="nav__link" href="/">Dashboard</a></li>)}
-            <li><a className="nav__link" href="">Features</a></li>
+            <li><Link to={FEATURES_ROUTE} className="nav__link">Features</Link></li>
             <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
-            <li><a className="nav__link" href="">Resources</a></li>
+            <li><Link to={RESOURCES_ROUTE} className="nav__link">Resources</Link></li>
           </ul>
 
           {cookies.token ? (

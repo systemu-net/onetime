@@ -111,7 +111,7 @@ const DashboardPage = () => {
           <Box className="border hover:shadow-lg transition-shadow duration-300">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-3 gap-3">
               <h2 className="text-lg font-semibold">{cookies.plan.name} plan</h2>
-              <Button to={'/_pricing'} className="w-full sm:w-auto">Upgrade</Button>
+              <Button to={'/plans'} className="w-full sm:w-auto">Upgrade</Button>
             </div>
             <div className="mt-4">
               <p className="font-medium">Included in your plan:</p>
