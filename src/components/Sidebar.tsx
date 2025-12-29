@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { FaUserCircle } from "react-icons/fa";
 import { IoHomeOutline } from 'react-icons/io5';
 import { LiaLinkSolid } from "react-icons/lia";
-import { MdArticle, MdMenuOpen } from "react-icons/md";
+import { MdMenuOpen, MdPhoneIphone } from "react-icons/md";
 import { RiQrCodeLine, RiSettings4Fill } from "react-icons/ri";
-import { SiThingiverse } from "react-icons/si";
-import { TbBrandGoogleAnalytics } from "react-icons/tb";
+import { SiPagespeedinsights, SiThingiverse } from "react-icons/si";
 
 
 const menuItems = [
@@ -22,11 +21,11 @@ const menuItems = [
     label: 'QR Codes'
   },
   {
-    icons: <MdArticle size={30}/>,
+    icons: <MdPhoneIphone size={30}/>,
     label: 'Pages'
   },
   {
-    icons: <TbBrandGoogleAnalytics size={30}/>,
+    icons: <SiPagespeedinsights size={30}/>,
     label: 'Analytics'
   },
   {

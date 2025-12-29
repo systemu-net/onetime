@@ -28,7 +28,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to={PRICING_ROUTE} className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
-                  Pricing
+                  Plans
                 </Link>
               </li>
               <li>

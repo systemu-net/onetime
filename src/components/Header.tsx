@@ -41,7 +41,7 @@ const Header = () => {
             <ul className="nav__links | hide">
               {cookies.token && (<li><a className="nav__link" href="/">Dashboard</a></li>)}
               <li><Link to={FEATURES_ROUTE} className="nav__link">Features</Link></li>
-              <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
+              <li><Link to={PRICING_ROUTE} className="nav__link">Plans</Link></li>
               <li><Link to={RESOURCES_ROUTE} className="nav__link">Resources</Link></li>
             </ul>
           </div>
@@ -63,7 +63,7 @@ const Header = () => {
           <ul className="nav__links | primary">
             {cookies.token && (<li><a className="nav__link" href="/">Dashboard</a></li>)}
             <li><Link to={FEATURES_ROUTE} className="nav__link">Features</Link></li>
-            <li><Link to={PRICING_ROUTE} className="nav__link">Pricing</Link></li>
+            <li><Link to={PRICING_ROUTE} className="nav__link">Plans</Link></li>
             <li><Link to={RESOURCES_ROUTE} className="nav__link">Resources</Link></li>
           </ul>
 

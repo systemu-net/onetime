@@ -13,15 +13,15 @@ import {
   Bars3Icon,
   BellIcon,
   Cog6ToothIcon,
-  DocumentTextIcon,
   HomeIcon,
   LinkIcon,
   QrCodeIcon,
-  ShieldCheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { IoCellular } from 'react-icons/io5';
+import { MdPhoneIphone } from 'react-icons/md';
 import { Link, useLocation } from 'react-router-dom';
 import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
 import Logo from '../../assets/logo.svg';
@@ -33,9 +33,9 @@ const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
   { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
-  { name: 'Pages', href: PAGES_ROUTE, icon: DocumentTextIcon, current: false },
+  { name: 'Pages', href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
   // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
-  { name: 'Pricing', href: PLANS_ROUTE, icon: ShieldCheckIcon, current: false },
+  { name: 'Plans', href: PLANS_ROUTE, icon: IoCellular, current: false },
 ];
 
 function classNames(...classes) {

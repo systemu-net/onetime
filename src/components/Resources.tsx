@@ -1,3 +1,7 @@
+import { LiaLinkSolid } from 'react-icons/lia';
+import { MdPhoneIphone } from 'react-icons/md';
+import { RiQrCodeLine } from 'react-icons/ri';
+
 export default function Resources() {
   return (
     <div className="bg-white py-24 sm:py-32">
@@ -21,7 +25,9 @@ export default function Resources() {
         {/* Resource Types Grid */}
         <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
-            <div className="text-4xl mb-4">🔗</div>
+            <div className="mb-4 text-indigo-600">
+              <LiaLinkSolid size={40} />
+            </div>
             <h3 className="text-xl font-semibold text-gray-900">Link Resources</h3>
             <p className="mt-3 text-sm leading-6 text-gray-600">
               Create and manage shortened links with full analytics tracking and custom titles. Perfect for marketing campaigns and social media sharing.
@@ -47,7 +53,9 @@ export default function Resources() {
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
-            <div className="text-4xl mb-4">📱</div>
+            <div className="mb-4 text-indigo-600">
+              <RiQrCodeLine size={40} />
+            </div>
             <h3 className="text-xl font-semibold text-gray-900">QR Code Resources</h3>
             <p className="mt-3 text-sm leading-6 text-gray-600">
               Generate and track QR codes for vCards, WiFi credentials, URLs, and more. Ideal for contactless interactions and event management.
@@ -73,27 +81,29 @@ export default function Resources() {
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
-            <div className="text-4xl mb-4">🖼️</div>
-            <h3 className="text-xl font-semibold text-gray-900">Image Resources</h3>
+            <div className="mb-4 text-indigo-600">
+              <MdPhoneIphone size={40} />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900">Page Resources</h3>
             <p className="mt-3 text-sm leading-6 text-gray-600">
-              Upload and display images on your brand pages. Enhance your landing pages with visual content that engages your audience.
+              Create and manage custom brand pages (bio link pages) with drag-and-drop functionality. Build beautiful landing pages that showcase your content.
             </p>
             <ul className="mt-6 space-y-2">
               <li className="flex gap-x-2 text-sm text-gray-600">
-                <span className="text-blue-600">•</span>
-                <span className="text-blue-700 font-medium">Coming Soon</span>
+                <span className="text-indigo-600">•</span>
+                Custom page templates
               </li>
               <li className="flex gap-x-2 text-sm text-gray-600">
                 <span className="text-indigo-600">•</span>
-                Image uploads
+                Drag-and-drop ordering
               </li>
               <li className="flex gap-x-2 text-sm text-gray-600">
                 <span className="text-indigo-600">•</span>
-                Optimized delivery
+                Link multiple resources
               </li>
               <li className="flex gap-x-2 text-sm text-gray-600">
                 <span className="text-indigo-600">•</span>
-                Responsive images
+                Page analytics
               </li>
             </ul>
           </div>

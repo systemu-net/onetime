@@ -1,4 +1,9 @@
 import { CheckIcon } from '@heroicons/react/20/solid';
+import { HiLightningBolt } from 'react-icons/hi';
+import { LiaLinkSolid } from 'react-icons/lia';
+import { MdPhoneIphone } from 'react-icons/md';
+import { RiQrCodeLine, RiShieldCheckLine } from 'react-icons/ri';
+import { SiPagespeedinsights } from 'react-icons/si';
 
 type FeatureItem = {
   text: string;
@@ -8,7 +13,7 @@ type FeatureItem = {
 type Feature = {
   name: string;
   description: string;
-  icon: string;
+  icon: JSX.Element;
   features: (string | FeatureItem)[];
 };
 
@@ -16,7 +21,7 @@ const features: Feature[] = [
   {
     name: 'Smart Link Management',
     description: 'Create, customize, and track your shortened links with powerful analytics',
-    icon: '🔗',
+    icon: <LiaLinkSolid size={30} className="text-white" />,
     features: [
       { text: 'Custom short URLs with your brand', badge: 'business' },
       { text: 'Bulk link creation and management', badge: 'business' },
@@ -31,7 +36,7 @@ const features: Feature[] = [
   {
     name: 'QR Code Generator',
     description: 'Generate dynamic QR codes for multiple use cases with full customization',
-    icon: '📱',
+    icon: <RiQrCodeLine size={30} className="text-white" />,
     features: [
       { text: 'Multiple QR code types (URLs, vCards, WiFi)', badge: 'coming-soon' },
       { text: 'Customizable design and colors', badge: 'coming-soon' },
@@ -46,7 +51,7 @@ const features: Feature[] = [
   {
     name: 'Brand Pages',
     description: 'Create beautiful landing pages to showcase your links and content',
-    icon: '🎨',
+    icon: <MdPhoneIphone size={30} className="text-white" />,
     features: [
       'Drag-and-drop resource management',
       'Custom page design and layouts',
@@ -61,7 +66,7 @@ const features: Feature[] = [
   {
     name: 'Advanced Analytics',
     description: 'Deep insights into your audience behavior and engagement',
-    icon: '📊',
+    icon: <SiPagespeedinsights size={30} className="text-white" />,
     features: [
       'Real-time traffic monitoring',
       'Geographic heat maps',
@@ -76,7 +81,7 @@ const features: Feature[] = [
   {
     name: 'API & Integrations',
     description: 'Powerful REST API for seamless integration with your workflow',
-    icon: '⚡',
+    icon: <HiLightningBolt size={30} className="text-white" />,
     features: [
       { text: 'Full CRUD operations for all resources', badge: 'coming-soon' },
       { text: 'JWT authentication', badge: 'coming-soon' },
@@ -91,7 +96,7 @@ const features: Feature[] = [
   {
     name: 'Security & Privacy',
     description: 'Enterprise-grade security to protect your data and your users',
-    icon: '🔒',
+    icon: <RiShieldCheckLine size={30} className="text-white" />,
     features: [
       'Google Safe Browsing API integration',
       'Malicious URL detection',
@@ -194,7 +199,7 @@ export default function Features() {
               href="/plans"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
-              View pricing <span aria-hidden="true">→</span>
+              View plans <span aria-hidden="true">→</span>
             </a>
           </div>
         </div>
