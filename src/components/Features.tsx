@@ -105,10 +105,6 @@ const features: Feature[] = [
   },
 ];
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 export default function Features() {
   return (
     <div className="bg-white py-24 sm:py-32">
