@@ -49,7 +49,7 @@ const tiers: Tier[] = [
     name: 'Creator',
     id: 'creator',
     href: '#',
-    price: { monthly: '$19', annually: '$190' },
+    price: { monthly: '$9', annually: '$90' },
     description: 'Everything in Free, plus:',
     features: [
       '300 links/month',
@@ -67,7 +67,7 @@ const tiers: Tier[] = [
     name: 'Influencer',
     id: 'influencer',
     href: '#',
-    price: { monthly: '$49', annually: '$490' },
+    price: { monthly: '$29', annually: '$290' },
     description: 'Everything in Creator, plus:',
     features: [
       '1000 links/month',
