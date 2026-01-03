@@ -66,13 +66,13 @@ const DashboardPage = () => {
 
   return (
     <MainLayout>
-      <h1 className="text-2xl mb-4">Your Tools</h1>
+      <h1 className="text-2xl mb-4 text-gray-900 dark:text-zinc-100">Your Tools</h1>
       <div ref={toolsRef} className="grid lg:grid-cols-3 gap-4">
         {tools.map((item, index) => (
           <Link
             key={item.label}
             to={item.path}
-            className={`block max-w-sm bg-white border border-gray-200 rounded-md shadow overflow-hidden transition-all duration-700 ease-out hover:shadow-lg ${isToolsVisible
+            className={`block max-w-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md shadow overflow-hidden transition-all duration-700 ease-out hover:shadow-lg ${isToolsVisible
               ? 'translate-y-0 opacity-100'
               : 'translate-y-8 opacity-0'
               }`}
@@ -82,10 +82,10 @@ const DashboardPage = () => {
             <div className="flex h-24 ">
               {/* Left half - Background image */}
               <div className="w-2/3 p-6 flex flex-col justify-center">
-                <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-700">
+                <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-700 dark:text-zinc-100">
                   {item.label}
                 </h5>
-                <p className="font-normal text-gray-700 text-sm">
+                <p className="font-normal text-gray-700 dark:text-gray-400 text-sm">
                   {item.descr}
                 </p>
               </div>
@@ -99,7 +99,7 @@ const DashboardPage = () => {
           </Link>
         ))}
       </div>
-      <h1 className="text-2xl my-4">Plan Details</h1>
+      <h1 className="text-2xl my-4 text-gray-900 dark:text-zinc-100">Plan Details</h1>
       {cookies?.plan && (
         <div
           ref={planRef}
@@ -109,13 +109,13 @@ const DashboardPage = () => {
             }`}
         >
           <Box className="border hover:shadow-lg transition-shadow duration-300">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-3 gap-3">
-              <h2 className="text-lg font-semibold">{cookies.plan.name} plan</h2>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b dark:border-zinc-700 pb-3 gap-3">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">{cookies.plan.name} plan</h2>
               <Button to={'/plans'} className="w-full sm:w-auto">Upgrade</Button>
             </div>
             <div className="mt-4">
-              <p className="font-medium">Included in your plan:</p>
-              <ul className="mt-2 space-y-2 text-sm">
+              <p className="font-medium text-gray-900 dark:text-zinc-100">Included in your plan:</p>
+              <ul className="mt-2 space-y-2 text-sm text-gray-700 dark:text-gray-400">
                 {cookies?.plan?.features?.map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <span>&#10003;</span> {feature.used}/{feature.limit}{' '}

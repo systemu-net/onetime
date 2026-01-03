@@ -2,17 +2,17 @@ import { getLinkAnalytics } from '@/apis/shorten';
 import { Subheading } from '@/components/elements/heading';
 import { Link, LinkAnalytics, StatsPeriod } from '@/types';
 import {
-  ArcElement,
-  CategoryScale,
-  Chart as ChartJS,
-  ChartOptions,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip
+    ArcElement,
+    CategoryScale,
+    Chart as ChartJS,
+    ChartOptions,
+    Filler,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    Tooltip
 } from 'chart.js';
 import { useEffect, useMemo, useState } from 'react';
 import { Line, Pie } from 'react-chartjs-2';
@@ -163,7 +163,7 @@ const SimpleChart: React.FC<{ data: SimpleChartData[]; title: string; beautifyNa
   
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">{title}</h3>
       <div className="space-y-3">
         {data.slice(0, 8).map((item, index) => (
           <ProgressBar
@@ -322,7 +322,7 @@ const ViewsChart: React.FC<{ data: DailyData[]; period: StatsPeriod }> = ({ data
   if (data.length === 0) {
     return (
       <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-        <h3 className="text-lg font-semibold mb-4">Clicks over time</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Clicks over time</h3>
         <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">No data available</p>
       </div>
     );
@@ -330,9 +330,9 @@ const ViewsChart: React.FC<{ data: DailyData[]; period: StatsPeriod }> = ({ data
   
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-      <h3 className="text-lg font-semibold mb-4">Clicks over time</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Clicks over time</h3>
       <div style={{ height: '350px' }}>
-        <Line data={chartData} options={options} />
+        <Line key={isDark ? 'dark' : 'light'} data={chartData} options={options} />
       </div>
     </div>
   );
@@ -397,9 +397,11 @@ const BrowsersPieChart: React.FC<{ data: SimpleChartData[] }> = ({ data }) => {
           },
           generateLabels: (chart) => {
             const datasets = chart.data.datasets;
+            const labelColor = isDark ? 'rgb(161, 161, 170)' : 'rgb(113, 113, 122)';
             return chart.data.labels?.map((label, i) => ({
               text: `${label}: ${datasets[0].data[i]}`,
               fillStyle: datasets[0].backgroundColor?.[i] as string,
+              fontColor: labelColor,
               hidden: false,
               index: i
             })) || [];
@@ -429,7 +431,7 @@ const BrowsersPieChart: React.FC<{ data: SimpleChartData[] }> = ({ data }) => {
   if (data.length === 0) {
     return (
       <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-        <h3 className="text-lg font-semibold mb-4">Browsers</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Browsers</h3>
         <p className="text-zinc-500 dark:text-zinc-400 text-center py-8">No data available</p>
       </div>
     );
@@ -437,9 +439,9 @@ const BrowsersPieChart: React.FC<{ data: SimpleChartData[] }> = ({ data }) => {
 
   return (
     <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-      <h3 className="text-lg font-semibold mb-4">Browsers</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-zinc-100">Browsers</h3>
       <div style={{ height: '300px' }}>
-        <Pie data={chartData} options={options} />
+        <Pie key={isDark ? 'dark' : 'light'} data={chartData} options={options} />
       </div>
     </div>
   );
@@ -637,7 +639,7 @@ const LinkStatsComponent: React.FC<LinkStatsComponentProps> = ({ link }) => {
       {/* World Map - Full Width with Zoom */}
       <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Countries</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">Countries</h3>
         </div>
         <WorldMapComponent data={countryData} />
       </div>
