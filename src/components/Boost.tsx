@@ -9,9 +9,9 @@ const Boost = () => {
   };
 
   return (
-    <section className="boost">
+    <section className="boost dark:bg-zinc-900">
       <div className="boost__content" onClick={handleClick} style={{ cursor: 'pointer' }}>
-        <h2>Boost your links today</h2>
+        <h2 className="dark:text-zinc-100">Boost your links today</h2>
         <button className="btn" datatype="narrow">Get Started</button>
       </div>
     </section>

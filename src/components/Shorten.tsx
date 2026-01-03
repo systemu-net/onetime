@@ -28,7 +28,7 @@ const Shorten = () => {
   }
 
   return (
-    <section className="shorten">
+    <section className="shorten dark:bg-zinc-900">
       <div className="container">
         {/* Shorten content */}
         <div className="shorten__content">
@@ -37,7 +37,7 @@ const Shorten = () => {
               <input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className={`${errorMessage ? 'error-input' : ''}`}
+                className={`dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 ${errorMessage ? 'error-input' : ''}`}
                 type="text"
                 placeholder='Shorten a link'
               />

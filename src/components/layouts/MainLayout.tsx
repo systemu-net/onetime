@@ -28,6 +28,7 @@ import Logo from '../../assets/logo.svg';
 import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PLANS_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
 import { User } from '../../types';
 import { getCachedUser, setCachedUser, USER_CACHE_VERSION_KEY_EXPORT } from '../../utils/userCache';
+import ThemeToggle from '../ThemeToggle';
 
 const navigation = [
   { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
@@ -301,22 +302,23 @@ const MainLayout = ({ children }) => {
                 <form
                   action="#"
                   method="GET"
-                  className="grid flex-1 grid-cols-1"
+                  className="grid flex-1 grid-cols-1 items-center my-2"
                 >
                   <input
                     name="search"
                     type="search"
                     placeholder="Search"
                     aria-label="Search"
-                    className="col-start-1 row-start-1 block size-full bg-white dark:bg-zinc-900 pl-8 text-base text-gray-900 outline-none placeholder:text-gray-400 sm:text-sm/6"
+                    className="col-start-1 row-start-1 block size-full rounded-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 dark:focus:ring-violet-500/30 outline-none transition-colors"
                   />
 
                   <MagnifyingGlassIcon
                     aria-hidden="true"
-                    className="pointer-events-none col-start-1 row-start-1 size-5 self-center text-gray-400"
+                    className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500"
                   />
                 </form>
-                <div className="flex items-center gap-x-4 lg:gap-x-6">
+                <div className="flex items-center gap-x-2 sm:gap-x-4 lg:gap-x-6">
+                  <ThemeToggle />
                   <button
                     type="button"
                     className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
@@ -327,7 +329,7 @@ const MainLayout = ({ children }) => {
                   {/* Separator */}
                   <div
                     aria-hidden="true"
-                    className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200"
+                    className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:bg-zinc-700"
                   />
                   {/* Profile dropdown */}
                   <Menu as="div" className="relative">

@@ -26,7 +26,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section ref={heroRef} className="hero">
+    <section ref={heroRef} className="hero dark:bg-zinc-900">
       <div className="container">
         <div className="flex">
           {/* Image */}
@@ -47,7 +47,7 @@ const Hero = () => {
           {/* Content */}
           <div className="hero__content">
             <h1
-              className={`transition-all duration-700 ease-out ${isVisible
+              className={`dark:text-zinc-100 transition-all duration-700 ease-out ${isVisible
                 ? 'translate-x-0 opacity-100'
                 : '-translate-x-12 opacity-0'
                 }`}
@@ -55,7 +55,7 @@ const Hero = () => {
               More than just shorter links
             </h1>
             <p
-              className={`text-gray-500 mb-4 transition-all duration-700 ease-out delay-200 ${isVisible
+              className={`text-gray-500 dark:text-gray-400 mb-4 transition-all duration-700 ease-out delay-200 ${isVisible
                 ? 'translate-x-0 opacity-100'
                 : '-translate-x-12 opacity-0'
                 }`}

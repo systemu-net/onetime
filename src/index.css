@@ -66,6 +66,10 @@ body {
   background-color: rgb(244 244 245 / var(--tw-bg-opacity, 1));
 }
 
+body.dark {
+  background-color: rgb(24 24 27 / var(--tw-bg-opacity, 1)); /* zinc-900 */
+}
+
 /* Utility classes */
 .container {
   padding-inline: 1rem;
@@ -106,7 +110,8 @@ h2 {
 
 /* Header section */
 .header {
-  background-color: var(--clr-neutral-100);
+  /* background-color: var(--clr-neutral-100); */
+  /* Removed to let Tailwind classes handle background */
 }
 
 .header .content {
@@ -360,7 +365,7 @@ input.error-input::placeholder {
 
 /* Boost section */
 .boost {
-  margin-top: 5rem;
+  /* margin-top: 5rem; */
   background: var(--clr-primary-500) url(./assets/bg-boost-mobile.svg);
   padding-block: 4rem;
   text-align: center;

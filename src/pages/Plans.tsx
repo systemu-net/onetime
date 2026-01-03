@@ -6,7 +6,7 @@ const PlansPage = () => {
   return (
     <MainLayout>
       <Heading className="px-4 sm:px-6 lg:px-8" >Your plans</Heading>
-      <div className='px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white mt-4 mb-4'>
+      <div className='px-4 sm:px-6 lg:px-8 shadow rounded-lg bg-white dark:bg-zinc-900 mt-4 mb-4'>
         <Pricing inline={true} />
       </div>
 

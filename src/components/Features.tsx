@@ -112,15 +112,15 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <div className="bg-white py-24 sm:py-32">
+    <div className="bg-white dark:bg-zinc-900 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-base font-semibold leading-7 text-indigo-600">Everything you need</h2>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">Everything you need</h2>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-zinc-100 sm:text-4xl">
             Powerful Features for Modern Link Management
           </p>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
+          <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
             From simple link shortening to comprehensive brand pages, thin.ly provides all the tools you need to manage your online presence effectively.
           </p>
         </div>
@@ -131,18 +131,18 @@ export default function Features() {
             {features.map((feature) => (
               <div
                 key={feature.name}
-                className="relative rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md"
+                className="relative rounded-2xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-8 shadow-sm transition-shadow hover:shadow-md"
               >
                 {/* Icon and Title */}
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-600 text-2xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-600 dark:bg-indigo-500 text-2xl">
                     {feature.icon}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold leading-7 text-gray-900">
+                    <h3 className="text-xl font-semibold leading-7 text-gray-900 dark:text-zinc-100">
                       {feature.name}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
+                    <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                       {feature.description}
                     </p>
                   </div>
@@ -157,16 +157,16 @@ export default function Features() {
                     
                     return (
                       <li key={index} className="flex gap-x-3">
-                        <CheckIcon className="h-6 w-5 flex-none text-indigo-600" aria-hidden="true" />
-                        <span className="flex items-center gap-2 text-sm leading-6 text-gray-600">
+                        <CheckIcon className="h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                        <span className="flex items-center gap-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                           {text}
                           {badge === 'business' && (
-                            <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                            <span className="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300">
                               Business
                             </span>
                           )}
                           {badge === 'coming-soon' && (
-                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                            <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
                               Coming Soon
                             </span>
                           )}
@@ -182,22 +182,22 @@ export default function Features() {
 
         {/* Call to Action */}
         <div className="mx-auto mt-20 max-w-2xl text-center">
-          <h3 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-zinc-100">
             Ready to get started?
           </h3>
-          <p className="mt-4 text-lg leading-8 text-gray-600">
+          <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-400">
             Start using thin.ly today and experience the power of modern link management.
           </p>
           <div className="mt-8 flex items-center justify-center gap-x-6">
             <a
               href="/register"
-              className="rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="rounded-md bg-indigo-600 dark:bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Sign up for free
             </a>
             <a
               href="/plans"
-              className="text-sm font-semibold leading-6 text-gray-900"
+              className="text-sm font-semibold leading-6 text-gray-900 dark:text-zinc-100"
             >
               View plans <span aria-hidden="true">→</span>
             </a>
