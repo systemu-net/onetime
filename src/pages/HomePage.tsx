@@ -6,7 +6,7 @@ import Statistic from '../components/Statistic';
 
 const HomePage = () => {
   return (
-    <div className="">
+    <div className="dark:bg-zinc-900">
       <div>
         <Header />
         <Hero />

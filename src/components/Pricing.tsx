@@ -164,17 +164,17 @@ export default function Pricing({ inline }: { inline?: boolean }) {
   };
 
   return (
-    <div className={`bg-white ${inline ? 'py-4' : 'py-24 sm:py-32'}`}>
+    <div className={`bg-white dark:bg-zinc-900 ${inline ? 'py-4' : 'py-24 sm:py-32'}`}>
       <div className="mx-auto max-w-7xl px-6 lg:px-2 mb-12">
         {!inline && (
           < div className="mx-auto max-w-4xl text-center">
             {/* <h2 className="text-base/7 font-semibold text-violet-600">Pricing</h2> */}
-            <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
+            <p className="mt-2 text-balance text-5xl font-semibold tracking-tight text-primary dark:text-violet-400 sm:text-6xl">
               Pricing that grows with you
             </p>
           </div>
         )}
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
+        <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 dark:text-gray-400 sm:text-xl/8">
           Upgrade to benefit so much more from your short links, QR Codes & Custom landing pages
         </p>
         <div className="mt-16 flex justify-center">
@@ -215,7 +215,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
               className={classNames(
                 tier.mostPopular
                   ? 'ring-2 ring-accent shadow-2xl'
-                  : 'ring-1 ring-gray-200 shadow-2xl',
+                  : 'ring-1 ring-gray-200 dark:ring-zinc-700 shadow-2xl',
                 tier.disabled
                   ? tier.name === 'Free'
                     ? 'ring-2 ring-accent bg-accent/10 dark:bg-accent/20 cursor-default'
@@ -227,23 +227,23 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     ? 'opacity-50 cursor-not-allowed ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-950/10'
                     : 'opacity-50 cursor-not-allowed'
                   : 'hover:ring-2 hover:ring-accent group',
-                'rounded-3xl p-8 transition-all duration-200'
+                'rounded-3xl p-8 transition-all duration-200 bg-white dark:bg-zinc-800'
               )}
             >
               <h3
                 id={tier.id}
                 className={classNames(
-                  tier.mostPopular ? 'text-primary' : 'text-gray-900',
+                  tier.mostPopular ? 'text-primary dark:text-violet-400' : 'text-gray-900 dark:text-zinc-100',
                   'text-2xl/8 font-semibold'
                 )}
               >
                 {tier.name}
               </h3>
               <p className="mt-6 flex items-baseline gap-x-1">
-                <span className="text-4xl font-semibold tracking-tight text-gray-900">
+                <span className="text-4xl font-semibold tracking-tight text-gray-900 dark:text-zinc-100">
                   {tier.price[frequency]}
                 </span>
-                <span className="text-sm/6 font-semibold text-gray-600">
+                <span className="text-sm/6 font-semibold text-gray-600 dark:text-gray-400">
                   {frequencies.find(f => f.value === frequency)?.priceSuffix}
                 </span>
               </p>
@@ -270,10 +270,10 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     : 'Coming Soon' 
                   : `Upgrade to ${tier.name}`}
               </button>
-              <p className="mt-8 font-bold text-sm/6 text-gray-600">{tier.description}</p>
+              <p className="mt-8 font-bold text-sm/6 text-gray-600 dark:text-gray-400">{tier.description}</p>
               <ul
                 role="list"
-                className="mt-2 space-y-3 text-sm/6 text-gray-600"
+                className="mt-2 space-y-3 text-sm/6 text-gray-600 dark:text-gray-400"
               >
                 {tier.features.map((feature) => (
                   <li key={feature} className="flex gap-x-3">

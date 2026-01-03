@@ -265,14 +265,14 @@ const AddLinkModal: React.FC<AddLinkModalProps> = ({
                   placeholder="Add a title"
                   value={linkTitle}
                   onChange={(e) => setLinkTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white mb-2"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 mb-2"
                 />
                 <input
                   type="text"
                   placeholder="Add a description (optional)"
                   value={linkDescription}
                   onChange={(e) => setLinkDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 />
               </div>
 
@@ -292,7 +292,7 @@ const AddLinkModal: React.FC<AddLinkModalProps> = ({
                     type="text"
                     value={linkColor}
                     onChange={(e) => setLinkColor(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                   />
                 </div>
               </div>
@@ -307,7 +307,7 @@ const AddLinkModal: React.FC<AddLinkModalProps> = ({
                   placeholder="Search by URL or title..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 />
               </div>
 
@@ -374,7 +374,7 @@ const AddLinkModal: React.FC<AddLinkModalProps> = ({
                       placeholder="Custom title for the button"
                       value={linkTitle}
                       onChange={(e) => setLinkTitle(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                     />
                   </div>
 
@@ -393,7 +393,7 @@ const AddLinkModal: React.FC<AddLinkModalProps> = ({
                         type="text"
                         value={linkColor}
                         onChange={(e) => setLinkColor(e.target.value)}
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                       />
                     </div>
                   </div>

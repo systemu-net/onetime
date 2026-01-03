@@ -138,7 +138,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
                   value={linkTitle}
                   onChange={(e) => setLinkTitle(e.target.value)}
                   placeholder="Enter link title"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -153,7 +153,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
                   value={linkDescription}
                   onChange={(e) => setLinkDescription(e.target.value)}
                   placeholder="Enter link description"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -175,7 +175,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({
                     value={linkColor}
                     onChange={(e) => setLinkColor(e.target.value)}
                     placeholder="#3b82f6"
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>

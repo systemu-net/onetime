@@ -115,11 +115,11 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
 
   return (
     <>
-      <div className="bg-white flex min-h-full flex-1">
+      <div className="bg-white dark:bg-zinc-900 flex min-h-full flex-1">
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
-              <h2 className="mt-2 text-balance text-2xl/9 font-semibold tracking-tight text-primary">
+              <h2 className="mt-2 text-balance text-2xl/9 font-semibold tracking-tight text-primary dark:text-violet-400">
                 {(pageType === LOGIN) ? (
                   <>
                     Sign in to your account
@@ -130,7 +130,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                   </>
                 )}
               </h2>
-              <p className="mt-2 text-sm/6 text-gray-500">
+              <p className="mt-2 text-sm/6 text-gray-500 dark:text-gray-400">
                 {(pageType === LOGIN) ? (
                   <>
                     Not a user?
@@ -149,7 +149,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
               <div>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
+                    <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900 dark:text-zinc-100">
                       Email address
                     </label>
                     <div className="mt-2">
@@ -159,7 +159,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                         type="email"
                         required
                         autoComplete="email"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white dark:bg-zinc-900 px-3 py-1.5 text-base text-gray-900 dark:text-zinc-100 outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-zinc-600 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
                         placeholder="Enter email address"
                         value={email}
                         onChange={handleEmailChange}
@@ -169,7 +169,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                   </div>
 
                   <div>
-                    <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
+                    <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900 dark:text-zinc-100">
                       Password
                     </label>
                     <div className="mt-2 relative">
@@ -179,7 +179,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                         type={showPassword ? "text" : "password"}
                         required
                         autoComplete="current-password"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white dark:bg-zinc-900 px-3 py-1.5 text-base text-gray-900 dark:text-zinc-100 outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-zinc-600 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-violet-600 sm:text-sm/6"
                         placeholder="Enter password"
                         value={password}
                         onChange={handlePasswordChange}
@@ -202,7 +202,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
 
                   {/* Legal Agreement - Only for Registration */}
                   {pageType === REGISTER && (
-                    <div className="border-t border-gray-200 pt-6">
+                    <div className="border-t border-gray-200 dark:border-zinc-700 pt-6">
                       <div className="flex items-start gap-3">
                         <div className="flex h-6 shrink-0 items-center">
                           <input
@@ -212,10 +212,10 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                             required
                             checked={termsAccepted}
                             onChange={(e) => setTermsAccepted(e.target.checked)}
-                            className="size-4 rounded border-gray-300 text-violet-600 focus:ring-violet-600"
+                            className="size-4 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 text-violet-600 focus:ring-violet-600"
                           />
                         </div>
-                        <label htmlFor="terms-accepted" className="text-sm text-gray-700 leading-tight">
+                        <label htmlFor="terms-accepted" className="text-sm text-gray-700 dark:text-gray-400 leading-tight">
                           I agree to the{' '}
                           <Link
                             to={TERMS_ROUTE}
@@ -260,7 +260,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                               id="remember-me"
                               name="remember-me"
                               type="checkbox"
-                              className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                              className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                             />
                             <svg
                               fill="none"
@@ -284,7 +284,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                             </svg>
                           </div>
                         </div>
-                        <label htmlFor="remember-me" className="block text-sm/6 text-gray-900">
+                        <label htmlFor="remember-me" className="block text-sm/6 text-gray-900 dark:text-zinc-100">
                           Remember me
                         </label>
                       </div>
@@ -318,17 +318,17 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                 <div className="mt-10">
                   <div className="relative">
                     <div aria-hidden="true" className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200" />
+                      <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
                     </div>
                     <div className="relative flex justify-center text-sm/6 font-medium">
-                      <span className="bg-white px-6 text-gray-900">Or continue with</span>
+                      <span className="bg-white dark:bg-zinc-900 px-6 text-gray-900 dark:text-zinc-100">Or continue with</span>
                     </div>
                   </div>
 
                   <div className="mt-6 grid grid-cols-2 gap-4">
                     <a
                       href="#"
-                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
+                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 focus-visible:ring-transparent"
                     >
                       <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
                         <path
@@ -353,9 +353,9 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
 
                     <a
                       href="#"
-                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
+                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 focus-visible:ring-transparent"
                     >
-                      <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" className="size-5 fill-[#24292F]">
+                      <svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" className="size-5 fill-[#24292F] dark:fill-zinc-100">
                         <path
                           d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
                           clipRule="evenodd"

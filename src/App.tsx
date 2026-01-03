@@ -1,6 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { LinksProvider } from './context/LinksContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './Notifications';
 import AnalyticsPage from './pages/Analytics';
 import CreatePage from './pages/CreatePage';
@@ -52,11 +53,12 @@ import {
 
 export const App = () => {
   return (
-    <NotificationProvider>
-      <LinksProvider>
+    <ThemeProvider>
+      <NotificationProvider>
+        <LinksProvider>
 
-        <Router>
-          <Routes>
+          <Router>
+            <Routes>
             {/* Public routes */}
             <Route path={FEATURES_ROUTE} element={<FeaturesPage />}></Route>
             <Route path={PRICING_ROUTE} element={<PricingPage />}></Route>
@@ -190,6 +192,7 @@ export const App = () => {
         </Router>
       </LinksProvider>
     </NotificationProvider>
+    </ThemeProvider>
   );
 };
 
