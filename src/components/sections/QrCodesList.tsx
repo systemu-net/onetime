@@ -39,7 +39,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
 
   const handleDownload = async (imageUrl: string, filename: string) => {
     try {
-      const response = await fetch(imageUrl);
+      const response = await fetch(imageUrl, { mode: 'cors' });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
