@@ -241,7 +241,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
                         <EllipsisVerticalIcon className="w-5 h-5" />
                       </DropdownButton>
                       <DropdownMenu anchor="bottom end" className="z-50">
-                        <DropdownItem onClick={() => handleDownload(item.image_url, `qr-${item.link.lookup_code}.png`)}>
+                        <DropdownItem onClick={() => handleDownload(item.image_url, `qr-${item.link.lookup_code}.svg`)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -396,7 +396,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
               {/* Action buttons */}
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
-                  onClick={() => handleDownload(modalQrCode.image_url, `qr-${modalQrCode.link.lookup_code}.png`)}
+                  onClick={() => handleDownload(modalQrCode.image_url, `qr-${modalQrCode.link.lookup_code}.svg`)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-medium transition-colors"
                 >
                   <svg
