@@ -16,7 +16,7 @@ export default function Notification({ text, autoDismiss = true, dismissTimeout 
     return (
         <div
             aria-live="assertive"
-            className="pointer-events-none fixed bottom-5 right-2 flex w-full items-end px-4 py-6 sm:items-start sm:p-6"
+            className="pointer-events-none fixed bottom-5 right-2 flex w-full items-end px-4 py-6 sm:items-start sm:p-6 z-[9999]"
         >
             <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
                 <Transition
@@ -28,23 +28,23 @@ export default function Notification({ text, autoDismiss = true, dismissTimeout 
                     leaveFrom="translate-y-0 opacity-100"
                     leaveTo="translate-y-2 opacity-0"
                 >
-                    <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5">
+                    <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-zinc-800 shadow-lg ring-1 ring-black/5 dark:ring-zinc-700">
                         <div className="p-4">
                             <div className="flex items-start">
                                 <div className="shrink-0">
                                     <CheckCircleIcon
                                         aria-hidden="true"
-                                        className="h-6 w-6 text-green-400"
+                                        className="h-6 w-6 text-green-400 dark:text-green-500"
                                     />
                                 </div>
                                 <div className="ml-3 w-0 flex-1 pt-0.5">
-                                    <p className="text-sm font-medium text-gray-900">{text}</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">{text}</p>
                                 </div>
                                 <div className="ml-4 flex shrink-0">
                                     <button
                                         type="button"
                                         onClick={() => setShow(false)}
-                                        className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        className="inline-flex rounded-md bg-white dark:bg-zinc-800 text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-800"
                                     >
                                         <span className="sr-only">Close</span>
                                         <XMarkIcon aria-hidden="true" className="h-5 w-5" />

@@ -84,7 +84,7 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
             >
               <div 
                 onClick={() => setModalQrCode(item)}
-                className="w-full flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm text-left cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors"
+                className="w-full flex items-center gap-3 sm:gap-5 px-4 py-2.5 text-sm text-left cursor-pointer hover:bg-neutral-50 dark:bg-[#0D1116] dark:hover:bg-[#171B21] transition-colors"
               >
                 {/* Left section - QR Code preview */}
                 <div className="shrink-0">
@@ -303,10 +303,10 @@ export const QrCodesList: React.FC<QrCodesListProps> = ({
             {/* Close button */}
             <button
               onClick={() => setModalQrCode(null)}
-              className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-full bg-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               aria-label="Close modal"
             >
-              <XMarkIcon className="w-6 h-6 text-neutral-600 dark:text-neutral-400" />
+              <XMarkIcon className="w-6 h-6 text-white dark:text-white" />
             </button>
 
             {/* Modal content */}

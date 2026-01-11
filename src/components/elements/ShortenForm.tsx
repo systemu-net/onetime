@@ -3,6 +3,7 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../../apis/config';
 import { shortenApi } from '../../apis/shorten';
+import { useNotification } from '../../Notifications';
 import { LOGIN_ROUTE } from '../../routes';
 import { AnimatedShortTextIcon } from '../icons/AnimatedShortTextIcon';
 import { Subheading } from './heading';
@@ -10,6 +11,7 @@ import { Subheading } from './heading';
 const ShortenForm = ({ fetchLinks }) => {
   const [cookies] = useCookies(['token']);
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
   const [url, setUrl] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,6 +48,7 @@ const ShortenForm = ({ fetchLinks }) => {
           if (lookupCode) {
             const shortUrl = `${API_URL}/${lookupCode}`;
             navigator.clipboard.writeText(shortUrl);
+            addNotification('Link was copied into the clipboard', 'success');
           }
           
           setErrorMessage('');
