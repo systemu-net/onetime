@@ -351,7 +351,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     "transition-all duration-200 w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600",
                   )}
                 >
-                  {loading && !disabled
+                  {loading
                     ? "Processing..."
                     : getButtonText(state, tier.name)}
                 </button>
