@@ -195,6 +195,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
       if (response.ok) {
         if (data.url) {
           // New subscription — redirect to Stripe Checkout
+          setLoading(false);
           window.location.href = data.url;
           return;
         }
