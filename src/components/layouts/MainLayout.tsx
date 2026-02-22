@@ -6,9 +6,12 @@ import {
   MenuButton,
   MenuItem,
   MenuItems,
-  TransitionChild
-} from '@headlessui/react';
-import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+  TransitionChild,
+} from "@headlessui/react";
+import {
+  ChevronDownIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/20/solid";
 import {
   Bars3Icon,
   BellIcon,
@@ -16,37 +19,51 @@ import {
   HomeIcon,
   LinkIcon,
   QrCodeIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
-import { useCallback, useEffect, useState } from 'react';
-import { useCookies } from 'react-cookie';
-import { IoCellular } from 'react-icons/io5';
-import { MdPhoneIphone } from 'react-icons/md';
-import { Link, useLocation } from 'react-router-dom';
-import { getCurrentUserApi, logoutApi } from '../../apis/authentication';
-import Logo from '../../assets/logo.svg';
-import { DASHBOARD_ROUTE, LANDING_ROUTE, LINKS_ROUTE, PAGES_ROUTE, PLANS_ROUTE, PROFILE_ROUTE, QR_ROUTE, SETTINGS_ROUTE } from '../../routes';
-import { User } from '../../types';
-import { getCachedUser, setCachedUser, USER_CACHE_VERSION_KEY_EXPORT } from '../../utils/userCache';
-import ThemeToggle from '../ThemeToggle';
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useCallback, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import { IoCellular } from "react-icons/io5";
+import { MdPhoneIphone } from "react-icons/md";
+import { Link, useLocation } from "react-router-dom";
+import { getCurrentUserApi, logoutApi } from "../../apis/authentication";
+import Logo from "../../assets/logo.svg";
+import {
+  DASHBOARD_ROUTE,
+  LANDING_ROUTE,
+  LINKS_ROUTE,
+  PAGES_ROUTE,
+  PLANS_ROUTE,
+  PROFILE_ROUTE,
+  QR_ROUTE,
+  SETTINGS_ROUTE,
+} from "../../routes";
+import { User } from "../../types";
+import {
+  getCachedUser,
+  invalidateUserCache,
+  setCachedUser,
+  USER_CACHE_VERSION_KEY_EXPORT,
+} from "../../utils/userCache";
+import ThemeToggle from "../ThemeToggle";
 
 const navigation = [
-  { name: 'Home', href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
-  { name: 'Links', href: LINKS_ROUTE, icon: LinkIcon, current: false },
-  { name: 'QR Codes', href: QR_ROUTE, icon: QrCodeIcon, current: false },
-  { name: 'Pages', href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
+  { name: "Home", href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
+  { name: "Links", href: LINKS_ROUTE, icon: LinkIcon, current: false },
+  { name: "QR Codes", href: QR_ROUTE, icon: QrCodeIcon, current: false },
+  { name: "Pages", href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
   // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
-  { name: 'Plans', href: PLANS_ROUTE, icon: IoCellular, current: false },
+  { name: "Plans", href: PLANS_ROUTE, icon: IoCellular, current: false },
 ];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const [cookies, , removeCookie] = useCookies(['token', 'email']);
+  const [cookies, , removeCookie] = useCookies(["token", "email"]);
   const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(true);
 
@@ -55,7 +72,7 @@ const MainLayout = ({ children }) => {
       setUserLoading(false);
       return;
     }
-    
+
     // Check cache first
     const cachedUser = getCachedUser();
     if (cachedUser) {
@@ -63,11 +80,11 @@ const MainLayout = ({ children }) => {
       setUserLoading(false);
       return;
     }
-    
+
     // Fetch from API if not cached
     setUserLoading(true);
     const [response, error] = await getCurrentUserApi(cookies.token);
-    if (!error && response && typeof response !== 'string') {
+    if (!error && response && typeof response !== "string") {
       const data = await response.json();
       setUser(data.user);
       setCachedUser(data.user);
@@ -86,10 +103,10 @@ const MainLayout = ({ children }) => {
         // Cache was invalidated, refetch user data
         const fetchFreshUser = async () => {
           if (!cookies.token) return;
-          
+
           setUserLoading(true);
           const [response, error] = await getCurrentUserApi(cookies.token);
-          if (!error && response && typeof response !== 'string') {
+          if (!error && response && typeof response !== "string") {
             const data = await response.json();
             setUser(data.user);
             setCachedUser(data.user);
@@ -100,28 +117,27 @@ const MainLayout = ({ children }) => {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [cookies.token]);
 
   const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
     handleLogoutResponse(result, error);
-  }
+  };
 
   const handleLogoutResponse = (_, error) => {
     if (error) {
       console.error(error);
-      removeCookie('token');
-    } else {
-      console.error('Logged out');
-      removeCookie('token');
     }
-  }
+    invalidateUserCache();
+    setUser(null);
+    removeCookie("token");
+  };
 
   return (
     <>
-      <div className='text-primary dark:text-gray-200 font-rubik bg-zinc-100 dark:bg-zinc-950 min-h-svh'>
+      <div className="text-primary dark:text-gray-200 font-rubik bg-zinc-100 dark:bg-zinc-950 min-h-svh">
         <Dialog
           open={sidebarOpen}
           onClose={setSidebarOpen}
@@ -156,7 +172,10 @@ const MainLayout = ({ children }) => {
 
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-zinc-950 px-6 pb-4">
                 <div className="flex h-16 shrink-0 items-center">
-                  <Link to="/" className="logo h-8 w-auto dark:invert hover:bg-pink-300">
+                  <Link
+                    to="/"
+                    className="logo h-8 w-auto dark:invert hover:bg-pink-300"
+                  >
                     <img src={Logo} alt="Logo" />
                   </Link>
                 </div>
@@ -170,18 +189,18 @@ const MainLayout = ({ children }) => {
                               to={item.href}
                               className={classNames(
                                 item.href === location.pathname
-                                  ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                                  : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600',
-                                'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                                  ? "bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500"
+                                  : "text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600",
+                                "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                               )}
                             >
                               <item.icon
                                 aria-hidden="true"
                                 className={classNames(
                                   item.href === location.pathname
-                                    ? 'text-violet-600 dark:text-violet-500'
-                                    : 'text-gray-400 group-hover:text-violet-600',
-                                  'size-6 shrink-0'
+                                    ? "text-violet-600 dark:text-violet-500"
+                                    : "text-gray-400 group-hover:text-violet-600",
+                                  "size-6 shrink-0",
                                 )}
                               />
                               {item.name}
@@ -196,18 +215,20 @@ const MainLayout = ({ children }) => {
                         to={SETTINGS_ROUTE}
                         className={classNames(
                           SETTINGS_ROUTE === location.pathname
-                            ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                            : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600',
-                          'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
-                        )}                      >
+                            ? "bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500"
+                            : "text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600",
+                          "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                        )}
+                      >
                         <Cog6ToothIcon
                           aria-hidden="true"
                           className={classNames(
                             SETTINGS_ROUTE === location.pathname
-                              ? 'text-violet-600 dark:text-violet-500'
-                              : 'text-gray-400 group-hover:text-violet-600',
-                            'size-6 shrink-0'
-                          )} />
+                              ? "text-violet-600 dark:text-violet-500"
+                              : "text-gray-400 group-hover:text-violet-600",
+                            "size-6 shrink-0",
+                          )}
+                        />
                         Settings
                       </Link>
                     </li>
@@ -235,18 +256,18 @@ const MainLayout = ({ children }) => {
                           to={item.href}
                           className={classNames(
                             item.href === location.pathname
-                              ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                              : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
-                            'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                              ? "bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500"
+                              : "text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900",
+                            "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                           )}
                         >
                           <item.icon
                             aria-hidden="true"
                             className={classNames(
                               item.href === location.pathname
-                                ? 'text-violet-600 dark:text-violet-500'
-                                : 'text-gray-400 group-hover:text-violet-600',
-                              'size-6 shrink-0'
+                                ? "text-violet-600 dark:text-violet-500"
+                                : "text-gray-400 group-hover:text-violet-600",
+                              "size-6 shrink-0",
                             )}
                           />
                           {item.name}
@@ -261,19 +282,20 @@ const MainLayout = ({ children }) => {
                     to={SETTINGS_ROUTE}
                     className={classNames(
                       SETTINGS_ROUTE === location.pathname
-                        ? 'bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500'
-                        : 'text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900',
-                      'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                        ? "bg-gray-50 text-violet-600 dark:bg-zinc-900 dark:text-violet-500"
+                        : "text-gray-700 dark:text-white hover:bg-gray-50 hover:text-violet-600 dark:hover:bg-zinc-900",
+                      "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                     )}
                   >
                     <Cog6ToothIcon
                       aria-hidden="true"
                       className={classNames(
                         SETTINGS_ROUTE === location.pathname
-                          ? 'text-violet-600 dark:text-violet-500'
-                          : 'text-gray-400 group-hover:text-violet-600',
-                        'size-6 shrink-0'
-                      )} />
+                          ? "text-violet-600 dark:text-violet-500"
+                          : "text-gray-400 group-hover:text-violet-600",
+                        "size-6 shrink-0",
+                      )}
+                    />
                     Settings
                   </Link>
                 </li>
@@ -338,14 +360,14 @@ const MainLayout = ({ children }) => {
                       {userLoading ? (
                         <div className="size-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
                       ) : user?.avatar_url ? (
-                        <img 
-                          src={user.avatar_url} 
-                          alt="User avatar" 
+                        <img
+                          src={user.avatar_url}
+                          alt="User avatar"
                           className="size-8 rounded-full bg-gray-50 object-cover"
                         />
                       ) : (
                         <div className="size-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm">
-                          {cookies.email?.[0]?.toUpperCase() || 'U'}
+                          {cookies.email?.[0]?.toUpperCase() || "U"}
                         </div>
                       )}
                       <span className="hidden lg:flex lg:items-center">
@@ -389,7 +411,7 @@ const MainLayout = ({ children }) => {
             </div>
           </div>
           <main className="pt-6 flex flex-1 h-full overflow-x-hidden">
-            <div className='flex-grow h-full min-w-0'>
+            <div className="flex-grow h-full min-w-0">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {children}
               </div>
