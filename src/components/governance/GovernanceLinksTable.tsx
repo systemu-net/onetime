@@ -5,8 +5,10 @@ import {
 } from "@/apis/governance";
 import type { Campaign } from "@/types/campaigns";
 import type { GovernanceLink, LinkState } from "@/types/governance";
+import { extractDomain } from "@/utils/transformers";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { TbWorld } from "react-icons/tb";
 import { GovernanceBadge } from "./GovernanceBadge";
 import { GovernanceDeleteConfirmModal } from "./GovernanceDeleteConfirmModal";
 
@@ -44,6 +46,10 @@ const GOVERNANCE_TABLE_COLUMNS: {
 interface GovernanceLinksTableProps {
   links: GovernanceLink[];
   campaigns: Campaign[];
+  search: string;
+  filterState: LinkState | "all";
+  onSearchChange: (v: string) => void;
+  onFilterChange: (v: LinkState | "all") => void;
   onSelect: (link: GovernanceLink) => void;
   onUpdate: (id: string, patch: Partial<GovernanceLink>) => void;
   onRemove: (id: string) => void;
@@ -63,6 +69,10 @@ function barPct(clicks: number, cap: number | null) {
 export function GovernanceLinksTable({
   links,
   campaigns,
+  search,
+  filterState,
+  onSearchChange,
+  onFilterChange,
   onSelect,
   onUpdate,
   onRemove,
@@ -70,8 +80,6 @@ export function GovernanceLinksTable({
 }: GovernanceLinksTableProps) {
   const [cookies] = useCookies(["token"]);
   const token = cookies.token as string;
-  const [search, setSearch] = useState("");
-  const [filterState, setFilterState] = useState<LinkState | "all">("all");
   const [pendingDelete, setPendingDelete] = useState<GovernanceLink | null>(
     null,
   );
@@ -81,19 +89,10 @@ export function GovernanceLinksTable({
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
 
-  const filtered = links.filter((l) => {
-    if (filterState !== "all" && l.state !== filterState) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      if (
-        !l.name.toLowerCase().includes(q) &&
-        !l.short.toLowerCase().includes(q)
-      )
-        return false;
-    }
-    return true;
-  });
+  // links is already the server-filtered page — use directly
+  const filtered = links;
 
   useEffect(() => {
     setSelectedIds((prev) => {
@@ -285,19 +284,52 @@ export function GovernanceLinksTable({
   return (
     <div className="rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden bg-white dark:bg-neutral-900">
       {/* Table toolbar */}
-      <div className="px-5 py-4 border-b border-neutral-200 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-semibold text-[15px] text-neutral-900 dark:text-white">
-          Governed Links
-        </h2>
+      <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-neutral-200 dark:border-white/[0.06] flex flex-col gap-3">
+        {/* Row 1: title + search */}
+        <div className="flex items-center gap-3">
+          <h2 className="font-semibold text-[15px] text-neutral-900 dark:text-white shrink-0">
+            Governed Links
+          </h2>
+          <div className="relative ml-auto w-full max-w-[200px] sm:max-w-[220px]">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none">
+              ⌕
+            </span>
+            <input
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search links…"
+              className="pl-7 pr-3 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-violet-500 transition-colors w-full"
+            />
+          </div>
+        </div>
+
+        {/* Row 2: state filters — horizontally scrollable on small screens */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hidden pb-0.5">
+          {FILTER_STATES.map((s) => (
+            <button
+              key={s}
+              onClick={() => onFilterChange(s)}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors shrink-0 ${
+                filterState === s
+                  ? "bg-violet-500/15 border-violet-500/30 text-violet-400"
+                  : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-500"
+              }`}
+            >
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Row 3: bulk actions — only when links are selected */}
         {selectedCount > 0 && (
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-violet-300/60 dark:border-violet-500/35 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1.5">
-            <span className="text-xs font-medium text-violet-700 dark:text-violet-300">
+            <span className="text-xs font-medium text-violet-700 dark:text-violet-300 shrink-0">
               {selectedCount} selected
             </span>
             <select
               value={bulkCampaignId}
               onChange={(e) => setBulkCampaignId(e.target.value)}
-              className="px-2 py-1 text-xs rounded-md border border-violet-200 dark:border-violet-500/35 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200"
+              className="flex-1 min-w-0 px-2 py-1 text-xs rounded-md border border-violet-200 dark:border-violet-500/35 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200"
             >
               <option value="">Assign campaign…</option>
               <option value="none">Unassign campaign</option>
@@ -310,52 +342,24 @@ export function GovernanceLinksTable({
             <button
               onClick={handleBulkAssignCampaign}
               disabled={isBulkAssigning || !bulkCampaignId}
-              className="px-2.5 py-1 text-xs rounded-md border border-violet-300 dark:border-violet-500/45 text-violet-700 dark:text-violet-200 hover:bg-violet-100 dark:hover:bg-violet-500/20 disabled:opacity-60"
+              className="shrink-0 px-2.5 py-1 text-xs rounded-md border border-violet-300 dark:border-violet-500/45 text-violet-700 dark:text-violet-200 hover:bg-violet-100 dark:hover:bg-violet-500/20 disabled:opacity-60"
             >
               {isBulkAssigning ? "Applying..." : "Apply"}
             </button>
             <button
               onClick={() => setBulkDeleteOpen(true)}
               disabled={isBulkDeleting}
-              className="px-2.5 py-1 text-xs rounded-md border border-red-300 dark:border-red-500/45 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/20 disabled:opacity-60"
+              className="shrink-0 px-2.5 py-1 text-xs rounded-md border border-red-300 dark:border-red-500/45 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/20 disabled:opacity-60"
             >
               Delete selected
             </button>
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-2 ml-auto">
-          {/* Search */}
-          <div className="relative">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none">
-              ⌕
-            </span>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search links…"
-              className="pl-7 pr-3 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-violet-500 transition-colors w-48"
-            />
-          </div>
-          {/* State filters */}
-          {FILTER_STATES.map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilterState(s)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                filterState === s
-                  ? "bg-violet-500/15 border-violet-500/30 text-violet-400"
-                  : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-500"
-              }`}
-            >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-0 lg:min-w-[1160px] xl:min-w-[1360px]">
+        <table className="w-full min-w-0 md:min-w-[860px] lg:min-w-[1160px] xl:min-w-[1360px]">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-white/[0.04]">
               <th className="px-5 py-3 text-left">
@@ -370,7 +374,7 @@ export function GovernanceLinksTable({
               {GOVERNANCE_TABLE_COLUMNS.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${column.className ?? ""}`}
+                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${column.key === "actions" ? "w-0 p-0" : ""} ${column.className ?? ""}`}
                 >
                   {column.label}
                 </th>
@@ -382,13 +386,10 @@ export function GovernanceLinksTable({
               <tr
                 key={link.id}
                 onClick={() => onSelect(link)}
-                className={`gov-link-row border-b border-neutral-50 dark:border-white/[0.025] last:border-0 cursor-pointer group ${selectedIds.has(link.id) ? "bg-violet-500/[0.08]" : ""}`}
+                className={`gov-link-row border-b border-neutral-50 dark:border-white/[0.025] last:border-0 cursor-pointer group ${selectedIds.has(link.id) ? "bg-violet-500/[0.08]" : ""} ${link.linkCampaignColor ? "gov-link-row--accented" : ""}`}
                 style={{
-                  background: link.linkCampaignColor
-                    ? `${link.linkCampaignColor}12`
-                    : undefined,
                   ["--gov-row-accent" as string]:
-                    link.linkCampaignColor ?? "#c0c0c0",
+                    link.linkCampaignColor ?? "transparent",
                 }}
               >
                 <td
@@ -405,8 +406,28 @@ export function GovernanceLinksTable({
                 </td>
                 {/* Name + short */}
                 <td className="px-5 py-3.5">
-                  <div className="font-medium text-[13.5px] text-neutral-900 dark:text-neutral-100">
-                    {link.name}
+                  <div className="flex items-center gap-2">
+                    <div className="shrink-0">
+                      {faviconErrors.has(link.lookup_code) ? (
+                        <div className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center">
+                          <TbWorld className="w-3 h-3 text-neutral-500 dark:text-neutral-400" />
+                        </div>
+                      ) : (
+                        <img
+                          alt={extractDomain(link.dest)}
+                          draggable={false}
+                          loading="lazy"
+                          width="20"
+                          height="20"
+                          className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600"
+                          src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(link.dest)}`}
+                          onError={() => setFaviconErrors((prev) => new Set(prev).add(link.lookup_code))}
+                        />
+                      )}
+                    </div>
+                    <div className="font-medium text-[13.5px] text-neutral-900 dark:text-neutral-100">
+                      {link.name}
+                    </div>
                   </div>
                   <div className="mt-0.5">
                     <span className="font-mono text-[11.5px] px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-400">
@@ -437,6 +458,42 @@ export function GovernanceLinksTable({
                         {link.campaign}
                       </span>
                     ) : null}
+
+                    {/* Mobile quick actions */}
+                    <div
+                      className="flex items-center gap-2 pt-1"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        className="flex-1 text-[11.5px] font-medium py-1.5 px-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                        onClick={() => onSelect(link)}
+                      >
+                        ✎ Manage
+                      </button>
+                      <button
+                        className={`flex-1 text-[11.5px] font-medium py-1.5 px-3 rounded-lg border transition-colors ${
+                          link.state === "paused"
+                            ? "border-green-200 dark:border-green-700/50 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                            : "border-amber-200 dark:border-amber-700/50 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+                        }`}
+                        onClick={(e) =>
+                          handleQuickTransition(
+                            e,
+                            link,
+                            link.state === "paused" ? "active" : "paused",
+                          )
+                        }
+                      >
+                        {link.state === "paused" ? "▶ Resume" : "⏸ Pause"}
+                      </button>
+                      <button
+                        title="Delete link"
+                        className="w-8 h-8 shrink-0 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 hover:border-red-200 dark:hover:border-red-700/50 transition-colors flex items-center justify-center text-sm"
+                        onClick={(e) => handleDeleteLink(e, link)}
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </div>
                 </td>
 
@@ -478,9 +535,9 @@ export function GovernanceLinksTable({
 
                 {/* Routing rules count */}
                 <td className="px-5 py-3.5 hidden lg:table-cell">
-                  {link.rules.length > 0 ? (
+                  {link.rulesCount > 0 ? (
                     <span className="text-xs font-mono text-violet-400">
-                      {link.rules.length} rule{link.rules.length > 1 ? "s" : ""}
+                      {link.rulesCount} rule{link.rulesCount > 1 ? "s" : ""}
                     </span>
                   ) : (
                     <span className="text-xs text-neutral-400">—</span>
@@ -498,10 +555,10 @@ export function GovernanceLinksTable({
                   )}
                 </td>
 
-                {/* Row actions */}
-                <td className="px-5 py-3.5 hidden md:table-cell">
+                {/* Row actions — zero-width sticky cell; buttons float over the row on hover */}
+                <td className="w-0 p-0 hidden md:table-cell sticky right-0 relative">
                   <div
-                    className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pr-3 pl-10 py-3 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-l from-white dark:from-neutral-900 via-white/90 dark:via-neutral-900/90 to-transparent pointer-events-none group-hover:pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <IconButton title="Edit" onClick={() => onSelect(link)}>
@@ -561,7 +618,7 @@ export function GovernanceLinksTable({
         title="Delete Link"
         description={
           pendingDelete
-            ? `Delete \"${pendingDelete.name}\"? This action cannot be undone.`
+            ? `Delete "${pendingDelete.name}"? This action cannot be undone.`
             : undefined
         }
         confirmLabel="Delete Link"

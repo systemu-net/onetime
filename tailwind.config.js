@@ -37,8 +37,8 @@ export default {
         },
 
         ".scrollbar-hidden": {
-          "scrollbar-width": "none" /* Firefox */,
-          "-ms-overflow-style": "none" /* IE and Edge */,
+          "scrollbar-width": "none",
+          "-ms-overflow-style": "none",
         },
 
         /* Mobile slider utilities */

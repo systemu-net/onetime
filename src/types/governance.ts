@@ -2,14 +2,24 @@
 
 export type LinkState = "active" | "paused" | "expired" | "draft" | "archived";
 
-export type RuleType = "geo" | "device" | "time" | "split";
+export type RuleType = "geo" | "device" | "time_window" | "referrer" | "percentage";
 
 export interface RoutingRule {
   id: number;
   type: RuleType;
+  conditions: Record<string, unknown>;
   dest: string;
   desc: string;
   weight?: number;
+  priority: number;
+}
+
+export interface CreateRoutingRulePayload {
+  ruleType: RuleType;
+  destinationUrl: string;
+  conditions: Record<string, unknown>;
+  weight?: number;
+  priority?: number;
 }
 
 export interface AuditLogEntry {
@@ -39,7 +49,8 @@ export interface GovernanceLink {
   linkCampaignId: number | null;
   linkCampaignColor: string | null;
   qrImageUrl: string | null;
-  /** Routing rules – populated lazily on drawer open */
+  /** Count from index response; full list populated lazily on drawer open */
+  rulesCount: number;
   rules: RoutingRule[];
 }
 

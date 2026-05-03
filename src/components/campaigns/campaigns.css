@@ -1647,6 +1647,84 @@ html:not(.dark) .gov-date-field::after {
     color-mix(in srgb, var(--cc-accent, #7c3aed) 35%, transparent);
 }
 
+/* ── Pinned card — elevated with campaign accent, no yellow ── */
+.cc-campaign-card--pinned {
+  border-color: color-mix(in srgb, var(--cc-accent, #7c3aed) 45%, rgba(115, 115, 130, 0.25));
+  box-shadow:
+    0 8px 28px -4px color-mix(in srgb, var(--cc-accent, #7c3aed) 18%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--cc-accent, #7c3aed) 18%, transparent) inset;
+}
+.cc-campaign-card--pinned::before {
+  background: var(--cc-accent, #7c3aed);
+  opacity: 1;
+  width: 4px;
+}
+
+/* ── Pinned inline chip (sits in .cc-badges row) ── */
+.cc-pin-inline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px 2px 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--cc-accent, #7c3aed) 14%, rgba(17, 17, 24, 0.85));
+  border: 1px solid color-mix(in srgb, var(--cc-accent, #7c3aed) 38%, transparent);
+  color: color-mix(in srgb, var(--cc-accent, #7c3aed) 80%, white 20%);
+}
+
+/* ── Pin button ── */
+.cc-pin-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  margin-top: 1px;
+}
+.cc-campaign-card:hover .cc-pin-btn,
+.cc-pin-btn--active {
+  opacity: 1;
+}
+.cc-pin-btn:hover {
+  background: rgba(250, 204, 21, 0.12);
+  border-color: rgba(250, 204, 21, 0.3);
+}
+.cc-pin-btn--active {
+  filter: saturate(1.2);
+}
+
+/* ── Pinned / unpinned divider ── */
+.cc-pin-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 2px;
+  color: rgba(115, 115, 130, 0.4);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cc-pin-divider::before,
+.cc-pin-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(115, 115, 130, 0.12);
+}
+
 .cc-header {
   padding: 16px 18px 14px;
   display: flex;
@@ -1885,6 +1963,21 @@ html:not(.dark) .gov-date-field::after {
 }
 .cc-btn-green:hover {
   background: rgba(16, 185, 129, 0.2);
+}
+.cc-btn-danger {
+  background: transparent;
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
+  padding: 3px 7px;
+}
+.cc-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+.cc-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ─── Reference stats cards (5-col) ─────────────────────────────────────── */
@@ -2141,18 +2234,28 @@ html:not(.dark) .gov-date-field::after {
 }
 
 /* ─── Toolbar ────────────────────────────────────────────────────────────── */
-.cc-toolbar {
+.cc-toolbar-stack {
   display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 14px;
 }
-.cc-toolbar-right {
-  margin-left: auto;
+.cc-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.cc-filter-scroll {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  min-width: 0;
+}
+.cc-filter-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .cc-search-wrap {
@@ -2229,6 +2332,17 @@ html:not(.dark) .cc-panel-card {
 html:not(.dark) .cc-stat-card::before,
 html:not(.dark) .cc-campaign-card::before {
   opacity: 1;
+}
+html:not(.dark) .cc-campaign-card--pinned {
+  border-color: color-mix(in srgb, var(--cc-accent, #7c3aed) 40%, #d4d4d8 60%);
+  box-shadow:
+    0 8px 28px -4px color-mix(in srgb, var(--cc-accent, #7c3aed) 12%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--cc-accent, #7c3aed) 14%, transparent) inset;
+}
+html:not(.dark) .cc-pin-inline-badge {
+  background: color-mix(in srgb, var(--cc-accent, #7c3aed) 10%, rgba(255, 255, 255, 0.95));
+  border-color: color-mix(in srgb, var(--cc-accent, #7c3aed) 30%, #e4e4ec);
+  color: color-mix(in srgb, var(--cc-accent, #7c3aed) 75%, #18181b 25%);
 }
 html:not(.dark) .cc-campaign-card:hover {
   border-color: color-mix(in srgb, var(--cc-accent, #7c3aed) 45%, #d4d4d8 55%);
@@ -2315,6 +2429,21 @@ html:not(.dark) .cc-activity-item + .cc-activity-item {
 }
 html:not(.dark) .cc-mini-link {
   border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+html:not(.dark) .cc-mini-link-rank {
+  color: #a1a1aa;
+}
+html:not(.dark) .cc-mini-link-button:hover {
+  background: rgba(124, 58, 237, 0.06);
+  border-radius: 8px;
+}
+html:not(.dark) .cc-mini-link-button:hover .cc-mini-link-name,
+html:not(.dark) .cc-mini-link-button:focus-visible .cc-mini-link-name {
+  color: #18181b;
+}
+html:not(.dark) .cc-mini-link-button:hover .cc-mini-link-clicks,
+html:not(.dark) .cc-mini-link-button:focus-visible .cc-mini-link-clicks {
+  color: #52525b;
 }
 html:not(.dark) .cc-check-box {
   background: #fafafa;

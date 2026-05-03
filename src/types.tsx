@@ -159,6 +159,7 @@ export type LinkAnalytics = {
     operating_systems: OSStats[];
     daily_clicks: DailyClickStats[];
     recent_clicks: RecentClick[];
+    referrer_sources: { source: string; clicks: number }[];
 };
 
 export type Link = {

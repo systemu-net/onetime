@@ -1,24 +1,42 @@
 import type {
   AuditLogEntry,
   CreateGovernedLinkPayload,
+  CreateRoutingRulePayload,
   GovernanceLink,
   LinkState,
   RoutingRule,
   RuleType,
 } from "../types/governance";
+import type { LinkStats, PaginationMeta } from "../types/pagination";
 import { API_URL, SHORT_URL } from "./config";
+
+export interface GovernanceLinksPage {
+  links: GovernanceLink[];
+  pagination: PaginationMeta;
+  stats: LinkStats;
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function generateRuleDesc(rule: Record<string, unknown>): string {
   const rt = rule.rule_type as string;
   const c = (rule.conditions as Record<string, unknown>) ?? {};
-  if (rt === "geo")
-    return `Geo: ${[c.country_code, c.region, c.city].filter(Boolean).join(", ")} → redirect`;
-  if (rt === "device") return `Device: ${c.device_type ?? "unknown"} users`;
-  if (rt === "time")
-    return `Time window: ${c.start_time ?? "—"} – ${c.end_time ?? "—"}`;
-  if (rt === "split") return `A/B split — ${c.weight ?? 50}% of traffic`;
+  if (rt === "geo") {
+    const countries = (c.countries as string[]) ?? [];
+    return countries.length
+      ? `Geo: visitors from ${countries.join(", ")}`
+      : "Geo: (no countries set)";
+  }
+  if (rt === "device") {
+    const types = (c.device_types as string[]) ?? [];
+    return types.length ? `Device: ${types.join(", ")} users` : "Device: (none)";
+  }
+  if (rt === "time_window")
+    return `Time window: ${c.start_time ?? "—"} – ${c.end_time ?? "—"}${c.timezone ? ` (${c.timezone})` : ""}`;
+  if (rt === "referrer")
+    return `Referrer matches: ${c.referrer_pattern ?? "—"}`;
+  if (rt === "percentage")
+    return `A/B split — ${(rule.weight as number) ?? c.weight ?? 50}% of traffic`;
   return rt;
 }
 
@@ -27,26 +45,15 @@ function mapRule(raw: Record<string, unknown>): RoutingRule {
   return {
     id: raw.id as number,
     type: (raw.rule_type as RuleType) ?? "geo",
+    conditions: c,
     dest: (raw.destination_url as string) ?? "",
     desc: generateRuleDesc(raw),
-    weight: c.weight as number | undefined,
+    weight: (raw.weight as number | undefined) ?? (c.weight as number | undefined),
+    priority: (raw.priority as number) ?? 0,
   };
 }
 
 function mapAuditLog(raw: Record<string, unknown>): AuditLogEntry {
-  const ACTION_META: Record<string, { label: string; color: string }> = {
-    state_change: { label: "State changed", color: "#7c3aed" },
-    destination_update: { label: "Destination updated", color: "#3b82f6" },
-    rule_added: { label: "Routing rule added", color: "#10b981" },
-    rule_updated: { label: "Routing rule updated", color: "#22c55e" },
-    rule_removed: { label: "Routing rule removed", color: "#f59e0b" },
-    campaign_assigned: { label: "Campaign changed", color: "#3b82f6" },
-    campaign_changed: { label: "Campaign changed", color: "#3b82f6" },
-    password_toggled: { label: "Password toggled", color: "#ef4444" },
-    cap_reached: { label: "Click cap reached", color: "#ef4444" },
-    link_created: { label: "Link created", color: "#10b981" },
-  };
-
   const action = raw.action as string;
   const meta = ACTION_META[action] ?? {
     label: action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -102,6 +109,19 @@ function mapAuditLog(raw: Record<string, unknown>): AuditLogEntry {
   };
 }
 
+const ACTION_META: Record<string, { label: string; color: string }> = {
+  state_change: { label: "State changed", color: "#7c3aed" },
+  destination_update: { label: "Destination updated", color: "#3b82f6" },
+  rule_added: { label: "Routing rule added", color: "#10b981" },
+  rule_updated: { label: "Routing rule updated", color: "#22c55e" },
+  rule_removed: { label: "Routing rule removed", color: "#f59e0b" },
+  campaign_assigned: { label: "Campaign changed", color: "#3b82f6" },
+  campaign_changed: { label: "Campaign changed", color: "#3b82f6" },
+  password_toggled: { label: "Password toggled", color: "#ef4444" },
+  cap_reached: { label: "Click cap reached", color: "#ef4444" },
+  link_created: { label: "Link created", color: "#10b981" },
+};
+
 function mapLink(raw: Record<string, unknown>): GovernanceLink {
   return {
     id: raw.lookup_code as string,
@@ -121,7 +141,20 @@ function mapLink(raw: Record<string, unknown>): GovernanceLink {
     linkCampaignId: (raw.link_campaign_id as number | null) ?? null,
     linkCampaignColor: null,
     qrImageUrl: null,
+    rulesCount: (raw.routing_rules_count as number) ?? 0,
     rules: [],
+  };
+}
+
+function buildRoutingRuleBody(payload: Partial<CreateRoutingRulePayload>) {
+  return {
+    routing_rule: {
+      rule_type: payload.ruleType,
+      destination_url: payload.destinationUrl,
+      conditions: payload.conditions,
+      weight: payload.weight,
+      priority: payload.priority ?? 0,
+    },
   };
 }
 
@@ -163,13 +196,55 @@ async function req<T>(
 
 export async function fetchGovernanceLinks(
   jwtToken: string,
-): Promise<GovernanceLink[]> {
-  const data = await req<{ links: Record<string, unknown>[] }>(
-    jwtToken,
-    "GET",
-    "/api/v1/links",
-  );
-  return (data.links ?? []).map(mapLink);
+  opts: { page?: number; search?: string; state?: string; sortBy?: string; order?: string } = {},
+): Promise<GovernanceLinksPage> {
+  const params = new URLSearchParams();
+  if (opts.page && opts.page > 1) params.set("page", String(opts.page));
+  if (opts.search)                params.set("search", opts.search);
+  if (opts.state && opts.state !== "all") params.set("state", opts.state);
+  if (opts.sortBy)                params.set("sort_by", opts.sortBy);
+  if (opts.order)                 params.set("order", opts.order);
+
+  const qs = params.toString();
+  const data = await req<{
+    links: Record<string, unknown>[];
+    pagination: Record<string, unknown>;
+    stats: Record<string, unknown>;
+  }>(jwtToken, "GET", `/api/v1/links${qs ? `?${qs}` : ""}`);
+
+  return {
+    links: (data.links ?? []).map(mapLink),
+    pagination: {
+      count:  (data.pagination?.count  as number) ?? 0,
+      page:   (data.pagination?.page   as number) ?? 1,
+      limit:  (data.pagination?.limit  as number) ?? 25,
+      pages:  (data.pagination?.pages  as number) ?? 1,
+      next:   (data.pagination?.next   as number | null) ?? null,
+      prev:   (data.pagination?.prev   as number | null) ?? null,
+    },
+    stats: {
+      total:       (data.stats?.total        as number) ?? 0,
+      active:      (data.stats?.active       as number) ?? 0,
+      paused:      (data.stats?.paused       as number) ?? 0,
+      totalClicks: (data.stats?.total_clicks as number) ?? 0,
+    },
+  };
+}
+
+export async function fetchGovernanceLinkByCode(
+  jwtToken: string,
+  lookupCode: string,
+): Promise<GovernanceLink | null> {
+  try {
+    const data = await req<{ link: Record<string, unknown> }>(
+      jwtToken,
+      "GET",
+      `/api/v1/links/${lookupCode}`,
+    );
+    return mapLink(data.link ?? {});
+  } catch {
+    return null;
+  }
 }
 
 export async function createGovernedLink(
@@ -361,6 +436,35 @@ export async function deleteRoutingRule(
     "DELETE",
     `/api/v1/links/${lookupCode}/routing_rules/${ruleId}`,
   );
+}
+
+export async function createRoutingRule(
+  jwtToken: string,
+  lookupCode: string,
+  payload: CreateRoutingRulePayload,
+): Promise<RoutingRule> {
+  const data = await req<Record<string, unknown>>(
+    jwtToken,
+    "POST",
+    `/api/v1/links/${lookupCode}/routing_rules`,
+    buildRoutingRuleBody(payload),
+  );
+  return mapRule(data);
+}
+
+export async function updateRoutingRule(
+  jwtToken: string,
+  lookupCode: string,
+  ruleId: number,
+  payload: Partial<CreateRoutingRulePayload>,
+): Promise<RoutingRule> {
+  const data = await req<Record<string, unknown>>(
+    jwtToken,
+    "PATCH",
+    `/api/v1/links/${lookupCode}/routing_rules/${ruleId}`,
+    buildRoutingRuleBody(payload),
+  );
+  return mapRule(data);
 }
 
 export async function deleteGovernedLink(

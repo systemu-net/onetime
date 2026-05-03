@@ -1,11 +1,13 @@
 import { useNotification } from "@/Notifications";
 import { fetchCampaigns } from "@/apis/campaigns";
 import {
-    createGovernedLink,
-    fetchGovernanceLinks,
-    pauseAllGovernedLinks,
+  createGovernedLink,
+  fetchGovernanceLinkByCode,
+  fetchGovernanceLinks,
+  pauseAllGovernedLinks,
 } from "@/apis/governance";
 import { getQrCodes } from "@/apis/qr_codes";
+import { Pagination } from "@/components/elements/Pagination";
 import { Heading } from "@/components/elements/heading";
 import { GovernanceDrawer } from "@/components/governance/GovernanceDrawer";
 import { GovernanceLinksTable } from "@/components/governance/GovernanceLinksTable";
@@ -16,15 +18,23 @@ import { GOVERNANCE_ROUTE } from "@/routes";
 import type { QrCode } from "@/types";
 import type { Campaign } from "@/types/campaigns";
 import type {
-    CreateGovernedLinkPayload,
-    GovernanceLink,
+  CreateGovernedLinkPayload,
+  GovernanceLink,
+  LinkState,
 } from "@/types/governance";
-import { useCallback, useEffect, useState } from "react";
+import type { LinkStats, PaginationMeta } from "@/types/pagination";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Import governance-specific design tokens (badges, rule pills, etc.)
 import "@/components/governance/governance.css";
+
+const DEFAULT_PAGINATION: PaginationMeta = {
+  count: 0, page: 1, limit: 25, pages: 1, next: null, prev: null,
+};
+const DEFAULT_STATS: LinkStats = {
+  total: 0, active: 0, paused: 0, totalClicks: 0,
+};
 
 export default function GovernancePage() {
   const [cookies] = useCookies(["token"]);
@@ -33,63 +43,30 @@ export default function GovernancePage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // ── Data state ──────────────────────────────────────────────────────────────
   const [links, setLinks] = useState<GovernanceLink[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [pagination, setPagination] = useState<PaginationMeta>(DEFAULT_PAGINATION);
+  const [stats, setStats] = useState<LinkStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<GovernanceLink | null>(null);
+
+  // ── Filter / page state (lifted from table) ─────────────────────────────────
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filterState, setFilterState] = useState<LinkState | "all">("all");
+  const [page, setPage] = useState(1);
+
+  // ── Modal state ─────────────────────────────────────────────────────────────
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isPausingAll, setIsPausingAll] = useState(false);
 
-  const loadLinks = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const [items, campaignList, qrCodes] = await Promise.all([
-        fetchGovernanceLinks(token),
-        fetchCampaigns(token).catch(() => []),
-        getQrCodes(token).catch(() => []),
-      ]);
-      const campaignMap = new Map(
-        campaignList.map((c) => [c.id, { name: c.name, color: c.accentColor }]),
-      );
-      const qrMap = new Map(
-        (qrCodes as QrCode[])
-          .filter((qr) => qr?.link?.lookup_code)
-          .map((qr) => [qr.link.lookup_code, qr.image_url]),
-      );
-      setCampaigns(campaignList);
-      const enriched = items.map((link) => {
-        const qrImageUrl = qrMap.get(link.lookup_code) ?? null;
-        if (link.linkCampaignId == null) {
-          return {
-            ...link,
-            qrImageUrl,
-          };
-        }
-        const meta = campaignMap.get(link.linkCampaignId);
-        if (!meta) {
-          return {
-            ...link,
-            qrImageUrl,
-          };
-        }
-        return {
-          ...link,
-          campaign: meta.name,
-          linkCampaignColor: meta.color ?? null,
-          qrImageUrl,
-        };
-      });
-      setLinks(enriched);
-    } catch (err) {
-      onToast(`Failed to load links: ${(err as Error).message}`, "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Campaigns and QR codes are loaded once; they don't paginate.
+  const campaignsRef = useRef<Campaign[]>([]);
+  const qrMapRef    = useRef<Map<string, string>>(new Map());
+  const campaignsLoaded = useRef(false);
 
-  // Wrap addNotification so child components can call a simpler API
   const onToast = useCallback(
     (msg: string, type: "success" | "info" | "error" | "warning" = "info") => {
       addNotification(msg, type);
@@ -97,59 +74,128 @@ export default function GovernancePage() {
     [addNotification],
   );
 
-  // Load all governed links on mount
+  // ── Debounce search → debouncedSearch, reset page ──────────────────────────
   useEffect(() => {
-    loadLinks();
-  }, [loadLinks]);
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  // Allow deep-linking from campaigns drawer: /governance?lookup=<lookup_code>
+  // Reset page when filter changes
+  useEffect(() => { setPage(1); }, [filterState]);
+
+  // ── Load campaigns + QR codes once ─────────────────────────────────────────
   useEffect(() => {
-    if (loading || links.length === 0) return;
+    if (!token || campaignsLoaded.current) return;
+    campaignsLoaded.current = true;
 
-    const query = new URLSearchParams(location.search);
+    Promise.all([
+      fetchCampaigns(token).catch(() => [] as Campaign[]),
+      getQrCodes(token).catch(() => []),
+    ]).then(([campaignList, qrCodes]) => {
+      campaignsRef.current = campaignList;
+      setCampaigns(campaignList);
+      qrMapRef.current = new Map(
+        (qrCodes as QrCode[])
+          .filter((qr) => qr?.link?.lookup_code)
+          .map((qr) => [qr.link.lookup_code, qr.image_url]),
+      );
+    });
+  }, [token]);
+
+  // ── Enrich raw links with campaign + QR data ────────────────────────────────
+  const enrich = useCallback((raw: GovernanceLink[]): GovernanceLink[] => {
+    const campaignMap = new Map(
+      campaignsRef.current.map((c) => [c.id, { name: c.name, color: c.accentColor }]),
+    );
+    return raw.map((link) => {
+      const qrImageUrl = qrMapRef.current.get(link.lookup_code) ?? null;
+      const meta = link.linkCampaignId != null
+        ? campaignMap.get(link.linkCampaignId)
+        : undefined;
+      return {
+        ...link,
+        qrImageUrl,
+        campaign:        meta?.name ?? link.campaign,
+        linkCampaignColor: meta?.color ?? link.linkCampaignColor ?? null,
+      };
+    });
+  }, []);
+
+  // ── Main data load — reruns on page / filter / debounced search ─────────────
+  const loadLinks = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const result = await fetchGovernanceLinks(token, {
+        page,
+        search:  debouncedSearch || undefined,
+        state:   filterState !== "all" ? filterState : undefined,
+      });
+      setLinks(enrich(result.links));
+      setPagination(result.pagination);
+      setStats(result.stats);
+    } catch (err) {
+      onToast(`Failed to load links: ${(err as Error).message}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [token, page, debouncedSearch, filterState, enrich, onToast]);
+
+  useEffect(() => { loadLinks(); }, [loadLinks]);
+
+  // ── Deep-link: /governance?lookup=<code> ────────────────────────────────────
+  useEffect(() => {
+    if (!token) return;
+    const query  = new URLSearchParams(location.search);
     const lookup = query.get("lookup") ?? query.get("lookup_code");
     if (!lookup) return;
 
-    const target = links.find((link) => link.lookup_code === lookup);
-    if (!target) return;
+    // Try current page first, fall back to a direct fetch.
+    const inPage = links.find((l) => l.lookup_code === lookup);
+    if (inPage) {
+      setSelected(inPage);
+      navigate(GOVERNANCE_ROUTE, { replace: true });
+      return;
+    }
 
-    setSelected(target);
-    navigate(GOVERNANCE_ROUTE, { replace: true });
-  }, [loading, links, location.search, navigate]);
+    fetchGovernanceLinkByCode(token, lookup).then((link) => {
+      if (!link) return;
+      setSelected(enrich([link])[0]);
+      navigate(GOVERNANCE_ROUTE, { replace: true });
+    });
+  // Only run when the URL search string changes — not on every links update.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, token]);
 
-  const updateLink = useCallback(
-    (id: string, patch: Partial<GovernanceLink>) => {
-      setLinks((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
-      setSelected((sel) => (sel?.id === id ? { ...sel, ...patch } : sel));
-    },
-    [],
-  );
-
-  const removeLink = useCallback((id: string) => {
-    setLinks((ls) => ls.filter((l) => l.id !== id));
-    setSelected((sel) => (sel?.id === id ? null : sel));
+  // ── Optimistic link updates (state transitions, field edits) ────────────────
+  const updateLink = useCallback((id: string, patch: Partial<GovernanceLink>) => {
+    setLinks((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+    setSelected((sel) => (sel?.id === id ? { ...sel, ...patch } : sel));
   }, []);
 
-  const stats = {
-    total: links.length,
-    active: links.filter((l) => l.state === "active").length,
-    paused: links.filter((l) => l.state === "paused").length,
-    totalClicks: links.reduce((s, l) => s + l.clicks, 0),
-  };
+  // After a delete, reload the page so count + pagination stay correct.
+  const removeLink = useCallback(
+    (id: string) => {
+      setSelected((sel) => (sel?.id === id ? null : sel));
+      loadLinks();
+    },
+    [loadLinks],
+  );
 
+  // ── Create ──────────────────────────────────────────────────────────────────
   const handleCreateGovernedLink = useCallback(
     async (payload: CreateGovernedLinkPayload) => {
-      if (!token) {
-        onToast("Missing auth token. Please log in again.", "error");
-        return;
-      }
-
+      if (!token) { onToast("Missing auth token.", "error"); return; }
       setIsCreating(true);
       try {
-        const created = await createGovernedLink(token, payload);
-        setLinks((current) => [created, ...current]);
+        await createGovernedLink(token, payload);
         setIsCreateOpen(false);
         onToast("Governed link created successfully.", "success");
+        // Reload page 1 so the new link (sorted desc) is immediately visible.
+        setPage(1);
       } catch (err) {
         onToast(`Create failed: ${(err as Error).message}`, "error");
       } finally {
@@ -159,27 +205,20 @@ export default function GovernancePage() {
     [token, onToast],
   );
 
+  // ── Pause all ───────────────────────────────────────────────────────────────
   const handlePauseAll = useCallback(async () => {
-    if (!token) {
-      onToast("Missing auth token. Please log in again.", "error");
-      return;
-    }
-
+    if (!token) { onToast("Missing auth token.", "error"); return; }
     setIsPausingAll(true);
     try {
-      const { pausedCount, pausedLookupCodes, message } =
-        await pauseAllGovernedLinks(
-          token,
-          "Bulk pause from Governance dashboard",
-        );
-
+      const { pausedCount, pausedLookupCodes, message } = await pauseAllGovernedLinks(
+        token,
+        "Bulk pause from Governance dashboard",
+      );
       if (pausedLookupCodes.length > 0) {
         const pausedSet = new Set(pausedLookupCodes);
         setLinks((current) =>
           current.map((link) =>
-            pausedSet.has(link.lookup_code)
-              ? { ...link, state: "paused" as const }
-              : link,
+            pausedSet.has(link.lookup_code) ? { ...link, state: "paused" as const } : link,
           ),
         );
         setSelected((current) =>
@@ -188,7 +227,6 @@ export default function GovernancePage() {
             : current,
         );
       }
-
       onToast(message ?? `Paused ${pausedCount} governed links.`, "success");
     } catch (err) {
       onToast(`Pause all failed: ${(err as Error).message}`, "error");
@@ -225,7 +263,6 @@ export default function GovernancePage() {
           </div>
         </div>
 
-        {/* Loading state */}
         {loading && (
           <div className="flex items-center justify-center py-16 text-sm text-neutral-400">
             <span className="animate-pulse">Loading governed links…</span>
@@ -234,23 +271,31 @@ export default function GovernancePage() {
 
         {!loading && (
           <div className="flex flex-col gap-6">
-            {/* Stats */}
-            <GovernanceStatsGrid {...stats} />
+            <GovernanceStatsGrid
+              total={stats.total}
+              active={stats.active}
+              paused={stats.paused}
+              totalClicks={stats.totalClicks}
+            />
 
-            {/* Table */}
             <GovernanceLinksTable
               links={links}
               campaigns={campaigns}
+              search={search}
+              filterState={filterState}
+              onSearchChange={setSearch}
+              onFilterChange={setFilterState}
               onSelect={setSelected}
               onUpdate={updateLink}
               onRemove={removeLink}
               onToast={onToast}
             />
+
+            <Pagination meta={pagination} onChange={setPage} />
           </div>
         )}
       </div>
 
-      {/* Detail drawer (portal-like, fixed positioning) */}
       {selected && (
         <GovernanceDrawer
           link={selected}

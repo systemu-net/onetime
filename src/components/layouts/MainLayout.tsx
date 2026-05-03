@@ -17,7 +17,6 @@ import {
   LinkIcon,
   MegaphoneIcon,
   QrCodeIcon,
-  ShieldCheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
@@ -50,14 +49,11 @@ import ThemeToggle from "../ThemeToggle";
 
 const navigation = [
   { name: "Home", href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
-  { name: "Links", href: LINKS_ROUTE, icon: LinkIcon, current: false },
-  { name: "QR Codes", href: QR_ROUTE, icon: QrCodeIcon, current: false },
-  { name: "Pages", href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
   // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
   {
-    name: "Governance",
+    name: "Link Governance",
     href: GOVERNANCE_ROUTE,
-    icon: ShieldCheckIcon,
+    icon: LinkIcon,
     current: false,
   },
   {
@@ -66,6 +62,9 @@ const navigation = [
     icon: MegaphoneIcon,
     current: false,
   },
+  { name: "Pages", href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
+  { name: "Links", href: LINKS_ROUTE, icon: LinkIcon, current: false },
+  { name: "QR Codes", href: QR_ROUTE, icon: QrCodeIcon, current: false },
   { name: "Plans", href: PLANS_ROUTE, icon: IoCellular, current: false },
 ];
 

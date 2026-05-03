@@ -1,6 +1,7 @@
 import { fetchCampaigns } from "@/apis/campaigns";
 import {
   assignLinkToCampaign,
+  createRoutingRule,
   deleteGovernedLink,
   deleteRoutingRule,
   fetchAuditLog,
@@ -13,6 +14,7 @@ import {
 import type { Campaign } from "@/types/campaigns";
 import type {
   AuditLogEntry,
+  CreateRoutingRulePayload,
   GovernanceLink,
   LinkState,
   RoutingRule,
@@ -20,16 +22,19 @@ import type {
 import { STATE_CONFIG } from "@/types/governance";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { AddRuleModal } from "./AddRuleModal";
 import { AuditLogPanel } from "./AuditLogPanel";
 import { GovernanceBadge } from "./GovernanceBadge";
 import { GovernanceDeleteConfirmModal } from "./GovernanceDeleteConfirmModal";
+import { GovernanceLinkAnalyticsPanel } from "./GovernanceLinkAnalyticsPanel";
 import { RoutingRulesPanel } from "./RoutingRulesPanel";
 import { SchedulePanel } from "./SchedulePanel";
 
-type DrawerTab = "governance" | "routing" | "schedule" | "audit";
+type DrawerTab = "governance" | "routing" | "schedule" | "audit" | "analytics";
 
 const TABS: { id: DrawerTab; label: string; icon: string }[] = [
   { id: "governance", label: "Governance", icon: "🛡" },
+  { id: "analytics", label: "Analytics", icon: "📊" },
   { id: "routing", label: "Routing", icon: "⇄" },
   { id: "schedule", label: "Schedule", icon: "🗓" },
   { id: "audit", label: "Audit", icon: "🧾" },
@@ -228,6 +233,23 @@ export function GovernanceDrawer({
     }
   };
 
+  const [addRuleOpen, setAddRuleOpen] = useState(false);
+  const [addRuleSubmitting, setAddRuleSubmitting] = useState(false);
+
+  const handleAddRule = async (payload: CreateRoutingRulePayload) => {
+    setAddRuleSubmitting(true);
+    try {
+      const newRule = await createRoutingRule(token, link.lookup_code, payload);
+      setRules((rs) => [...rs, newRule]);
+      setAddRuleOpen(false);
+      onToast("Routing rule added", "success");
+    } catch (err) {
+      onToast((err as Error).message, "error");
+    } finally {
+      setAddRuleSubmitting(false);
+    }
+  };
+
   const handleSaveFallbacks = async () => {
     setSaving(true);
     try {
@@ -293,11 +315,19 @@ export function GovernanceDrawer({
       <GovernanceDeleteConfirmModal
         isOpen={isDeleteModalOpen}
         title="Delete Link"
-        description={`Delete \"${localLink.name}\"? This action cannot be undone.`}
+        description={`Delete "${localLink.name}"? This action cannot be undone.`}
         confirmLabel="Delete Link"
         isSubmitting={isDeleting}
         onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteLink}
+      />
+
+      <AddRuleModal
+        isOpen={addRuleOpen}
+        isSubmitting={addRuleSubmitting}
+        existingRuleCount={rules.length}
+        onClose={() => setAddRuleOpen(false)}
+        onSubmit={handleAddRule}
       />
 
       {/* Overlay */}
@@ -678,7 +708,7 @@ export function GovernanceDrawer({
               rules={rules}
               loading={rulesLoading}
               onDeleteRule={handleDeleteRule}
-              onAddRule={() => onToast("Rule builder coming soon", "info")}
+              onAddRule={() => setAddRuleOpen(true)}
             />
           )}
 
@@ -702,6 +732,15 @@ export function GovernanceDrawer({
               onExport={() => onToast("Audit log exported to CSV", "success")}
             />
           )}
+
+          {/* ── Analytics tab — always mounted to preserve state across tab switches ── */}
+          <div style={{ display: tab === "analytics" ? "block" : "none" }}>
+            <GovernanceLinkAnalyticsPanel
+              lookupCode={link.lookup_code}
+              token={token}
+              onToast={onToast}
+            />
+          </div>
         </div>
       </div>
     </>
