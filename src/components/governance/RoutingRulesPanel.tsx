@@ -13,7 +13,7 @@ export function RoutingRulesPanel({
   onDeleteRule,
   onAddRule,
 }: RoutingRulesPanelProps) {
-  const splitRule = rules.find((r) => r.type === "split");
+  const splitRule = rules.find((r) => r.type === "percentage");
   const splitWeight = splitRule?.weight ?? 50;
 
   return (
@@ -61,7 +61,7 @@ export function RoutingRulesPanel({
                 <div className="text-[11.5px] text-violet-400 font-mono mt-1 truncate">
                   → {r.dest.length > 48 ? r.dest.slice(0, 48) + "…" : r.dest}
                 </div>
-                {r.type === "split" && (
+                {r.type === "percentage" && (
                   <div className="flex items-center gap-2 mt-2">
                     <div className="flex-1 h-1 rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden">
                       <div
