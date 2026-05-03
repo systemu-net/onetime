@@ -210,7 +210,7 @@ const DashboardPage = () => {
         {/* ── Tools ─────────────────────────────────────────────────── */}
         <h2 className="dash-section-title">Tools</h2>
         <div className="dash-tools-grid">
-          {TOOLS.map((t, i) => (
+          {TOOLS.map((t) => (
             <Link
               key={t.href}
               to={t.href}
