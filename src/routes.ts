@@ -1,4 +1,3 @@
-export const PRICING_ROUTE = "/plans";
 export const FEATURES_ROUTE = "/features";
 export const RESOURCES_ROUTE = "/resources";
 export const REGISTER_ROUTE = "/register";
@@ -17,6 +16,9 @@ export const ANALYTICS_ROUTE = "/analytics";
 export const PLANS_ROUTE = "/plans";
 export const SETTINGS_ROUTE = "/settings";
 export const STATS_ROUTE = "/stats";
+
+export const GOVERNANCE_ROUTE = "/governance";
+export const CAMPAIGNS_ROUTE = "/governance/campaigns";
 
 // Legal routes
 export const TERMS_ROUTE = "/terms";

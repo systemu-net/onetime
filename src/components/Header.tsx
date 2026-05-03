@@ -6,7 +6,7 @@ import Logo from "../assets/thinly.svg";
 import {
   FEATURES_ROUTE,
   LOGIN_ROUTE,
-  PRICING_ROUTE,
+  PLANS_ROUTE,
   REGISTER_ROUTE,
   RESOURCES_ROUTE,
 } from "../routes";
@@ -62,10 +62,7 @@ const Header = () => {
                 </Link>
               </li>
               <li>
-                <Link
-                  to={PRICING_ROUTE}
-                  className="nav__link dark:text-zinc-100"
-                >
+                <Link to={PLANS_ROUTE} className="nav__link dark:text-zinc-100">
                   Plans
                 </Link>
               </li>
@@ -141,7 +138,7 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to={PRICING_ROUTE} className="nav__link">
+              <Link to={PLANS_ROUTE} className="nav__link">
                 Plans
               </Link>
             </li>

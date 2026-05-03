@@ -8,16 +8,14 @@ import {
   MenuItems,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/20/solid";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import {
   Bars3Icon,
   BellIcon,
   Cog6ToothIcon,
   HomeIcon,
   LinkIcon,
+  MegaphoneIcon,
   QrCodeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -29,7 +27,9 @@ import { Link, useLocation } from "react-router-dom";
 import { getCurrentUserApi, logoutApi } from "../../apis/authentication";
 import Logo from "../../assets/logo.svg";
 import {
+  CAMPAIGNS_ROUTE,
   DASHBOARD_ROUTE,
+  GOVERNANCE_ROUTE,
   LANDING_ROUTE,
   LINKS_ROUTE,
   PAGES_ROUTE,
@@ -49,15 +49,110 @@ import ThemeToggle from "../ThemeToggle";
 
 const navigation = [
   { name: "Home", href: DASHBOARD_ROUTE, icon: HomeIcon, current: true },
+  // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
+  {
+    name: "Link Governance",
+    href: GOVERNANCE_ROUTE,
+    icon: LinkIcon,
+    current: false,
+  },
+  {
+    name: "Campaigns",
+    href: CAMPAIGNS_ROUTE,
+    icon: MegaphoneIcon,
+    current: false,
+  },
+  { name: "Pages", href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
   { name: "Links", href: LINKS_ROUTE, icon: LinkIcon, current: false },
   { name: "QR Codes", href: QR_ROUTE, icon: QrCodeIcon, current: false },
-  { name: "Pages", href: PAGES_ROUTE, icon: MdPhoneIphone, current: false },
-  // { name: 'Analytics', href: ANALYTICS_ROUTE, icon: ChartBarIcon, current: false },
   { name: "Plans", href: PLANS_ROUTE, icon: IoCellular, current: false },
 ];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
+}
+
+function SidebarFooterActions({
+  user,
+  userLoading,
+  email,
+  onLogout,
+}: {
+  user: User | null;
+  userLoading: boolean;
+  email?: string;
+  onLogout: () => void;
+}) {
+  return (
+    <div className="mt-4 border-t border-gray-200 dark:border-zinc-700 pt-3">
+      <div className="flex items-center gap-2">
+        <Menu as="div" className="relative min-w-0 flex-1">
+          <MenuButton className="-m-1.5 flex w-full items-center gap-2 rounded-md p-1.5 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">
+            <span className="sr-only">Open user menu</span>
+            {userLoading ? (
+              <div className="size-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            ) : user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt="User avatar"
+                className="size-8 rounded-full bg-gray-50 object-cover"
+              />
+            ) : (
+              <div className="size-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm">
+                {email?.[0]?.toUpperCase() || "U"}
+              </div>
+            )}
+
+            <span className="min-w-0 flex-1 text-left">
+              <span className="block truncate text-sm font-semibold text-gray-900 dark:text-zinc-100">
+                {email || "Account"}
+              </span>
+              <span className="block text-[11px] text-gray-500 dark:text-zinc-400">
+                Account
+              </span>
+            </span>
+
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="size-5 shrink-0 text-gray-400"
+            />
+          </MenuButton>
+
+          <MenuItems
+            transition
+            className="absolute bottom-full left-0 z-20 mb-2 w-40 origin-bottom-left rounded-md bg-white dark:bg-zinc-900 py-2 shadow-lg ring-1 ring-gray-900/5 dark:ring-zinc-700 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+          >
+            <MenuItem key="Your profile">
+              <Link
+                to={PROFILE_ROUTE}
+                className="block px-3 py-1 text-sm/6 text-gray-900 dark:text-zinc-100 data-[focus]:bg-gray-50 dark:data-[focus]:bg-zinc-800 data-[focus]:outline-none"
+              >
+                Your profile
+              </Link>
+            </MenuItem>
+            <MenuItem key="Sign out">
+              <Link
+                to={LANDING_ROUTE}
+                className="block px-3 py-1 text-sm/6 text-gray-900 dark:text-zinc-100 data-[focus]:bg-gray-50 dark:data-[focus]:bg-zinc-800 data-[focus]:outline-none"
+                onClick={onLogout}
+              >
+                Sign out
+              </Link>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
+
+        <ThemeToggle />
+        <button
+          type="button"
+          className="p-2 text-gray-400 hover:text-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+        >
+          <span className="sr-only">View notifications</span>
+          <BellIcon aria-hidden="true" className="size-5" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 const MainLayout = ({ children }) => {
@@ -234,6 +329,12 @@ const MainLayout = ({ children }) => {
                     </li>
                   </ul>
                 </nav>
+                <SidebarFooterActions
+                  user={user}
+                  userLoading={userLoading}
+                  email={cookies.email}
+                  onLogout={handleLogout}
+                />
               </div>
             </DialogPanel>
           </div>
@@ -301,118 +402,29 @@ const MainLayout = ({ children }) => {
                 </li>
               </ul>
             </nav>
+            <SidebarFooterActions
+              user={user}
+              userLoading={userLoading}
+              email={cookies.email}
+              onLogout={handleLogout}
+            />
           </div>
         </div>
 
         <div className="lg:pl-72">
-          <div className="border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
-            <div className="flex h-16 items-center gap-x-4 bg-white dark:bg-zinc-950 shadow-sm sm:gap-x-6 sm:px-6 px-4 lg:shadow-none">
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="-m-2.5 p-2.5 text-gray-700 dark:text-white lg:hidden"
-              >
-                <span className="sr-only">Open sidebar</span>
-                <Bars3Icon aria-hidden="true" className="size-6" />
-              </button>
-              {/* Separator */}
-              <div
-                aria-hidden="true"
-                className="h-6 w-px bg-gray-200 lg:hidden"
-              />
-              <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-                <form
-                  action="#"
-                  method="GET"
-                  className="grid flex-1 grid-cols-1 items-center my-2"
-                >
-                  <input
-                    name="search"
-                    type="search"
-                    placeholder="Search"
-                    aria-label="Search"
-                    className="col-start-1 row-start-1 block size-full rounded-full border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:border-violet-500 dark:focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 dark:focus:ring-violet-500/30 outline-none transition-colors"
-                  />
-
-                  <MagnifyingGlassIcon
-                    aria-hidden="true"
-                    className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-gray-400 dark:text-gray-500"
-                  />
-                </form>
-                <div className="flex items-center gap-x-2 sm:gap-x-4 lg:gap-x-6">
-                  <ThemeToggle />
-                  <button
-                    type="button"
-                    className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon aria-hidden="true" className="size-6" />
-                  </button>
-                  {/* Separator */}
-                  <div
-                    aria-hidden="true"
-                    className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:bg-zinc-700"
-                  />
-                  {/* Profile dropdown */}
-                  <Menu as="div" className="relative">
-                    <MenuButton className="-m-1.5 flex items-center p-1.5">
-                      <span className="sr-only">Open user menu</span>
-                      {userLoading ? (
-                        <div className="size-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                      ) : user?.avatar_url ? (
-                        <img
-                          src={user.avatar_url}
-                          alt="User avatar"
-                          className="size-8 rounded-full bg-gray-50 object-cover"
-                        />
-                      ) : (
-                        <div className="size-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-semibold text-sm">
-                          {cookies.email?.[0]?.toUpperCase() || "U"}
-                        </div>
-                      )}
-                      <span className="hidden lg:flex lg:items-center">
-                        <span
-                          aria-hidden="true"
-                          className="ml-4 text-sm/6 font-semibold"
-                        >
-                          {cookies.email}
-                        </span>
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className="ml-2 size-5 text-gray-400"
-                        />
-                      </span>
-                    </MenuButton>
-                    <MenuItems
-                      transition
-                      className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white dark:bg-zinc-900 py-2 shadow-lg ring-1 ring-gray-900/5 dark:ring-zinc-700 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                    >
-                      <MenuItem key={`Your profile`}>
-                        <Link
-                          to={PROFILE_ROUTE}
-                          className="block px-3 py-1 text-sm/6 text-gray-900 dark:text-zinc-100 data-[focus]:bg-gray-50 dark:data-[focus]:bg-zinc-800 data-[focus]:outline-none"
-                        >
-                          Your profile
-                        </Link>
-                      </MenuItem>
-                      <MenuItem key={`Sign out`}>
-                        <Link
-                          to={LANDING_ROUTE}
-                          className="block px-3 py-1 text-sm/6 text-gray-900 dark:text-zinc-100 data-[focus]:bg-gray-50 dark:data-[focus]:bg-zinc-800 data-[focus]:outline-none"
-                          onClick={handleLogout}
-                        >
-                          Sign out
-                        </Link>
-                      </MenuItem>
-                    </MenuItems>
-                  </Menu>
-                </div>
-              </div>
-            </div>
-          </div>
           <main className="pt-6 flex flex-1 h-full overflow-x-hidden">
             <div className="flex-grow h-full min-w-0">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
+                <div className="mb-4 lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-gray-700 dark:text-zinc-100"
+                  >
+                    <Bars3Icon aria-hidden="true" className="size-5" />
+                    Menu
+                  </button>
+                </div>
                 {children}
               </div>
             </div>

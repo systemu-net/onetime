@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import {
   COOKIES_ROUTE,
   FEATURES_ROUTE,
-  PRICING_ROUTE,
+  PLANS_ROUTE,
   PRIVACY_ROUTE,
   TERMS_ROUTE,
-  USER_POLICY_ROUTE,
+  USER_POLICY_ROUTE
 } from "../routes";
 
 const Footer = () => {
@@ -41,7 +41,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to={PRICING_ROUTE}
+                  to={PLANS_ROUTE}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                 >
                   Plans
