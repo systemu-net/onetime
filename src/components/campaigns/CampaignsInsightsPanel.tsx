@@ -1,4 +1,6 @@
+import { GOVERNANCE_ROUTE } from "@/routes";
 import type { Campaign } from "@/types/campaigns";
+import { useNavigate } from "react-router-dom";
 
 interface CampaignsInsightsPanelProps {
   campaigns: Campaign[];
@@ -86,6 +88,8 @@ function Donut({
 export function CampaignsInsightsPanel({
   campaigns,
 }: CampaignsInsightsPanelProps) {
+  const navigate = useNavigate();
+
   // Flatten links across all campaigns, sorted by clicks descending
   const topLinks = campaigns
     .flatMap((campaign) =>
@@ -135,7 +139,18 @@ export function CampaignsInsightsPanel({
             <p style={{ fontSize: 12, color: "#a3a3b2" }}>No links yet.</p>
           ) : (
             topLinks.map((link, i) => (
-              <div key={link.id} className="cc-mini-link">
+              <button
+                key={link.id}
+                type="button"
+                className="cc-mini-link cc-mini-link-button"
+                onClick={() =>
+                  navigate(
+                    `${GOVERNANCE_ROUTE}?lookup=${encodeURIComponent(link.lookupCode)}`,
+                  )
+                }
+                aria-label={`Open governance details for ${link.title || link.lookupCode}`}
+                title="Open in Link Governance"
+              >
                 <div className="cc-mini-link-rank">{i + 1}</div>
                 <div
                   className="cc-mini-link-dot"
@@ -162,7 +177,7 @@ export function CampaignsInsightsPanel({
                     />
                   </div>
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>

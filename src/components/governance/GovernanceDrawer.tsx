@@ -28,11 +28,11 @@ import { SchedulePanel } from "./SchedulePanel";
 
 type DrawerTab = "governance" | "routing" | "schedule" | "audit";
 
-const TABS: { id: DrawerTab; label: string }[] = [
-  { id: "governance", label: "Governance" },
-  { id: "routing", label: "Routing" },
-  { id: "schedule", label: "Schedule" },
-  { id: "audit", label: "Audit" },
+const TABS: { id: DrawerTab; label: string; icon: string }[] = [
+  { id: "governance", label: "Governance", icon: "🛡" },
+  { id: "routing", label: "Routing", icon: "⇄" },
+  { id: "schedule", label: "Schedule", icon: "🗓" },
+  { id: "audit", label: "Audit", icon: "🧾" },
 ];
 
 interface GovernanceDrawerProps {
@@ -307,9 +307,9 @@ export function GovernanceDrawer({
       />
 
       {/* Drawer panel */}
-      <div className="gov-drawer-enter fixed right-0 top-0 bottom-0 z-50 w-full max-w-[680px] transform-gpu will-change-transform flex flex-col bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-white/[0.06] shadow-2xl">
+      <div className="gov-drawer-enter fixed right-0 top-0 bottom-0 z-50 h-[100dvh] w-full max-w-[680px] transform-gpu will-change-transform flex flex-col bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-white/[0.06] shadow-2xl">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-neutral-200 dark:border-white/[0.06] flex items-start justify-between gap-4 shrink-0">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-neutral-200 dark:border-white/[0.06] flex items-start justify-between gap-3 sm:gap-4 shrink-0">
           <div className="min-w-0">
             {editingName ? (
               <div className="gov-title-edit-row">
@@ -397,24 +397,24 @@ export function GovernanceDrawer({
           </button>
         </div>
 
-        <div className="px-6 py-2.5 border-b border-neutral-200 dark:border-white/[0.06] flex items-center justify-between gap-2">
+        <div className="px-4 sm:px-6 py-2.5 border-b border-neutral-200 dark:border-white/[0.06] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
           <button
             onClick={handleCopyShortUrl}
-            className={`gov-copy-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${copiedShortUrl ? "gov-copy-btn-burst" : ""}`}
+            className={`gov-copy-btn inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${copiedShortUrl ? "gov-copy-btn-burst" : ""}`}
           >
             {copiedShortUrl ? "Copied!" : "Copy Short URL"}
           </button>
           <button
             onClick={() => setIsDeleteModalOpen(true)}
             disabled={isDeleting}
-            className={`gov-delete-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${isDeleting ? "gov-delete-btn-burst" : ""} disabled:opacity-60`}
+            className={`gov-delete-btn inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${isDeleting ? "gov-delete-btn-burst" : ""} disabled:opacity-60`}
           >
             Delete Link
           </button>
         </div>
 
         {/* Tab strip */}
-        <div className="px-6 py-3 border-b border-neutral-200 dark:border-white/[0.06] shrink-0">
+        <div className="px-4 sm:px-6 py-3 border-b border-neutral-200 dark:border-white/[0.06] shrink-0">
           <div className="gov-tab-strip bg-neutral-100 dark:bg-neutral-800">
             {TABS.map((t) => (
               <button
@@ -425,15 +425,21 @@ export function GovernanceDrawer({
                     ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-600"
                     : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
                 }`}
+                aria-label={t.label}
+                title={t.label}
               >
-                {t.label}
+                <span className="sm:hidden" aria-hidden="true">
+                  {t.icon}
+                </span>
+                <span className="hidden sm:inline">{t.label}</span>
+                <span className="sr-only sm:hidden">{t.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 flex flex-col gap-4 sm:gap-5">
           {/* ── Governance tab ── */}
           {tab === "governance" && (
             <>
@@ -490,7 +496,7 @@ export function GovernanceDrawer({
                 }
               >
                 {editingDest ? (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       className="gov-field-input flex-1"
                       value={dest}
@@ -519,15 +525,15 @@ export function GovernanceDrawer({
               {/* Complementary QR code */}
               <SectionCard title="QR Code">
                 {localLink.qrImageUrl ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0">
                       <img
                         src={localLink.qrImageUrl}
                         alt={`${localLink.name} QR code`}
                         className="h-24 w-24 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white"
                         style={{ imageRendering: "crisp-edges" }}
                       />
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-neutral-400 font-mono">
                           Linked complementary QR
                         </p>
@@ -540,7 +546,7 @@ export function GovernanceDrawer({
                       href={localLink.qrImageUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs px-2.5 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                      className="text-xs px-2.5 py-1.5 rounded-md border border-neutral-300 dark:border-neutral-600 text-neutral-500 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors self-start sm:self-auto"
                     >
                       Open
                     </a>
@@ -605,7 +611,7 @@ export function GovernanceDrawer({
                   )
                 }
               >
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                   <select
                     disabled={assigningCampaign}
                     value={localLink.linkCampaignId ?? ""}
@@ -624,7 +630,7 @@ export function GovernanceDrawer({
                     ))}
                   </select>
                   {assigningCampaign && (
-                    <span className="text-xs text-neutral-400 shrink-0">
+                    <span className="text-xs text-neutral-400 shrink-0 self-start sm:self-auto">
                       Saving…
                     </span>
                   )}
@@ -714,7 +720,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden">
+    <div className="rounded-xl border border-neutral-200 dark:border-white/[0.06] bg-white dark:bg-neutral-900">
       <div className="px-4 py-2.5 border-b border-neutral-200 dark:border-white/[0.06] bg-neutral-50 dark:bg-neutral-800/40 flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-neutral-400 font-mono">
           {title}

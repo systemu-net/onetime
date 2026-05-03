@@ -1266,25 +1266,25 @@
   font-family: "DM Mono", monospace;
 }
 
-body:not(.dark) .gov-stat-card,
-body:not(.dark) .gov-campaign-card,
-body:not(.dark) .gov-panel,
-body:not(.dark) .gov-campaign-metrics div,
-body:not(.dark) .gov-links-list li,
-body:not(.dark) .gov-drawer-widget,
-body:not(.dark) .gov-kpi-box,
-body:not(.dark) .gov-timeline-card,
-body:not(.dark) .gov-modal {
+html:not(.dark) .gov-stat-card,
+html:not(.dark) .gov-campaign-card,
+html:not(.dark) .gov-panel,
+html:not(.dark) .gov-campaign-metrics div,
+html:not(.dark) .gov-links-list li,
+html:not(.dark) .gov-drawer-widget,
+html:not(.dark) .gov-kpi-box,
+html:not(.dark) .gov-timeline-card,
+html:not(.dark) .gov-modal {
   background: #ffffff;
   border-color: #e8e8ee;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
-body:not(.dark) .gov-campaign-insights {
+html:not(.dark) .gov-campaign-insights {
   gap: 16px;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-panel {
+html:not(.dark) .gov-campaign-insights .gov-panel {
   border-color: #ececf2;
   border-radius: 14px;
   padding: 15px 16px;
@@ -1292,89 +1292,89 @@ body:not(.dark) .gov-campaign-insights .gov-panel {
   box-shadow: 0 1px 1px rgba(15, 23, 42, 0.02);
 }
 
-body:not(.dark) .gov-campaign-insights .gov-panel h4 {
+html:not(.dark) .gov-campaign-insights .gov-panel h4 {
   margin-bottom: 2px;
   letter-spacing: 0.05em;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-links-list {
+html:not(.dark) .gov-campaign-insights .gov-links-list {
   gap: 10px;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-links-list li {
+html:not(.dark) .gov-campaign-insights .gov-links-list li {
   border-color: #f0f0f5;
   background: #fcfcfd;
   padding: 10px 11px;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-links-list li:hover {
+html:not(.dark) .gov-campaign-insights .gov-links-list li:hover {
   border-color: #e4e4ec;
   background: #fafafc;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-health-wrap {
+html:not(.dark) .gov-campaign-insights .gov-health-wrap {
   gap: 14px;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-health-legend {
+html:not(.dark) .gov-campaign-insights .gov-health-legend {
   gap: 7px;
 }
 
-body:not(.dark) .gov-campaign-insights .gov-activity-list {
+html:not(.dark) .gov-campaign-insights .gov-activity-list {
   gap: 8px;
   padding-left: 20px;
 }
 
-body:not(.dark) .gov-links-summary {
+html:not(.dark) .gov-links-summary {
   color: #71717a;
 }
 
-body:not(.dark) .gov-campaign-links-list {
+html:not(.dark) .gov-campaign-links-list {
   border-color: #e4e4ec;
   background: #fcfcfd;
 }
 
-body:not(.dark) .gov-campaign-link-row {
+html:not(.dark) .gov-campaign-link-row {
   border-bottom-color: #ececf2;
 }
 
-body:not(.dark) .gov-campaign-link-copy strong {
+html:not(.dark) .gov-campaign-link-copy strong {
   color: #18181b;
 }
 
-body:not(.dark) .gov-campaign-link-copy p {
+html:not(.dark) .gov-campaign-link-copy p {
   color: #7c3aed;
 }
 
-body:not(.dark) .gov-campaign-link-clicks {
+html:not(.dark) .gov-campaign-link-clicks {
   color: #71717a;
 }
 
-body:not(.dark) .gov-link-icon-btn {
+html:not(.dark) .gov-link-icon-btn {
   border-color: #d4d4d8;
   background: #ffffff;
   color: #52525b;
 }
 
-body:not(.dark) .gov-add-link-panel {
+html:not(.dark) .gov-add-link-panel {
   border-color: #e4e4ec;
   background: #fcfcfd;
 }
 
-body:not(.dark) .gov-add-link-panel label {
+html:not(.dark) .gov-add-link-panel label {
   color: #71717a;
 }
 
-body:not(.dark) .gov-campaign-card-selected {
+html:not(.dark) .gov-campaign-card-selected {
   border-color: rgba(124, 58, 237, 0.45);
   box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2) inset;
 }
 
-body:not(.dark) .gov-campaign-card::before {
+html:not(.dark) .gov-campaign-card::before {
   opacity: 0.9;
 }
 
-body:not(.dark) .gov-campaign-card::after {
+html:not(.dark) .gov-campaign-card::after {
   background: radial-gradient(
     120% 80% at 100% 0%,
     color-mix(in srgb, var(--gov-campaign-accent, #7c3aed) 10%, transparent 90%)
@@ -1383,7 +1383,7 @@ body:not(.dark) .gov-campaign-card::after {
   );
 }
 
-body:not(.dark) .gov-campaign-card-selected {
+html:not(.dark) .gov-campaign-card-selected {
   border-color: color-mix(
     in srgb,
     var(--gov-campaign-accent, #7c3aed) 50%,
@@ -1394,161 +1394,161 @@ body:not(.dark) .gov-campaign-card-selected {
     inset;
 }
 
-body:not(.dark) .gov-stat-label,
-body:not(.dark) .gov-stat-subtitle,
-body:not(.dark) .gov-campaign-description,
-body:not(.dark) .gov-campaign-metrics span,
-body:not(.dark) .gov-panel p,
-body:not(.dark) .gov-links-list p,
-body:not(.dark) .gov-drawer-meta,
-body:not(.dark) .gov-meta-grid dt,
-body:not(.dark) .gov-timeline-subtitle,
-body:not(.dark) .gov-timeline-item p,
-body:not(.dark) .gov-timeline-item span,
-body:not(.dark) .gov-ab-legend p,
-body:not(.dark) .gov-spark-labels,
-body:not(.dark) .gov-link-row-meta > span {
+html:not(.dark) .gov-stat-label,
+html:not(.dark) .gov-stat-subtitle,
+html:not(.dark) .gov-campaign-description,
+html:not(.dark) .gov-campaign-metrics span,
+html:not(.dark) .gov-panel p,
+html:not(.dark) .gov-links-list p,
+html:not(.dark) .gov-drawer-meta,
+html:not(.dark) .gov-meta-grid dt,
+html:not(.dark) .gov-timeline-subtitle,
+html:not(.dark) .gov-timeline-item p,
+html:not(.dark) .gov-timeline-item span,
+html:not(.dark) .gov-ab-legend p,
+html:not(.dark) .gov-spark-labels,
+html:not(.dark) .gov-link-row-meta > span {
   color: #71717a;
 }
 
-body:not(.dark) .gov-stat-value,
-body:not(.dark) .gov-campaign-name,
-body:not(.dark) .gov-campaign-metrics strong,
-body:not(.dark) .gov-panel h4,
-body:not(.dark) .gov-links-list strong,
-body:not(.dark) .gov-drawer-title,
-body:not(.dark) .gov-meta-grid dd,
-body:not(.dark) .gov-kpi-box strong,
-body:not(.dark) .gov-ab-legend strong,
-body:not(.dark) .gov-timeline-item strong {
+html:not(.dark) .gov-stat-value,
+html:not(.dark) .gov-campaign-name,
+html:not(.dark) .gov-campaign-metrics strong,
+html:not(.dark) .gov-panel h4,
+html:not(.dark) .gov-links-list strong,
+html:not(.dark) .gov-drawer-title,
+html:not(.dark) .gov-meta-grid dd,
+html:not(.dark) .gov-kpi-box strong,
+html:not(.dark) .gov-ab-legend strong,
+html:not(.dark) .gov-timeline-item strong {
   color: #18181b;
 }
 
-body:not(.dark) .gov-chip {
+html:not(.dark) .gov-chip {
   border-color: #d4d4d8;
   color: #52525b;
   background: #ffffff;
 }
 
-body:not(.dark) .gov-chip-active {
+html:not(.dark) .gov-chip-active {
   border-color: rgba(124, 58, 237, 0.35);
   color: #7c3aed;
   background: rgba(124, 58, 237, 0.09);
 }
 
-body:not(.dark) .gov-action-btn,
-body:not(.dark) .gov-secondary-btn,
-body:not(.dark) .gov-icon-btn {
+html:not(.dark) .gov-action-btn,
+html:not(.dark) .gov-secondary-btn,
+html:not(.dark) .gov-icon-btn {
   border-color: #d4d4d8;
   color: #27272a;
   background: #ffffff;
 }
 
-body:not(.dark) .gov-primary-btn {
+html:not(.dark) .gov-primary-btn {
   background: #7c3aed;
   border-color: #7c3aed;
   color: #ffffff;
 }
 
-body:not(.dark) .gov-danger-btn {
+html:not(.dark) .gov-danger-btn {
   background: rgba(239, 68, 68, 0.08);
   color: #dc2626;
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-body:not(.dark) .gov-campaign-progress,
-body:not(.dark) .gov-link-progress {
+html:not(.dark) .gov-campaign-progress,
+html:not(.dark) .gov-link-progress {
   background: #e4e4e7;
 }
 
-body:not(.dark) .gov-drawer-overlay {
+html:not(.dark) .gov-drawer-overlay {
   background: rgba(17, 24, 39, 0.24);
 }
 
-body:not(.dark) .gov-drawer {
+html:not(.dark) .gov-drawer {
   background: #ffffff;
   border-left-color: #e4e4e7;
 }
 
-body:not(.dark) .gov-drawer-head,
-body:not(.dark) .gov-drawer-tabs,
-body:not(.dark) .gov-modal-header,
-body:not(.dark) .gov-modal-actions {
+html:not(.dark) .gov-drawer-head,
+html:not(.dark) .gov-drawer-tabs,
+html:not(.dark) .gov-modal-header,
+html:not(.dark) .gov-modal-actions {
   border-color: #e4e4e7;
 }
 
-body:not(.dark) .gov-drawer-tabs {
+html:not(.dark) .gov-drawer-tabs {
   background: #fafafa;
 }
 
-body:not(.dark) .gov-drawer-tab {
+html:not(.dark) .gov-drawer-tab {
   border-color: #d4d4d8;
   color: #52525b;
 }
 
-body:not(.dark) .gov-drawer-tab:hover {
+html:not(.dark) .gov-drawer-tab:hover {
   color: #27272a;
   background: #f4f4f5;
 }
 
-body:not(.dark) .gov-drawer-tab-active {
+html:not(.dark) .gov-drawer-tab-active {
   color: #111827;
   border-color: rgba(234, 179, 8, 0.7);
   background: rgba(234, 179, 8, 0.13);
 }
 
-body:not(.dark) .gov-drawer-type-chip,
-body:not(.dark) .gov-link-state-pill {
+html:not(.dark) .gov-drawer-type-chip,
+html:not(.dark) .gov-link-state-pill {
   border-color: #d4d4d8;
   color: #5b21b6;
   background: #faf5ff;
 }
 
-body:not(.dark) .gov-ab-track {
+html:not(.dark) .gov-ab-track {
   background: #e4e4e7;
 }
 
-body:not(.dark) .gov-timeline-list::before {
+html:not(.dark) .gov-timeline-list::before {
   background: #d4d4d8;
 }
 
-body:not(.dark) .gov-timeline-dot {
+html:not(.dark) .gov-timeline-dot {
   border-color: #ffffff;
 }
 
-body:not(.dark) .gov-modal {
+html:not(.dark) .gov-modal {
   border-color: #e8e8ee;
 }
 
-body:not(.dark) .gov-form-label {
+html:not(.dark) .gov-form-label {
   color: #71717a;
 }
 
-body:not(.dark) .gov-modal-header h3 {
+html:not(.dark) .gov-modal-header h3 {
   color: #18181b;
 }
 
-body:not(.dark) .gov-icon-opt {
+html:not(.dark) .gov-icon-opt {
   border-color: #d4d4d8;
   background: #fafafa;
 }
 
-body:not(.dark) .gov-icon-opt:hover {
+html:not(.dark) .gov-icon-opt:hover {
   border-color: rgba(124, 58, 237, 0.35);
   background: #f5f3ff;
 }
 
-body:not(.dark) .gov-icon-opt-selected {
+html:not(.dark) .gov-icon-opt-selected {
   border-color: rgba(124, 58, 237, 0.5);
   background: #f3e8ff;
 }
 
-body:not(.dark) .gov-color-opt-selected {
+html:not(.dark) .gov-color-opt-selected {
   border-color: #ffffff;
   box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.24);
 }
 
-body:not(.dark) .gov-date-field::after {
+html:not(.dark) .gov-date-field::after {
   opacity: 0.7;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%236b7280' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5.5' width='13' height='11' rx='2'/%3E%3Cpath d='M6.5 3.5v4M13.5 3.5v4M3.5 8.5h13'/%3E%3C/svg%3E");
 }
@@ -1995,6 +1995,38 @@ body:not(.dark) .gov-date-field::after {
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
+
+.cc-mini-link-button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cc-mini-link-button:hover {
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.cc-mini-link-button:focus-visible {
+  outline: 1px solid rgba(168, 85, 247, 0.45);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.cc-mini-link-button:hover .cc-mini-link-name,
+.cc-mini-link-button:focus-visible .cc-mini-link-name {
+  color: #ffffff;
+}
+
+.cc-mini-link-button:hover .cc-mini-link-clicks,
+.cc-mini-link-button:focus-visible .cc-mini-link-clicks {
+  color: #e4e4ef;
+}
+
 .cc-mini-link:last-child {
   border-bottom: none;
 }
@@ -2188,17 +2220,17 @@ body:not(.dark) .gov-date-field::after {
 }
 
 /* ─── Light mode overrides for cc-* ─────────────────────────────────────── */
-body:not(.dark) .cc-stat-card,
-body:not(.dark) .cc-campaign-card,
-body:not(.dark) .cc-panel-card {
+html:not(.dark) .cc-stat-card,
+html:not(.dark) .cc-campaign-card,
+html:not(.dark) .cc-panel-card {
   background: #ffffff;
   border-color: #e8e8ee;
 }
-body:not(.dark) .cc-stat-card::before,
-body:not(.dark) .cc-campaign-card::before {
+html:not(.dark) .cc-stat-card::before,
+html:not(.dark) .cc-campaign-card::before {
   opacity: 1;
 }
-body:not(.dark) .cc-campaign-card:hover {
+html:not(.dark) .cc-campaign-card:hover {
   border-color: color-mix(in srgb, var(--cc-accent, #7c3aed) 45%, #d4d4d8 55%);
   box-shadow:
     0 10px 24px rgba(63, 63, 70, 0.12),
@@ -2211,84 +2243,84 @@ body:not(.dark) .cc-campaign-card:hover {
     ),
     #ffffff;
 }
-body:not(.dark) .cc-stat-card:hover {
+html:not(.dark) .cc-stat-card:hover {
   border-color: #d4d4d8;
 }
-body:not(.dark) .cc-stat-card-label,
-body:not(.dark) .cc-stat-card-sub,
-body:not(.dark) .cc-desc,
-body:not(.dark) .cc-quick-metric span,
-body:not(.dark) .cc-mini-link-campaign,
-body:not(.dark) .cc-mini-link-clicks,
-body:not(.dark) .cc-act-time,
-body:not(.dark) .cc-footer-date,
-body:not(.dark) .cc-stat-label,
-body:not(.dark) .cc-stat-sub {
+html:not(.dark) .cc-stat-card-label,
+html:not(.dark) .cc-stat-card-sub,
+html:not(.dark) .cc-desc,
+html:not(.dark) .cc-quick-metric span,
+html:not(.dark) .cc-mini-link-campaign,
+html:not(.dark) .cc-mini-link-clicks,
+html:not(.dark) .cc-act-time,
+html:not(.dark) .cc-footer-date,
+html:not(.dark) .cc-stat-label,
+html:not(.dark) .cc-stat-sub {
   color: #71717a;
 }
-body:not(.dark) .cc-stat-card-value,
-body:not(.dark) .cc-name,
-body:not(.dark) .cc-quick-metric strong,
-body:not(.dark) .cc-mini-link-name,
-body:not(.dark) .cc-act-text {
+html:not(.dark) .cc-stat-card-value,
+html:not(.dark) .cc-name,
+html:not(.dark) .cc-quick-metric strong,
+html:not(.dark) .cc-mini-link-name,
+html:not(.dark) .cc-act-text {
   color: #18181b;
 }
-body:not(.dark) .cc-stat-value-primary {
+html:not(.dark) .cc-stat-value-primary {
   color: #0f172a;
 }
-body:not(.dark) .cc-quick-metric {
+html:not(.dark) .cc-quick-metric {
   background: #fafafc;
   border-color: #e4e4ec;
 }
-body:not(.dark) .cc-stats,
-body:not(.dark) .cc-stat,
-body:not(.dark) .cc-footer,
-body:not(.dark) .cc-progress-track {
+html:not(.dark) .cc-stats,
+html:not(.dark) .cc-stat,
+html:not(.dark) .cc-footer,
+html:not(.dark) .cc-progress-track {
   border-color: #e8e8ee;
 }
-body:not(.dark) .cc-panel-head {
+html:not(.dark) .cc-panel-head {
   background: #fafafc;
   border-color: #ececf2;
 }
-body:not(.dark) .cc-panel-head-title,
-body:not(.dark) .cc-donut-leg-label {
+html:not(.dark) .cc-panel-head-title,
+html:not(.dark) .cc-donut-leg-label {
   color: #52525b;
 }
-body:not(.dark) .cc-donut-leg-val {
+html:not(.dark) .cc-donut-leg-val {
   color: #18181b;
 }
-body:not(.dark) .cc-filter-chip {
+html:not(.dark) .cc-filter-chip {
   background: #ffffff;
   border-color: #d4d4d8;
   color: #52525b;
 }
-body:not(.dark) .cc-filter-chip.cc-chip-on {
+html:not(.dark) .cc-filter-chip.cc-chip-on {
   background: rgba(124, 58, 237, 0.09);
   color: #7c3aed;
   border-color: rgba(124, 58, 237, 0.35);
 }
-body:not(.dark) .cc-search-input {
+html:not(.dark) .cc-search-input {
   background: #fafafa;
   border-color: #d4d4d8;
   color: #18181b;
 }
-body:not(.dark) .cc-search-icon {
+html:not(.dark) .cc-search-icon {
   color: #71717a;
 }
-body:not(.dark) .cc-mini-link-bar {
+html:not(.dark) .cc-mini-link-bar {
   background: #e8e8ee;
 }
-body:not(.dark) .cc-activity-item + .cc-activity-item {
+html:not(.dark) .cc-activity-item + .cc-activity-item {
   border-color: rgba(0, 0, 0, 0.05);
 }
-body:not(.dark) .cc-mini-link {
+html:not(.dark) .cc-mini-link {
   border-bottom-color: rgba(0, 0, 0, 0.04);
 }
-body:not(.dark) .cc-check-box {
+html:not(.dark) .cc-check-box {
   background: #fafafa;
   border-color: #d4d4d8;
 }
-body:not(.dark) .cc-check-box.cc-checked {
+html:not(.dark) .cc-check-box.cc-checked {
   background: #7c3aed;
   border-color: #7c3aed;
 }

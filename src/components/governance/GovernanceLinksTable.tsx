@@ -1,7 +1,7 @@
 import {
-    assignLinkToCampaign,
-    deleteGovernedLink,
-    transitionLink,
+  assignLinkToCampaign,
+  deleteGovernedLink,
+  transitionLink,
 } from "@/apis/governance";
 import type { Campaign } from "@/types/campaigns";
 import type { GovernanceLink, LinkState } from "@/types/governance";
@@ -16,6 +16,29 @@ const FILTER_STATES: (LinkState | "all")[] = [
   "paused",
   "expired",
   "draft",
+];
+
+const GOVERNANCE_TABLE_COLUMNS: {
+  key: string;
+  label: string;
+  className?: string;
+}[] = [
+  { key: "link", label: "Link" },
+  { key: "status", label: "Status", className: "hidden md:table-cell" },
+  {
+    key: "destination",
+    label: "Destination",
+    className:
+      "hidden md:table-cell w-[320px] min-w-[320px] md:w-[420px] md:min-w-[420px] xl:w-[520px] xl:min-w-[520px]",
+  },
+  { key: "clicks", label: "Clicks", className: "hidden md:table-cell" },
+  { key: "routing", label: "Routing", className: "hidden lg:table-cell" },
+  {
+    key: "campaign",
+    label: "Campaign",
+    className: "hidden lg:table-cell",
+  },
+  { key: "actions", label: "", className: "hidden md:table-cell" },
 ];
 
 interface GovernanceLinksTableProps {
@@ -332,7 +355,7 @@ export function GovernanceLinksTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1360px]">
+        <table className="w-full min-w-0 lg:min-w-[1160px] xl:min-w-[1360px]">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-white/[0.04]">
               <th className="px-5 py-3 text-left">
@@ -344,22 +367,12 @@ export function GovernanceLinksTable({
                   className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-600"
                 />
               </th>
-              {[
-                "Link",
-                "Status",
-                "Destination",
-                "Clicks",
-                "Routing",
-                "Campaign",
-                "",
-              ].map((h) => (
+              {GOVERNANCE_TABLE_COLUMNS.map((column) => (
                 <th
-                  key={h}
-                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${
-                    h === "Destination" ? "w-[520px] min-w-[520px]" : ""
-                  }`}
+                  key={column.key}
+                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${column.className ?? ""}`}
                 >
-                  {h}
+                  {column.label}
                 </th>
               ))}
             </tr>
@@ -400,16 +413,41 @@ export function GovernanceLinksTable({
                       {link.short}
                     </span>
                   </div>
+
+                  {/* Mobile details */}
+                  <div className="mt-2.5 md:hidden flex flex-col gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <GovernanceBadge state={link.state} />
+                      <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400">
+                        {link.clicks.toLocaleString()} clicks
+                      </span>
+                    </div>
+                    <a
+                      href={link.dest}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block text-[12.5px] font-mono text-violet-400 break-all leading-relaxed hover:text-violet-500 dark:hover:text-violet-300 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                      title={link.dest}
+                    >
+                      {link.dest}
+                    </a>
+                    {link.campaign ? (
+                      <span className="text-xs px-2 py-0.5 rounded font-medium border border-neutral-200 dark:border-white/[0.08] bg-white/80 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-200 self-start">
+                        {link.campaign}
+                      </span>
+                    ) : null}
+                  </div>
                 </td>
 
                 {/* Badge */}
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-3.5 hidden md:table-cell">
                   <GovernanceBadge state={link.state} />
                 </td>
 
                 {/* Destination */}
                 <td
-                  className="px-5 py-3.5 w-[520px] min-w-[520px] max-w-[520px]"
+                  className="px-5 py-3.5 hidden md:table-cell w-[420px] min-w-[420px] max-w-[420px] xl:w-[520px] xl:min-w-[520px] xl:max-w-[520px]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <a
@@ -424,7 +462,7 @@ export function GovernanceLinksTable({
                 </td>
 
                 {/* Clicks bar */}
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-3.5 hidden md:table-cell">
                   <div className="w-24">
                     <div className="text-[12.5px] font-mono font-medium text-neutral-700 dark:text-neutral-300">
                       {link.clicks.toLocaleString()}
@@ -439,7 +477,7 @@ export function GovernanceLinksTable({
                 </td>
 
                 {/* Routing rules count */}
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-3.5 hidden lg:table-cell">
                   {link.rules.length > 0 ? (
                     <span className="text-xs font-mono text-violet-400">
                       {link.rules.length} rule{link.rules.length > 1 ? "s" : ""}
@@ -450,7 +488,7 @@ export function GovernanceLinksTable({
                 </td>
 
                 {/* Campaign tag */}
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-3.5 hidden lg:table-cell">
                   {link.campaign ? (
                     <span className="text-xs px-2 py-0.5 rounded font-medium border border-neutral-200 dark:border-white/[0.08] bg-white/80 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-200">
                       {link.campaign}
@@ -461,9 +499,9 @@ export function GovernanceLinksTable({
                 </td>
 
                 {/* Row actions */}
-                <td className="px-5 py-3.5">
+                <td className="px-5 py-3.5 hidden md:table-cell">
                   <div
-                    className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <IconButton title="Edit" onClick={() => onSelect(link)}>
