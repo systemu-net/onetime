@@ -160,6 +160,13 @@ export function GovernanceDrawer({
       .finally(() => setAuditLoading(false));
   }, [tab, link.lookup_code, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Close drawer on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   // Lazy-load routing rules
   useEffect(() => {
     if (tab !== "routing") return;

@@ -11,6 +11,8 @@ interface GovernanceStatsGridProps {
   total: number;
   active: number;
   paused: number;
+  expired: number;
+  draft: number;
   totalClicks: number;
 }
 
@@ -18,6 +20,8 @@ export function GovernanceStatsGrid({
   total,
   active,
   paused,
+  expired,
+  draft,
   totalClicks,
 }: GovernanceStatsGridProps) {
   const activePct = total > 0 ? ((active / total) * 100).toFixed(0) : "0";
@@ -26,8 +30,8 @@ export function GovernanceStatsGrid({
     {
       label: "Total Links",
       value: total,
-      delta: "+2 this week",
-      dir: "up",
+      delta: `${activePct}% active`,
+      dir: "neutral",
       icon: "⊞",
       gradient: "linear-gradient(90deg,#7c3aed,#a855f7)",
     },
@@ -42,15 +46,31 @@ export function GovernanceStatsGrid({
     {
       label: "Paused Links",
       value: paused,
-      delta: "1 auto-paused today",
-      dir: "down",
+      delta: paused > 0 ? "traffic suspended" : "none paused",
+      dir: paused > 0 ? "down" : "neutral",
       icon: "⏸",
       gradient: "linear-gradient(90deg,#f59e0b,#fbbf24)",
     },
     {
+      label: "Expired Links",
+      value: expired,
+      delta: expired > 0 ? "past expiry date" : "none expired",
+      dir: expired > 0 ? "down" : "neutral",
+      icon: "⊘",
+      gradient: "linear-gradient(90deg,#ef4444,#f87171)",
+    },
+    {
+      label: "Draft Links",
+      value: draft,
+      delta: draft > 0 ? "not yet active" : "none in draft",
+      dir: "neutral",
+      icon: "◌",
+      gradient: "linear-gradient(90deg,#6b7280,#9ca3af)",
+    },
+    {
       label: "Total Clicks",
       value: totalClicks.toLocaleString(),
-      delta: "+1,240 today",
+      delta: "all-time traffic",
       dir: "up",
       icon: "⇗",
       gradient: "linear-gradient(90deg,#3b82f6,#60a5fa)",
@@ -58,7 +78,7 @@ export function GovernanceStatsGrid({
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
       {stats.map((s) => (
         <div
           key={s.label}

@@ -20,27 +20,20 @@ const FILTER_STATES: (LinkState | "all")[] = [
   "draft",
 ];
 
-const GOVERNANCE_TABLE_COLUMNS: {
+// Explicit column widths are required here AND in GovernanceLastOpenedTable so
+// that the two separate <table> elements align their columns pixel-perfectly.
+export const GOVERNANCE_TABLE_COLUMNS: {
   key: string;
   label: string;
   className?: string;
 }[] = [
-  { key: "link", label: "Link" },
-  { key: "status", label: "Status", className: "hidden md:table-cell" },
-  {
-    key: "destination",
-    label: "Destination",
-    className:
-      "hidden md:table-cell w-[320px] min-w-[320px] md:w-[420px] md:min-w-[420px] xl:w-[520px] xl:min-w-[520px]",
-  },
-  { key: "clicks", label: "Clicks", className: "hidden md:table-cell" },
-  { key: "routing", label: "Routing", className: "hidden lg:table-cell" },
-  {
-    key: "campaign",
-    label: "Campaign",
-    className: "hidden lg:table-cell",
-  },
-  { key: "actions", label: "", className: "hidden md:table-cell" },
+  { key: "link",        label: "Link",        className: "w-[220px]" },
+  { key: "status",      label: "Status",      className: "hidden md:table-cell w-[110px]" },
+  { key: "destination", label: "Destination", className: "hidden md:table-cell w-[420px] xl:w-[520px]" },
+  { key: "clicks",      label: "Clicks",      className: "hidden md:table-cell w-[100px]" },
+  { key: "routing",     label: "Routing",     className: "hidden lg:table-cell w-[110px]" },
+  { key: "campaign",    label: "Campaign",    className: "hidden lg:table-cell w-[150px]" },
+  { key: "actions",     label: "",            className: "hidden md:table-cell w-0 p-0" },
 ];
 
 interface GovernanceLinksTableProps {
@@ -48,6 +41,8 @@ interface GovernanceLinksTableProps {
   campaigns: Campaign[];
   search: string;
   filterState: LinkState | "all";
+  lastOpenedId?: string | null;
+  flashingId?: string | null;
   onSearchChange: (v: string) => void;
   onFilterChange: (v: LinkState | "all") => void;
   onSelect: (link: GovernanceLink) => void;
@@ -71,6 +66,8 @@ export function GovernanceLinksTable({
   campaigns,
   search,
   filterState,
+  lastOpenedId,
+  flashingId,
   onSearchChange,
   onFilterChange,
   onSelect,
@@ -359,10 +356,10 @@ export function GovernanceLinksTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-0 md:min-w-[860px] lg:min-w-[1160px] xl:min-w-[1360px]">
+        <table className="w-full table-fixed min-w-0 md:min-w-[860px] lg:min-w-[1160px] xl:min-w-[1360px]">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-white/[0.04]">
-              <th className="px-5 py-3 text-left">
+              <th className="px-5 py-3 text-left w-[56px]">
                 <input
                   type="checkbox"
                   checked={allVisibleSelected}
@@ -374,7 +371,7 @@ export function GovernanceLinksTable({
               {GOVERNANCE_TABLE_COLUMNS.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${column.key === "actions" ? "w-0 p-0" : ""} ${column.className ?? ""}`}
+                  className={`px-5 py-3 text-left text-[11px] font-medium uppercase tracking-[0.06em] text-neutral-400 font-mono ${column.className ?? ""}`}
                 >
                   {column.label}
                 </th>
@@ -385,8 +382,15 @@ export function GovernanceLinksTable({
             {filtered.map((link) => (
               <tr
                 key={link.id}
+                data-link-id={link.id}
                 onClick={() => onSelect(link)}
-                className={`gov-link-row border-b border-neutral-50 dark:border-white/[0.025] last:border-0 cursor-pointer group ${selectedIds.has(link.id) ? "bg-violet-500/[0.08]" : ""} ${link.linkCampaignColor ? "gov-link-row--accented" : ""}`}
+                className={[
+                  "gov-link-row border-b border-neutral-50 dark:border-white/[0.025] last:border-0 cursor-pointer group",
+                  selectedIds.has(link.id) ? "bg-violet-500/[0.08]" : "",
+                  link.linkCampaignColor ? "gov-link-row--accented" : "",
+                  link.id === lastOpenedId ? "gov-link-row--last-opened" : "",
+                  link.id === flashingId  ? "gov-link-row--flash" : "",
+                ].filter(Boolean).join(" ")}
                 style={{
                   ["--gov-row-accent" as string]:
                     link.linkCampaignColor ?? "transparent",
@@ -425,7 +429,7 @@ export function GovernanceLinksTable({
                         />
                       )}
                     </div>
-                    <div className="font-medium text-[13.5px] text-neutral-900 dark:text-neutral-100">
+                    <div className="font-medium text-[13.5px] text-neutral-900 dark:text-neutral-100 truncate">
                       {link.name}
                     </div>
                   </div>
@@ -504,7 +508,7 @@ export function GovernanceLinksTable({
 
                 {/* Destination */}
                 <td
-                  className="px-5 py-3.5 hidden md:table-cell w-[420px] min-w-[420px] max-w-[420px] xl:w-[520px] xl:min-w-[520px] xl:max-w-[520px]"
+                  className="px-5 py-3.5 hidden md:table-cell w-[420px] xl:w-[520px]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <a

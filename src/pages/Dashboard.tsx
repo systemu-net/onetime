@@ -25,6 +25,8 @@ interface DashStats {
   total: number;
   active: number;
   paused: number;
+  expired: number;
+  draft: number;
   totalClicks: number;
 }
 
@@ -162,7 +164,7 @@ const DashboardPage = () => {
       fetchGovernanceLinks(cookies.token, {}).catch(() => null),
       fetchCampaigns(cookies.token).catch(() => [] as Campaign[]),
     ]).then(([govPage, camps]) => {
-      if (govPage) setStats(govPage.stats);
+      if (govPage) setStats(govPage.stats as DashStats);
       setCampaigns(camps ?? []);
       setStatsLoading(false);
     });
@@ -201,10 +203,12 @@ const DashboardPage = () => {
 
         {/* ── Stats strip ───────────────────────────────────────────── */}
         <div className="dash-stats-grid">
-          <StatCard label="Total Links" value={stats?.total ?? 0} sub="across all states" accent="#7c3aed" href={GOVERNANCE_ROUTE} loading={statsLoading} delay={0} />
-          <StatCard label="Active Links" value={stats?.active ?? 0} sub="currently live" accent="#10b981" href={GOVERNANCE_ROUTE + "?state=active"} loading={statsLoading} delay={60} />
-          <StatCard label="Paused Links" value={stats?.paused ?? 0} sub="traffic suspended" accent="#f59e0b" href={GOVERNANCE_ROUTE + "?state=paused"} loading={statsLoading} delay={120} />
-          <StatCard label="Total Clicks" value={stats?.totalClicks ?? 0} sub="all-time traffic" accent="#3b82f6" href={GOVERNANCE_ROUTE} loading={statsLoading} delay={180} />
+          <StatCard label="Total Links"   value={stats?.total ?? 0}       sub="across all states"   accent="#7c3aed" href={GOVERNANCE_ROUTE}                       loading={statsLoading} delay={0} />
+          <StatCard label="Active Links"  value={stats?.active ?? 0}      sub="currently live"      accent="#10b981" href={GOVERNANCE_ROUTE + "?state=active"}  loading={statsLoading} delay={50} />
+          <StatCard label="Paused Links"  value={stats?.paused ?? 0}      sub="traffic suspended"   accent="#f59e0b" href={GOVERNANCE_ROUTE + "?state=paused"}  loading={statsLoading} delay={100} />
+          <StatCard label="Expired Links" value={stats?.expired ?? 0}     sub="past expiry date"    accent="#ef4444" href={GOVERNANCE_ROUTE + "?state=expired"} loading={statsLoading} delay={150} />
+          <StatCard label="Draft Links"   value={stats?.draft ?? 0}       sub="not yet active"      accent="#6b7280" href={GOVERNANCE_ROUTE + "?state=draft"}   loading={statsLoading} delay={200} />
+          <StatCard label="Total Clicks"  value={stats?.totalClicks ?? 0} sub="all-time traffic"    accent="#3b82f6" href={GOVERNANCE_ROUTE}                    loading={statsLoading} delay={250} />
         </div>
 
         {/* ── Tools ─────────────────────────────────────────────────── */}
@@ -272,36 +276,57 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* Top Performing Campaigns — cc-panel style */}
+          {/* Top Performing Campaigns */}
           <div className="cc-panel-card">
             <div className="cc-panel-head">
               <span className="cc-panel-head-title">Top Performing Campaigns</span>
-              <Link to={CAMPAIGNS_ROUTE} style={{ fontSize: 11, color: "#7c3aed", textDecoration: "none", fontFamily: "'DM Mono', monospace" }}>
-                View all →
-              </Link>
+              <Link to={CAMPAIGNS_ROUTE} className="dash-camp-view-all">View all →</Link>
             </div>
-            <div className="cc-panel-body">
+
+            {/* Column header */}
+            <div className="dash-camp-col-header">
+              <span className="dash-camp-col-rank">#</span>
+              <span className="dash-camp-col-name">Campaign</span>
+              <span className="dash-camp-col-state">State</span>
+              <span className="dash-camp-col-links">Links</span>
+              <span className="dash-camp-col-clicks">Clicks</span>
+            </div>
+
+            <div className="dash-camp-list">
               {statsLoading ? (
-                <>
-                  {[0,1,2,3].map((i) => <div key={i} className="dash-shimmer" style={{ height: 36, marginBottom: 8, borderRadius: 6 }} />)}
-                </>
+                [0,1,2,3,4].map((i) => (
+                  <div key={i} className="dash-camp-row dash-camp-shimmer-row">
+                    <div className="dash-shimmer" style={{ width: 18, height: 18, borderRadius: 4 }} />
+                    <div className="dash-shimmer" style={{ flex: 1, height: 14, borderRadius: 4 }} />
+                    <div className="dash-shimmer" style={{ width: 48, height: 18, borderRadius: 10 }} />
+                    <div className="dash-shimmer" style={{ width: 28, height: 14, borderRadius: 4 }} />
+                    <div className="dash-shimmer" style={{ width: 56, height: 14, borderRadius: 4 }} />
+                  </div>
+                ))
               ) : topCampaigns.length === 0 ? (
-                <p style={{ fontSize: 12, color: "#a3a3b2" }}>No campaigns yet.</p>
+                <div className="dash-camp-empty">No campaigns yet.</div>
               ) : (
                 topCampaigns.map((camp, i) => (
-                  <Link key={camp.id} to={CAMPAIGNS_ROUTE} className="cc-mini-link cc-mini-link-button" style={{ display: "flex", textDecoration: "none" }}>
-                    <div className="cc-mini-link-rank">{i + 1}</div>
-                    <div className="cc-mini-link-dot" style={{ background: camp.accentColor ?? "#7c3aed" }} />
-                    <div className="cc-mini-link-info">
-                      <div className="cc-mini-link-name">{camp.name}</div>
-                      <div className="cc-mini-link-campaign">
-                        {camp.linksCount} link{camp.linksCount !== 1 ? "s" : ""} · {camp.state}
-                      </div>
+                  <Link key={camp.id} to={CAMPAIGNS_ROUTE} className="dash-camp-row" style={{ ["--camp-accent" as string]: camp.accentColor ?? "#7c3aed" }}>
+                    <span className="dash-camp-rank">{i + 1}</span>
+
+                    <div className="dash-camp-name-cell">
+                      <span className="dash-camp-dot" />
+                      <span className="dash-camp-name">{camp.name}</span>
                     </div>
-                    <div className="dash-clicks-pill">
-                      <ClicksIcon className="h-3.5 w-3.5 shrink-0 text-blue-500" />
-                      <span>{camp.totalClicks.toLocaleString()} {camp.totalClicks === 1 ? "click" : "clicks"}</span>
-                    </div>
+
+                    <span className={`dash-camp-state dash-camp-state--${camp.state}`}>
+                      {camp.state}
+                    </span>
+
+                    <span className="dash-camp-links">
+                      {camp.linksCount.toLocaleString()}
+                    </span>
+
+                    <span className="dash-camp-clicks">
+                      <ClicksIcon className="h-3 w-3 shrink-0" style={{ color: "var(--camp-accent)" }} />
+                      {camp.totalClicks.toLocaleString()}
+                    </span>
                   </Link>
                 ))
               )}
@@ -370,12 +395,12 @@ const DASH_CSS = `
 /* Stats grid */
 .dash-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
   margin-bottom: 28px;
 }
-@media (max-width: 900px) { .dash-stats-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .dash-stats-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1200px) { .dash-stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px)  { .dash-stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .dash-stat-card {
   background: #fff;
@@ -626,6 +651,155 @@ html:not(.dark) .dash-clicks-pill {
   border-color: #e4e4e7;
   color: #52525b;
 }
+
+/* ── Top Performing Campaigns table ──────────────────────────────────────── */
+.dash-camp-view-all {
+  font-size: 11px;
+  font-family: "DM Mono", monospace;
+  color: #7c3aed;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.dash-camp-view-all:hover { opacity: 1; }
+
+.dash-camp-col-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-bottom: 1px solid rgba(115,115,130,0.12);
+  background: rgba(255,255,255,0.01);
+}
+html:not(.dark) .dash-camp-col-header { background: rgba(0,0,0,0.015); border-color: #f0f0f2; }
+
+.dash-camp-col-rank,
+.dash-camp-col-name,
+.dash-camp-col-state,
+.dash-camp-col-links,
+.dash-camp-col-clicks {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: "DM Mono", monospace;
+  color: #52525b;
+}
+html:not(.dark) .dash-camp-col-rank,
+html:not(.dark) .dash-camp-col-name,
+html:not(.dark) .dash-camp-col-state,
+html:not(.dark) .dash-camp-col-links,
+html:not(.dark) .dash-camp-col-clicks { color: #a1a1aa; }
+
+.dash-camp-col-rank  { width: 28px; flex-shrink: 0; }
+.dash-camp-col-name  { flex: 1; min-width: 0; }
+.dash-camp-col-state { width: 64px; flex-shrink: 0; }
+.dash-camp-col-links { width: 44px; flex-shrink: 0; text-align: right; }
+.dash-camp-col-clicks{ width: 72px; flex-shrink: 0; text-align: right; }
+
+.dash-camp-list { display: flex; flex-direction: column; }
+
+.dash-camp-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(115,115,130,0.08);
+  gap: 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  box-shadow: inset 3px 0 0 transparent;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.dash-camp-row:last-child { border-bottom: none; }
+.dash-camp-row:hover {
+  background: rgba(124,58,237,0.05);
+  box-shadow: inset 3px 0 0 var(--camp-accent, #7c3aed);
+}
+html:not(.dark) .dash-camp-row:hover { background: rgba(124,58,237,0.04); }
+
+.dash-camp-shimmer-row { gap: 12px; pointer-events: none; }
+
+.dash-camp-rank {
+  width: 28px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: "DM Mono", monospace;
+  font-weight: 700;
+  color: #52525b;
+}
+html:not(.dark) .dash-camp-rank { color: #a1a1aa; }
+
+.dash-camp-name-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+}
+.dash-camp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--camp-accent, #7c3aed);
+  opacity: 0.85;
+}
+.dash-camp-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e4e4ef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html:not(.dark) .dash-camp-name { color: #18181b; }
+
+.dash-camp-state {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: capitalize;
+  font-family: "DM Mono", monospace;
+}
+.dash-camp-state--active   { color: #10b981; }
+.dash-camp-state--paused   { color: #f59e0b; }
+.dash-camp-state--archived { color: #6b7280; }
+.dash-camp-state--expired  { color: #ef4444; }
+
+.dash-camp-links {
+  width: 44px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 12px;
+  font-family: "DM Mono", monospace;
+  color: #71717a;
+}
+html:not(.dark) .dash-camp-links { color: #52525b; }
+
+.dash-camp-clicks {
+  width: 72px;
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 12px;
+  font-family: "DM Mono", monospace;
+  font-weight: 600;
+  color: #d4d4df;
+}
+html:not(.dark) .dash-camp-clicks { color: #18181b; }
+
+.dash-camp-empty {
+  padding: 24px 16px;
+  font-size: 12.5px;
+  color: #52525b;
+  text-align: center;
+}
+html:not(.dark) .dash-camp-empty { color: #a1a1aa; }
 
 /* Image tool card — original split layout */
 .dash-tool-image-inner {
