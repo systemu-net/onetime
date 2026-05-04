@@ -1,7 +1,7 @@
 import { getCampaignType } from "@/apis/campaigns";
 import type { Campaign } from "@/types/campaigns";
 import { Pin, PinOff, Trash2 } from "lucide-react";
-import React, { memo, type CSSProperties, useCallback, useState } from "react";
+import React, { memo, useCallback, useState, type CSSProperties } from "react";
 import { CampaignStateBadge } from "./CampaignStateBadge";
 import { CampaignTypeTag } from "./CampaignTypeTag";
 
@@ -62,30 +62,48 @@ const CampaignCard = memo(function CampaignCard({
   const iconBg = `${accent}26`;
   const iconBorder = `${accent}40`;
   const startDate = new Date(campaign.createdAt).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 
-  const handleDelete = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!window.confirm(`Delete "${campaign.name}"? This cannot be undone.`)) return;
-    setIsDeleting(true);
-    try {
-      await onDelete(campaign.id);
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [campaign.id, campaign.name, onDelete]);
+  const handleDelete = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!window.confirm(`Delete "${campaign.name}"? This cannot be undone.`))
+        return;
+      setIsDeleting(true);
+      try {
+        await onDelete(campaign.id);
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [campaign.id, campaign.name, onDelete],
+  );
 
-  const handleSelect = useCallback(() => onSelect(campaign), [campaign, onSelect]);
-  const handlePauseToggle = useCallback(() => onPauseToggle(campaign), [campaign, onPauseToggle]);
-  const handleCheck = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleCheck(campaign.id);
-  }, [campaign.id, onToggleCheck]);
-  const handlePin = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onTogglePin(campaign.id);
-  }, [campaign.id, onTogglePin]);
+  const handleSelect = useCallback(
+    () => onSelect(campaign),
+    [campaign, onSelect],
+  );
+  const handlePauseToggle = useCallback(
+    () => onPauseToggle(campaign),
+    [campaign, onPauseToggle],
+  );
+  const handleCheck = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onToggleCheck(campaign.id);
+    },
+    [campaign.id, onToggleCheck],
+  );
+  const handlePin = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onTogglePin(campaign.id);
+    },
+    [campaign.id, onTogglePin],
+  );
 
   return (
     <React.Fragment>
@@ -103,13 +121,18 @@ const CampaignCard = memo(function CampaignCard({
             {isChecked && "✓"}
           </div>
 
-          <div className="cc-icon" style={{ background: iconBg, border: `1px solid ${iconBorder}` }}>
+          <div
+            className="cc-icon"
+            style={{ background: iconBg, border: `1px solid ${iconBorder}` }}
+          >
             {TYPE_ICONS[campaignType] ?? "🚀"}
           </div>
 
           <div className="cc-meta">
             <div className="cc-name">{campaign.name}</div>
-            <div className="cc-desc">{campaign.description || "No description yet"}</div>
+            <div className="cc-desc">
+              {campaign.description || "No description yet"}
+            </div>
             <div className="cc-quick-metrics">
               <div className="cc-quick-metric">
                 <span>Links</span>
@@ -119,6 +142,19 @@ const CampaignCard = memo(function CampaignCard({
             <div className="cc-badges">
               <CampaignStateBadge state={campaign.state} />
               <CampaignTypeTag type={campaignType} />
+              {campaign.isDefault && (
+                <span
+                  className="cc-pin-inline-badge"
+                  title="This is the default campaign. New links are assigned here automatically."
+                  style={{
+                    background: "#ede9fe",
+                    color: "#6d28d9",
+                    borderColor: "#c4b5fd",
+                  }}
+                >
+                  ⚑ Default
+                </span>
+              )}
               {isPinned && (
                 <span className="cc-pin-inline-badge">
                   <Pin size={9} strokeWidth={2.5} />
@@ -134,7 +170,10 @@ const CampaignCard = memo(function CampaignCard({
                 <div
                   key={i}
                   className="cc-mini-spark-bar"
-                  style={{ height: `${(v / sparkPeak) * 100}%`, background: accent }}
+                  style={{
+                    height: `${(v / sparkPeak) * 100}%`,
+                    background: accent,
+                  }}
                 />
               ))}
             </div>
@@ -145,17 +184,44 @@ const CampaignCard = memo(function CampaignCard({
             onClick={handlePin}
             className={`cc-pin-btn${isPinned ? " cc-pin-btn--active" : ""}`}
           >
-            {isPinned ? <PinOff size={14} strokeWidth={2} /> : <Pin size={14} strokeWidth={2} />}
+            {isPinned ? (
+              <PinOff size={14} strokeWidth={2} />
+            ) : (
+              <Pin size={14} strokeWidth={2} />
+            )}
           </button>
         </div>
 
         {/* Stats row */}
         <div className="cc-stats">
           {[
-            { label: "Total Clicks", value: totalClicks.toLocaleString(), sub: `${pct.toFixed(0)}% of peak`, primary: true },
-            { label: "CTR",          value: "—", sub: "avg per link",  color: "#10b981", primary: false },
-            { label: "Conversions",  value: "—", sub: "total",         color: "#a855f7", primary: false },
-            { label: "Revenue",      value: "—", sub: "estimated",     color: "#f59e0b", primary: false },
+            {
+              label: "Total Clicks",
+              value: totalClicks.toLocaleString(),
+              sub: `${pct.toFixed(0)}% of peak`,
+              primary: true,
+            },
+            {
+              label: "CTR",
+              value: "—",
+              sub: "avg per link",
+              color: "#10b981",
+              primary: false,
+            },
+            {
+              label: "Conversions",
+              value: "—",
+              sub: "total",
+              color: "#a855f7",
+              primary: false,
+            },
+            {
+              label: "Revenue",
+              value: "—",
+              sub: "estimated",
+              color: "#f59e0b",
+              primary: false,
+            },
           ].map((s) => (
             <div key={s.label} className="cc-stat">
               <div className="cc-stat-label">{s.label}</div>
@@ -175,7 +241,10 @@ const CampaignCard = memo(function CampaignCard({
           <div className="cc-progress-track">
             <div
               className="cc-progress-fill"
-              style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${accent}, ${accent}88)` }}
+              style={{
+                width: `${pct}%`,
+                background: `linear-gradient(90deg, ${accent}, ${accent}88)`,
+              }}
             />
           </div>
         </div>
@@ -193,14 +262,16 @@ const CampaignCard = memo(function CampaignCard({
             >
               {campaign.state === "paused" ? "▶ Resume" : "⏸ Pause"}
             </button>
-            <button
-              className="cc-btn cc-btn-danger"
-              title="Delete campaign"
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
-              <Trash2 size={13} strokeWidth={2} />
-            </button>
+            {!campaign.isDefault && (
+              <button
+                className="cc-btn cc-btn-danger"
+                title="Delete campaign"
+                disabled={isDeleting}
+                onClick={handleDelete}
+              >
+                <Trash2 size={13} strokeWidth={2} />
+              </button>
+            )}
           </div>
         </div>
       </article>
@@ -262,7 +333,11 @@ export function CampaignsList({
           isChecked={checkedIds.has(campaign.id)}
           isPinned={pinnedIds.has(campaign.id)}
           maxClicks={maxClicks}
-          showDivider={index === pinnedCount - 1 && pinnedCount > 0 && pinnedCount < campaigns.length}
+          showDivider={
+            index === pinnedCount - 1 &&
+            pinnedCount > 0 &&
+            pinnedCount < campaigns.length
+          }
           onSelect={onSelect}
           onPauseToggle={onPauseToggle}
           onToggleCheck={onToggleCheck}

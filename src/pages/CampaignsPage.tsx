@@ -1,12 +1,12 @@
 import {
-  createCampaign,
-  deleteCampaign,
-  fetchCampaign,
-  fetchCampaigns,
-  getCampaignType,
-  pauseCampaign,
-  resumeCampaign,
-  updateCampaign,
+    createCampaign,
+    deleteCampaign,
+    fetchCampaign,
+    fetchCampaigns,
+    getCampaignType,
+    pauseCampaign,
+    resumeCampaign,
+    updateCampaign,
 } from "@/apis/campaigns";
 import { CampaignDrawer } from "@/components/campaigns/CampaignDrawer";
 import { CampaignsInsightsPanel } from "@/components/campaigns/CampaignsInsightsPanel";
@@ -16,10 +16,10 @@ import { NewCampaignModal } from "@/components/campaigns/NewCampaignModal";
 import MainLayout from "@/components/layouts/MainLayout";
 import { useNotification } from "@/Notifications";
 import type {
-  Campaign,
-  CampaignCreatePayload,
-  CampaignState,
-  CampaignUpdatePayload,
+    Campaign,
+    CampaignCreatePayload,
+    CampaignState,
+    CampaignUpdatePayload,
 } from "@/types/campaigns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCookies } from "react-cookie";
@@ -69,7 +69,10 @@ export default function CampaignsPage() {
   });
 
   const notify = useCallback(
-    (message: string, type: "success" | "info" | "error" | "warning" = "info") => {
+    (
+      message: string,
+      type: "success" | "info" | "error" | "warning" = "info",
+    ) => {
       addNotification(message, type);
     },
     [addNotification],
@@ -88,30 +91,39 @@ export default function CampaignsPage() {
     }
   }, [token, notify]);
 
-  useEffect(() => { loadCampaigns(); }, [loadCampaigns]);
+  useEffect(() => {
+    loadCampaigns();
+  }, [loadCampaigns]);
 
   useEffect(() => {
     if (!selected || !token) return;
     fetchCampaign(token, selected.id)
       .then((fullCampaign) => {
         setCampaigns((current) =>
-          current.map((c) => c.id === fullCampaign.id ? { ...c, ...fullCampaign } : c),
+          current.map((c) =>
+            c.id === fullCampaign.id ? { ...c, ...fullCampaign } : c,
+          ),
         );
         setSelected((current) =>
           current && current.id === fullCampaign.id ? fullCampaign : current,
         );
       })
-      .catch(() => { /* keep drawer usable on refresh failure */ });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch(() => {
+        /* keep drawer usable on refresh failure */
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.id, token]);
 
   const handleTogglePin = useCallback((id: number) => {
     setPinnedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       try {
         localStorage.setItem("campaigns:pinned", JSON.stringify([...next]));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       return next;
     });
   }, []);
@@ -123,7 +135,8 @@ export default function CampaignsPage() {
     const rest: Campaign[] = [];
     for (const campaign of campaigns) {
       if (stateFilter !== "all" && campaign.state !== stateFilter) continue;
-      if (typeFilter !== "all" && getCampaignType(campaign.name) !== typeFilter) continue;
+      if (typeFilter !== "all" && getCampaignType(campaign.name) !== typeFilter)
+        continue;
       if (query.length > 0) {
         const inName = campaign.name.toLowerCase().includes(query);
         const inDesc = campaign.description.toLowerCase().includes(query);
@@ -154,53 +167,82 @@ export default function CampaignsPage() {
   const toggleCheck = useCallback((id: number) => {
     setCheckedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);
 
-  const handlePauseToggle = useCallback(async (campaign: Campaign) => {
-    if (!token) return;
-    try {
-      if (campaign.state === "paused") {
-        await resumeCampaign(token, campaign.id, "Resumed from campaigns dashboard");
-        setCampaigns((current) =>
-          current.map((item) => item.id === campaign.id ? { ...item, state: "active" } : item),
-        );
-        setSelected((current) =>
-          current && current.id === campaign.id ? { ...current, state: "active" } : current,
-        );
-        notify(`Campaign "${campaign.name}" resumed.`, "success");
-      } else {
-        await pauseCampaign(token, campaign.id, "Paused from campaigns dashboard");
-        setCampaigns((current) =>
-          current.map((item) => item.id === campaign.id ? { ...item, state: "paused" } : item),
-        );
-        setSelected((current) =>
-          current && current.id === campaign.id ? { ...current, state: "paused" } : current,
-        );
-        notify(`Campaign "${campaign.name}" paused.`, "info");
+  const handlePauseToggle = useCallback(
+    async (campaign: Campaign) => {
+      if (!token) return;
+      try {
+        if (campaign.state === "paused") {
+          await resumeCampaign(
+            token,
+            campaign.id,
+            "Resumed from campaigns dashboard",
+          );
+          setCampaigns((current) =>
+            current.map((item) =>
+              item.id === campaign.id ? { ...item, state: "active" } : item,
+            ),
+          );
+          setSelected((current) =>
+            current && current.id === campaign.id
+              ? { ...current, state: "active" }
+              : current,
+          );
+          notify(`Campaign "${campaign.name}" resumed.`, "success");
+        } else {
+          await pauseCampaign(
+            token,
+            campaign.id,
+            "Paused from campaigns dashboard",
+          );
+          setCampaigns((current) =>
+            current.map((item) =>
+              item.id === campaign.id ? { ...item, state: "paused" } : item,
+            ),
+          );
+          setSelected((current) =>
+            current && current.id === campaign.id
+              ? { ...current, state: "paused" }
+              : current,
+          );
+          notify(`Campaign "${campaign.name}" paused.`, "info");
+        }
+      } catch (error) {
+        notify((error as Error).message, "error");
       }
-    } catch (error) {
-      notify((error as Error).message, "error");
-    }
-  }, [token, notify]);
+    },
+    [token, notify],
+  );
 
   const handlePauseAll = useCallback(async () => {
     if (!token) return;
     const active = campaigns.filter((c) => c.state === "active");
-    if (active.length === 0) { notify("No active campaigns to pause.", "info"); return; }
+    if (active.length === 0) {
+      notify("No active campaigns to pause.", "info");
+      return;
+    }
 
     setIsPausing(true);
     try {
       await Promise.all(
-        active.map((c) => pauseCampaign(token, c.id, "Bulk paused from campaigns dashboard")),
+        active.map((c) =>
+          pauseCampaign(token, c.id, "Bulk paused from campaigns dashboard"),
+        ),
       );
       setCampaigns((current) =>
-        current.map((c) => c.state === "active" ? { ...c, state: "paused" } : c),
+        current.map((c) =>
+          c.state === "active" ? { ...c, state: "paused" } : c,
+        ),
       );
       setSelected((current) =>
-        current && current.state === "active" ? { ...current, state: "paused" } : current,
+        current && current.state === "active"
+          ? { ...current, state: "paused" }
+          : current,
       );
       notify(`Paused ${active.length} active campaigns.`, "success");
     } catch (error) {
@@ -210,37 +252,55 @@ export default function CampaignsPage() {
     }
   }, [token, campaigns, notify]);
 
-  const handleCreate = useCallback(async (payload: CampaignCreatePayload) => {
-    if (!token) return;
-    try {
-      const created = await createCampaign(token, payload);
-      setCampaigns((current) => [created, ...current]);
-      notify("Campaign created successfully.", "success");
-    } catch (error) {
-      notify(`Create failed: ${(error as Error).message}`, "error");
-      throw error;
-    }
-  }, [token, notify]);
+  const handleCreate = useCallback(
+    async (payload: CampaignCreatePayload) => {
+      if (!token) return;
+      try {
+        const created = await createCampaign(token, payload);
+        setCampaigns((current) => [created, ...current]);
+        notify("Campaign created successfully.", "success");
+      } catch (error) {
+        notify(`Create failed: ${(error as Error).message}`, "error");
+        throw error;
+      }
+    },
+    [token, notify],
+  );
 
-  const handleSaveFromDrawer = useCallback(async (campaignId: number, payload: CampaignUpdatePayload) => {
-    if (!token) return;
-    const updated = await updateCampaign(token, campaignId, payload);
-    setCampaigns((current) =>
-      current.map((c) => c.id === campaignId ? { ...c, ...updated } : c),
-    );
-    setSelected((current) =>
-      current && current.id === campaignId ? { ...current, ...updated } : current,
-    );
-    notify("Campaign updated.", "success");
-  }, [token, notify]);
+  const handleSaveFromDrawer = useCallback(
+    async (campaignId: number, payload: CampaignUpdatePayload) => {
+      if (!token) return;
+      const updated = await updateCampaign(token, campaignId, payload);
+      setCampaigns((current) =>
+        current.map((c) => (c.id === campaignId ? { ...c, ...updated } : c)),
+      );
+      setSelected((current) =>
+        current && current.id === campaignId
+          ? { ...current, ...updated }
+          : current,
+      );
+      notify("Campaign updated.", "success");
+    },
+    [token, notify],
+  );
 
-  const handleDeleteCampaign = useCallback(async (campaignId: number) => {
-    if (!token) return;
-    await deleteCampaign(token, campaignId);
-    setCampaigns((current) => current.filter((c) => c.id !== campaignId));
-    setSelected((current) => (current?.id === campaignId ? null : current));
-    notify("Campaign deleted.", "success");
-  }, [token, notify]);
+  const handleDeleteCampaign = useCallback(
+    async (campaignId: number) => {
+      if (!token) return;
+      try {
+        await deleteCampaign(token, campaignId);
+        setCampaigns((current) => current.filter((c) => c.id !== campaignId));
+        setSelected((current) => (current?.id === campaignId ? null : current));
+        notify("Campaign deleted.", "success");
+      } catch (err) {
+        notify(
+          err instanceof Error ? err.message : "Failed to delete campaign.",
+          "error",
+        );
+      }
+    },
+    [token, notify],
+  );
 
   return (
     <MainLayout>
@@ -249,7 +309,12 @@ export default function CampaignsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <h1
-              style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 18, letterSpacing: "-0.3px" }}
+              style={{
+                fontFamily: "'Syne', sans-serif",
+                fontWeight: 700,
+                fontSize: 18,
+                letterSpacing: "-0.3px",
+              }}
               className="text-neutral-900 dark:text-white"
             >
               Campaigns
@@ -269,7 +334,10 @@ export default function CampaignsPage() {
             <button
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors"
-              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)", boxShadow: "0 0 20px rgba(124,58,237,0.3)" }}
+              style={{
+                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                boxShadow: "0 0 20px rgba(124,58,237,0.3)",
+              }}
             >
               + New Campaign
             </button>
@@ -311,7 +379,9 @@ export default function CampaignsPage() {
                         <button
                           key={s}
                           className={`cc-filter-chip shrink-0${stateFilter === s ? " cc-chip-on" : ""}`}
-                          onClick={() => setStateFilter(s as "all" | CampaignState)}
+                          onClick={() =>
+                            setStateFilter(s as "all" | CampaignState)
+                          }
                         >
                           {s.charAt(0).toUpperCase() + s.slice(1)}
                         </button>
@@ -325,7 +395,9 @@ export default function CampaignsPage() {
                       <button
                         key={t}
                         className={`cc-filter-chip shrink-0${typeFilter === t ? " cc-chip-on" : ""}`}
-                        onClick={() => setTypeFilter((prev) => (prev === t ? "all" : t))}
+                        onClick={() =>
+                          setTypeFilter((prev) => (prev === t ? "all" : t))
+                        }
                       >
                         {t}
                       </button>

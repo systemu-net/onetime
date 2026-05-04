@@ -1,9 +1,9 @@
 import type {
-  Campaign,
-  CampaignCreatePayload,
-  CampaignLink,
-  CampaignState,
-  CampaignUpdatePayload,
+    Campaign,
+    CampaignCreatePayload,
+    CampaignLink,
+    CampaignState,
+    CampaignUpdatePayload,
 } from "@/types/campaigns";
 import { API_URL } from "./config";
 
@@ -43,6 +43,7 @@ function mapCampaign(raw: Record<string, unknown>): Campaign {
     description: (raw.description as string) ?? "",
     state: (raw.state as CampaignState) ?? "active",
     accentColor: (raw.accent_color as string) ?? "#7c3aed",
+    isDefault: (raw.default as boolean) ?? false,
     linksCount: (raw.links_count as number) ?? linksRaw.length,
     totalClicks:
       (raw.total_clicks as number) ??

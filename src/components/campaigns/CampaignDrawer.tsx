@@ -1,8 +1,8 @@
 import { getCampaignType } from "@/apis/campaigns";
 import {
-  assignLinkToCampaign,
-  createGovernedLink,
-  transitionLink,
+    assignLinkToCampaign,
+    createGovernedLink,
+    transitionLink,
 } from "@/apis/governance";
 import { GovernanceBadge } from "@/components/governance/GovernanceBadge";
 import { NewGovernedLinkModal } from "@/components/governance/NewGovernedLinkModal";
@@ -369,6 +369,27 @@ export function CampaignDrawer({
               ) : (
                 <div className="gov-title-display-row">
                   <h3 className="gov-title-display">{name}</h3>
+                  {campaign.isDefault && (
+                    <span
+                      title="This is the default campaign. New links are assigned here automatically."
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: "2px 8px",
+                        borderRadius: 99,
+                        background: "#ede9fe",
+                        color: "#6d28d9",
+                        border: "1px solid #c4b5fd",
+                        letterSpacing: "0.02em",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      ⚑ Default
+                    </span>
+                  )}
                   <button
                     onClick={() => {
                       setEditingName(true);
@@ -709,13 +730,15 @@ export function CampaignDrawer({
                 >
                   {isSaving ? "Saving..." : "Save"}
                 </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="gov-danger-btn"
-                >
-                  {isDeleting ? "Deleting..." : "Delete Campaign"}
-                </button>
+                {!campaign.isDefault && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="gov-danger-btn"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Campaign"}
+                  </button>
+                )}
               </div>
             </section>
           )}

@@ -30,6 +30,7 @@ export interface Campaign {
   description: string;
   state: CampaignState;
   accentColor: string;
+  isDefault: boolean;
   linksCount: number;
   totalClicks: number;
   createdAt: string;
