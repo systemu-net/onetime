@@ -10,6 +10,7 @@ import { getQrCodes } from "@/apis/qr_codes";
 import { Pagination } from "@/components/elements/Pagination";
 import { Heading } from "@/components/elements/heading";
 import { GovernanceDrawer } from "@/components/governance/GovernanceDrawer";
+import { GovernanceLastOpenedTable } from "@/components/governance/GovernanceLastOpenedTable";
 import { GovernanceLinksTable } from "@/components/governance/GovernanceLinksTable";
 import { GovernanceStatsGrid } from "@/components/governance/GovernanceStatsGrid";
 import { NewGovernedLinkModal } from "@/components/governance/NewGovernedLinkModal";
@@ -25,7 +26,7 @@ import type {
 import type { LinkStats, PaginationMeta } from "@/types/pagination";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import "@/components/governance/governance.css";
 
@@ -33,7 +34,7 @@ const DEFAULT_PAGINATION: PaginationMeta = {
   count: 0, page: 1, limit: 25, pages: 1, next: null, prev: null,
 };
 const DEFAULT_STATS: LinkStats = {
-  total: 0, active: 0, paused: 0, totalClicks: 0,
+  total: 0, active: 0, paused: 0, expired: 0, draft: 0, totalClicks: 0,
 };
 
 export default function GovernancePage() {
@@ -41,7 +42,6 @@ export default function GovernancePage() {
   const token = cookies.token as string;
   const { addNotification } = useNotification();
   const location = useLocation();
-  const navigate = useNavigate();
 
   // ── Data state ──────────────────────────────────────────────────────────────
   const [links, setLinks] = useState<GovernanceLink[]>([]);
@@ -51,11 +51,75 @@ export default function GovernancePage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<GovernanceLink | null>(null);
 
+  // ── Last-opened tracking ─────────────────────────────────────────────────────
+  // Stores the full link object so both the row highlight and the cross-page chip
+  // can render without extra fetches. lastOpenedIdRef is a stable copy for the
+  // handleClose callback so it doesn't need the state value in its dep array.
+  const [lastOpenedLink, setLastOpenedLink] = useState<GovernanceLink | null>(null);
+  const [flashingId, setFlashingId] = useState<string | null>(null);
+  const lastOpenedIdRef = useRef<string | null>(null);
+
   // ── Filter / page state (lifted from table) ─────────────────────────────────
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filterState, setFilterState] = useState<LinkState | "all">("all");
+  const [filterState, setFilterState] = useState<LinkState | "all">(() => {
+    const s = new URLSearchParams(window.location.search).get("state");
+    return (s as LinkState) || "all";
+  });
   const [page, setPage] = useState(1);
+
+  const setFilterStateWithUrl = useCallback((state: LinkState | "all") => {
+    setFilterState(state);
+    const params = new URLSearchParams(window.location.search);
+    if (state === "all") {
+      params.delete("state");
+    } else {
+      params.set("state", state);
+    }
+    const qs = params.toString();
+    window.history.replaceState(null, "", GOVERNANCE_ROUTE + (qs ? `?${qs}` : ""));
+  }, []);
+
+  // Open the drawer and record which link was opened in the URL.
+  const handleSelect = useCallback((link: GovernanceLink) => {
+    setSelected(link);
+    setLastOpenedLink(link);
+    lastOpenedIdRef.current = link.id;
+    const params = new URLSearchParams(window.location.search);
+    params.set("lookup", link.lookup_code);
+    window.history.replaceState(null, "", GOVERNANCE_ROUTE + "?" + params.toString());
+  }, []);
+
+  // Close the drawer: preserve the URL (so refresh reopens it), flash + scroll
+  // the row back into view so the user instantly sees what they just edited.
+  const handleClose = useCallback(() => {
+    setSelected(null);
+    const id = lastOpenedIdRef.current;
+    if (!id) return;
+    setFlashingId(id);
+    requestAnimationFrame(() => {
+      document.querySelector(`[data-link-id="${id}"]`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    });
+  }, []);
+
+  const handleDismissLastOpened = useCallback(() => {
+    setLastOpenedLink(null);
+    lastOpenedIdRef.current = null;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("lookup");
+    const qs = params.toString();
+    window.history.replaceState(null, "", GOVERNANCE_ROUTE + (qs ? `?${qs}` : ""));
+  }, []);
+
+  // Auto-clear the flash class after the animation finishes.
+  useEffect(() => {
+    if (!flashingId) return;
+    const t = setTimeout(() => setFlashingId(null), 800);
+    return () => clearTimeout(t);
+  }, [flashingId]);
 
   // ── Modal state ─────────────────────────────────────────────────────────────
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -147,26 +211,27 @@ export default function GovernancePage() {
   useEffect(() => { loadLinks(); }, [loadLinks]);
 
   // ── Deep-link: /governance?lookup=<code> ────────────────────────────────────
+  // Runs once on mount. URL is preserved (not cleared) so refresh reopens the drawer.
   useEffect(() => {
     if (!token) return;
     const query  = new URLSearchParams(location.search);
     const lookup = query.get("lookup") ?? query.get("lookup_code");
     if (!lookup) return;
 
+    const open = (link: GovernanceLink) => {
+      setSelected(link);
+      setLastOpenedLink(link);
+      lastOpenedIdRef.current = link.id;
+    };
+
     // Try current page first, fall back to a direct fetch.
     const inPage = links.find((l) => l.lookup_code === lookup);
-    if (inPage) {
-      setSelected(inPage);
-      navigate(GOVERNANCE_ROUTE, { replace: true });
-      return;
-    }
+    if (inPage) { open(inPage); return; }
 
     fetchGovernanceLinkByCode(token, lookup).then((link) => {
-      if (!link) return;
-      setSelected(enrich([link])[0]);
-      navigate(GOVERNANCE_ROUTE, { replace: true });
+      if (link) open(enrich([link])[0]);
     });
-  // Only run when the URL search string changes — not on every links update.
+  // Only on initial mount — replaceState updates don't change location.search.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search, token]);
 
@@ -180,6 +245,8 @@ export default function GovernancePage() {
   const removeLink = useCallback(
     (id: string) => {
       setSelected((sel) => (sel?.id === id ? null : sel));
+      setLastOpenedLink((prev) => (prev?.id === id ? null : prev));
+      if (lastOpenedIdRef.current === id) lastOpenedIdRef.current = null;
       loadLinks();
     },
     [loadLinks],
@@ -275,17 +342,30 @@ export default function GovernancePage() {
               total={stats.total}
               active={stats.active}
               paused={stats.paused}
+              expired={stats.expired}
+              draft={stats.draft}
               totalClicks={stats.totalClicks}
             />
+
+            {lastOpenedLink && (
+              <GovernanceLastOpenedTable
+                link={lastOpenedLink}
+                flashingId={flashingId}
+                onSelect={handleSelect}
+                onDismiss={handleDismissLastOpened}
+              />
+            )}
 
             <GovernanceLinksTable
               links={links}
               campaigns={campaigns}
               search={search}
               filterState={filterState}
+              lastOpenedId={lastOpenedLink?.id ?? null}
+              flashingId={flashingId}
               onSearchChange={setSearch}
-              onFilterChange={setFilterState}
-              onSelect={setSelected}
+              onFilterChange={setFilterStateWithUrl}
+              onSelect={handleSelect}
               onUpdate={updateLink}
               onRemove={removeLink}
               onToast={onToast}
@@ -299,7 +379,7 @@ export default function GovernancePage() {
       {selected && (
         <GovernanceDrawer
           link={selected}
-          onClose={() => setSelected(null)}
+          onClose={handleClose}
           onUpdate={updateLink}
           onDelete={removeLink}
           onToast={onToast}

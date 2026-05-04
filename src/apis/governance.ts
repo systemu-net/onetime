@@ -226,6 +226,8 @@ export async function fetchGovernanceLinks(
       total:       (data.stats?.total        as number) ?? 0,
       active:      (data.stats?.active       as number) ?? 0,
       paused:      (data.stats?.paused       as number) ?? 0,
+      expired:     (data.stats?.expired      as number) ?? 0,
+      draft:       (data.stats?.draft        as number) ?? 0,
       totalClicks: (data.stats?.total_clicks as number) ?? 0,
     },
   };

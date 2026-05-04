@@ -11,5 +11,7 @@ export interface LinkStats {
   total: number;
   active: number;
   paused: number;
+  expired: number;
+  draft: number;
   totalClicks: number;
 }
