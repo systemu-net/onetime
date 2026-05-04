@@ -1,10 +1,16 @@
-export const ClicksIcon = ({ className }: { className?: string }) => (
+import type { SVGProps } from "react";
+
+export const ClicksIcon = ({
+  className,
+  ...props
+}: SVGProps<SVGSVGElement>) => (
   <svg
     height="18"
     width="18"
     viewBox="0 0 18 18"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
+    {...props}
   >
     <g fill="currentColor">
       <path
