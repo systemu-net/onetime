@@ -48,7 +48,7 @@ const tiers: Tier[] = [
       "30 links/month",
       "30 QR Codes/month",
       "1 custom landing pages",
-      "1 link campaign",
+      "3 link campaigns",
       "7 days of click & scan data",
       "Google Safe Browsing API protection",
     ],
@@ -64,7 +64,7 @@ const tiers: Tier[] = [
       "300 links/month",
       "300 QR Codes/month",
       "3 custom landing pages",
-      "3 link campaigns",
+      "10 link campaigns",
       "30 days of click & scan data",
       "City-level & device type click & scan data",
       "Post-click analytics: see what users do after clicking",
@@ -82,7 +82,7 @@ const tiers: Tier[] = [
       "1000 links/month",
       "1000 QR Codes/month",
       "10 custom landing pages",
-      "10 link campaigns",
+      "30 link campaigns",
       "90 days of click & scan data",
       // 'Bulk link shortening',
       "City-level & device type click & scan data",
@@ -101,7 +101,7 @@ const tiers: Tier[] = [
       "3000 links/month",
       "3000 QR Codes/month",
       "30 custom landing pages",
-      "30 link campaigns",
+      "100 link campaigns",
       "6 months of click & scan data",
       "API access for integrations",
       "Custom branded domains",
@@ -138,10 +138,10 @@ function classNames(...classes: string[]) {
 
 function isCampaignFeature(feature: string) {
   return [
-    "1 link campaign",
     "3 link campaigns",
     "10 link campaigns",
     "30 link campaigns",
+    "100 link campaigns",
   ].includes(feature);
 }
 
