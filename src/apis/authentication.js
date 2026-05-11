@@ -48,6 +48,30 @@ export const loginApi = async (bodyObject) => {
   }
 }
 
+export const googleAuthApi = async (bodyObject) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyObject)
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/users/auth/google`, requestOptions);
+    if (response.ok) {
+      return [response, null];
+    }
+
+    if (response.status === 401) {
+      return [null, 'Google sign-in was rejected. Please try again.'];
+    }
+
+    const errorMessage = await response.json();
+    return [null, `Server side error: ${errorMessage.message}`];
+  } catch (error) {
+    return [null, `Server down: ${error}`];
+  }
+}
+
 export const logoutApi = async (jwtToken) => {
   const requestOptions = {
     method: 'DELETE',
