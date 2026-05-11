@@ -1,7 +1,8 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
-import { loginApi, registerApi } from "../apis/authentication";
+import { googleAuthApi, loginApi, registerApi } from "../apis/authentication";
+import { useGoogleSignIn } from "../hooks/useGoogleSignIn";
 import {
   DASHBOARD_ROUTE,
   LOGIN_ROUTE,
@@ -22,7 +23,6 @@ const initialErrorsState = {
   email: "",
   password: "",
   api: "",
-  terms: "",
 };
 
 const normalizeToken = (token: string): string => {
@@ -59,8 +59,12 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Six months expressed in seconds — used both as the JWT lifetime on the
+  // server and as the cookie maxAge here so the two stay in sync.
+  const REMEMBER_ME_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30 * 6;
   const [errors, setErrors] =
     useState<typeof initialErrorsState>(initialErrorsState);
 
@@ -91,14 +95,6 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
       };
     }
 
-    // Validate legal agreements for registration only
-    if (pageType === REGISTER && !termsAccepted) {
-      newErrors = {
-        ...newErrors,
-        terms: "You must accept the terms and policies to continue",
-      };
-    }
-
     setErrors(newErrors);
 
     // Check if there are any errors
@@ -113,27 +109,38 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
         user: {
           email: email,
           password: password,
+          remember_me: rememberMe,
         },
       });
-      handleResponse([response, error]);
+      handleResponse([response, error], rememberMe);
     } else {
       const [response, error] = await registerApi({
         user: {
           email: email,
           password: password,
-          terms_accepted: termsAccepted,
+          terms_accepted: true,
         },
       });
       handleResponse([response, error]);
     }
   };
 
-  const handleResponse = async ([response, error]) => {
+  const handleGoogleCredential = async (idToken: string) => {
+    const [response, error] = await googleAuthApi({
+      id_token: idToken,
+      terms_accepted: true,
+    });
+    handleResponse([response, error]);
+  };
+
+  const { buttonRef: googleButtonRef, error: googleError } =
+    useGoogleSignIn(handleGoogleCredential);
+
+  const handleResponse = async ([response, error], persist = false) => {
     if (error) {
       setErrors({ ...errors, api: error });
     } else {
       const jwt = await extractTokenFromResponse(response);
-      // debugger;
       if (!jwt) {
         setErrors({
           ...errors,
@@ -142,7 +149,11 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
         return;
       }
 
-      setCookie("token", jwt, { path: "/", sameSite: "lax" });
+      setCookie("token", jwt, {
+        path: "/",
+        sameSite: "lax",
+        ...(persist ? { maxAge: REMEMBER_ME_COOKIE_MAX_AGE_SECONDS } : {}),
+      });
     }
   };
 
@@ -159,29 +170,6 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                   <>Create an account</>
                 )}
               </h2>
-              <p className="mt-2 text-sm/6 text-gray-500 dark:text-gray-400">
-                {pageType === LOGIN ? (
-                  <>
-                    Not a user?
-                    <Link
-                      to={REGISTER_ROUTE}
-                      className="ms-1 text-violet-500 underline"
-                    >
-                      Register
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    Already a user?
-                    <Link
-                      to={LOGIN_ROUTE}
-                      className="ms-1 text-violet-500 underline"
-                    >
-                      Login
-                    </Link>
-                  </>
-                )}
-              </p>
             </div>
 
             <div className="mt-10">
@@ -279,63 +267,6 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                     </div>
                   </div>
 
-                  {/* Legal Agreement - Only for Registration */}
-                  {pageType === REGISTER && (
-                    <div className="border-t border-gray-200 dark:border-zinc-700 pt-6">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-6 shrink-0 items-center">
-                          <input
-                            id="terms-accepted"
-                            name="terms-accepted"
-                            type="checkbox"
-                            required
-                            checked={termsAccepted}
-                            onChange={(e) => setTermsAccepted(e.target.checked)}
-                            className="size-4 rounded border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 text-violet-600 focus:ring-violet-600"
-                          />
-                        </div>
-                        <label
-                          htmlFor="terms-accepted"
-                          className="text-sm text-gray-700 dark:text-gray-400 leading-tight"
-                        >
-                          I agree to the{" "}
-                          <Link
-                            to={TERMS_ROUTE}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-violet-600 hover:text-violet-500 underline"
-                          >
-                            Terms of Service
-                          </Link>
-                          ,{" "}
-                          <Link
-                            to={PRIVACY_ROUTE}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-violet-600 hover:text-violet-500 underline"
-                          >
-                            Privacy Policy
-                          </Link>{" "}
-                          and{" "}
-                          <Link
-                            to={USER_POLICY_ROUTE}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-violet-600 hover:text-violet-500 underline"
-                          >
-                            User Policy
-                          </Link>
-                          .
-                        </label>
-                      </div>
-                      {errors.terms && (
-                        <p className="text-sm text-red-500 mt-2 ml-7">
-                          {errors.terms}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
                   {/* Remember me and Forgot password - Only for Login */}
                   {pageType === LOGIN && (
                     <div className="flex items-center justify-between">
@@ -346,6 +277,8 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                               id="remember-me"
                               name="remember-me"
                               type="checkbox"
+                              checked={rememberMe}
+                              onChange={(e) => setRememberMe(e.target.checked)}
                               className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 checked:border-violet-600 checked:bg-violet-600 indeterminate:border-violet-600 indeterminate:bg-violet-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                             />
                             <svg
@@ -407,74 +340,87 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                 </form>
               </div>
 
-              {/* OAuth sign-in options - Only for Login */}
-              {pageType === LOGIN && (
-                <div className="mt-10">
-                  <div className="relative">
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 flex items-center"
-                    >
-                      <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
-                    </div>
-                    <div className="relative flex justify-center text-sm/6 font-medium">
-                      <span className="bg-white dark:bg-zinc-900 px-6 text-gray-900 dark:text-zinc-100">
-                        Or continue with
-                      </span>
-                    </div>
+              {/* OAuth sign-in options - Shown on both Login and Register */}
+              <div className="mt-10">
+                <div className="relative">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 flex items-center"
+                  >
+                    <div className="w-full border-t border-gray-200 dark:border-zinc-700" />
                   </div>
-
-                  <div className="mt-6 grid grid-cols-2 gap-4">
-                    <a
-                      href="#"
-                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 focus-visible:ring-transparent"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        className="h-5 w-5"
-                      >
-                        <path
-                          d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                          fill="#EA4335"
-                        />
-                        <path
-                          d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                          fill="#4285F4"
-                        />
-                        <path
-                          d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                          fill="#FBBC05"
-                        />
-                        <path
-                          d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                          fill="#34A853"
-                        />
-                      </svg>
-                      <span className="text-sm/6 font-semibold">Google</span>
-                    </a>
-
-                    <a
-                      href="#"
-                      className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-zinc-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 hover:bg-gray-50 dark:hover:bg-zinc-700 focus-visible:ring-transparent"
-                    >
-                      <svg
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                        className="size-5 fill-[#24292F] dark:fill-zinc-100"
-                      >
-                        <path
-                          d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                          clipRule="evenodd"
-                          fillRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-sm/6 font-semibold">GitHub</span>
-                    </a>
+                  <div className="relative flex justify-center text-sm/6 font-medium">
+                    <span className="bg-white dark:bg-zinc-900 px-6 text-gray-900 dark:text-zinc-100">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
-              )}
+
+                <div className="mt-6">
+                  <div
+                    ref={googleButtonRef}
+                    className="flex justify-center [&>div]:!w-full [&_iframe]:!w-full"
+                  />
+                </div>
+                <p className="mt-4 text-xs text-gray-500 dark:text-zinc-400 text-center leading-relaxed">
+                  By continuing, you agree to our{" "}
+                  <Link
+                    to={TERMS_ROUTE}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-violet-600 hover:text-violet-500 underline"
+                  >
+                    Terms of Service
+                  </Link>
+                  ,{" "}
+                  <Link
+                    to={PRIVACY_ROUTE}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-violet-600 hover:text-violet-500 underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                  , and{" "}
+                  <Link
+                    to={USER_POLICY_ROUTE}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-violet-600 hover:text-violet-500 underline"
+                  >
+                    User Policy
+                  </Link>
+                  .
+                </p>
+                {googleError && (
+                  <p className="text-sm text-medium text-red-500 mt-2">
+                    {googleError}
+                  </p>
+                )}
+              </div>
+              <p className="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                {pageType === LOGIN ? (
+                  <>
+                    Don&apos;t have an account?{" "}
+                    <Link
+                      to={REGISTER_ROUTE}
+                      className="font-medium text-violet-600 hover:text-violet-500 hover:underline"
+                    >
+                      Sign up
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <Link
+                      to={LOGIN_ROUTE}
+                      className="font-medium text-violet-600 hover:text-violet-500 hover:underline"
+                    >
+                      Sign in
+                    </Link>
+                  </>
+                )}
+              </p>
             </div>
           </div>
         </div>

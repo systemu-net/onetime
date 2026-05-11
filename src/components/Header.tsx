@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCookies } from "react-cookie";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { logoutApi } from "../apis/authentication";
 import Logo from "../assets/thinly.svg";
 import {
@@ -16,6 +16,9 @@ import ThemeToggle from "./ThemeToggle";
 const Header = () => {
   const [click, setClick] = useState(false);
   const [cookies, , removeCookie] = useCookies(["token"]);
+  const { pathname } = useLocation();
+  const onLoginPage = pathname === LOGIN_ROUTE;
+  const onRegisterPage = pathname === REGISTER_ROUTE;
 
   const handleLogout = async () => {
     const [result, error] = await logoutApi(cookies.token);
@@ -97,16 +100,28 @@ const Header = () => {
               </button>
             ) : (
               <>
-                <Link to={LOGIN_ROUTE} className="nav__link dark:text-zinc-100">
-                  Login
-                </Link>
-                <Link
-                  to={REGISTER_ROUTE}
-                  className="nav__link | btn"
-                  datatype="narrow"
-                >
-                  Sign Up
-                </Link>
+                {!onLoginPage && (
+                  <Link
+                    to={LOGIN_ROUTE}
+                    className={
+                      onRegisterPage
+                        ? "nav__link | btn"
+                        : "nav__link dark:text-zinc-100"
+                    }
+                    datatype={onRegisterPage ? "narrow" : undefined}
+                  >
+                    Login
+                  </Link>
+                )}
+                {!onRegisterPage && (
+                  <Link
+                    to={REGISTER_ROUTE}
+                    className="nav__link | btn"
+                    datatype="narrow"
+                  >
+                    Sign Up
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -163,24 +178,28 @@ const Header = () => {
             </ul>
           ) : (
             <ul className="nav__links | secondary">
-              <li>
-                <Link
-                  to={LOGIN_ROUTE}
-                  className="nav__link | btn"
-                  datatype="wide"
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={REGISTER_ROUTE}
-                  className="nav__link | btn"
-                  datatype="wide"
-                >
-                  Sign Up
-                </Link>
-              </li>
+              {!onLoginPage && (
+                <li>
+                  <Link
+                    to={LOGIN_ROUTE}
+                    className="nav__link | btn"
+                    datatype="wide"
+                  >
+                    Login
+                  </Link>
+                </li>
+              )}
+              {!onRegisterPage && (
+                <li>
+                  <Link
+                    to={REGISTER_ROUTE}
+                    className="nav__link | btn"
+                    datatype="wide"
+                  >
+                    Sign Up
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </nav>
