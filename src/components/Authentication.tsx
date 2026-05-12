@@ -133,8 +133,9 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
     handleResponse([response, error]);
   };
 
-  const { buttonRef: googleButtonRef, error: googleError } =
-    useGoogleSignIn(handleGoogleCredential);
+  const { buttonRef: googleButtonRef, error: googleError } = useGoogleSignIn(
+    handleGoogleCredential,
+  );
 
   const handleResponse = async ([response, error], persist = false) => {
     if (error) {
@@ -359,7 +360,7 @@ const Authentication = ({ pageType = LOGIN }: AuthenticationProps) => {
                 <div className="mt-6">
                   <div
                     ref={googleButtonRef}
-                    className="flex justify-center [&>div]:!w-full [&_iframe]:!w-full"
+                    className="flex justify-center overflow-hidden [&>div]:!w-full"
                   />
                 </div>
                 <p className="mt-4 text-xs text-gray-500 dark:text-zinc-400 text-center leading-relaxed">
