@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
 const GIS_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+const CLIENT_ID: string | undefined =
+  window.__ENV__?.GOOGLE_CLIENT_ID ||
+  (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined);
 
 // Google's renderButton accepts a max width of 400px.
 const MAX_BUTTON_WIDTH = 400;
@@ -118,6 +120,9 @@ interface GoogleButtonOptions {
 
 declare global {
   interface Window {
+    __ENV__?: {
+      GOOGLE_CLIENT_ID?: string;
+    };
     google?: {
       accounts: {
         id: {
