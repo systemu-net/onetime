@@ -9,14 +9,14 @@ import { extractDomain } from "@/utils/transformers";
 import { useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import {
-  LuCheck,
-  LuCopy,
-  LuMousePointerClick,
-  LuPause,
-  LuPlay,
-  LuTrash2,
-  LuEllipsisVertical,
-  LuPencilLine,
+    LuCheck,
+    LuCopy,
+    LuEllipsisVertical,
+    LuMousePointerClick,
+    LuPause,
+    LuPencilLine,
+    LuPlay,
+    LuTrash2,
 } from "react-icons/lu";
 import { TbWorld } from "react-icons/tb";
 import { GovernanceBadge } from "./GovernanceBadge";
@@ -104,17 +104,18 @@ function splitShort(short: string): { domain: string; slug: string } {
 
 // Pretty short numbers: 4324 → "4.3k", 1_200_000 → "1.2m".
 function formatClicks(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "m";
-  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  if (n >= 1_000_000)
+    return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "m";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
   return n.toString();
 }
 
 // State → left-stripe color, used by the mobile card list.
 const STATE_STRIPE: Record<string, string> = {
-  active:   "#2a7a5c",
-  paused:   "#b5613c",
-  expired:  "#b54a31",
-  draft:    "#9a9aa8",
+  active: "#2a7a5c",
+  paused: "#b5613c",
+  expired: "#b54a31",
+  draft: "#9a9aa8",
   archived: "#9a9aa8",
 };
 
@@ -152,10 +153,7 @@ export function GovernanceLinksTable({
   useEffect(() => {
     if (!openMenuId) return;
     const onDocPointer = (e: PointerEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenuId(null);
       }
     };
@@ -163,10 +161,7 @@ export function GovernanceLinksTable({
     return () => document.removeEventListener("pointerdown", onDocPointer);
   }, [openMenuId]);
 
-  const handleCopyShort = async (
-    e: React.MouseEvent,
-    link: GovernanceLink,
-  ) => {
+  const handleCopyShort = async (e: React.MouseEvent, link: GovernanceLink) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(link.short);
@@ -458,8 +453,7 @@ export function GovernanceLinksTable({
           const isCopied = copiedId === link.lookup_code;
           const { domain, slug } = splitShort(link.short);
           const destDisplay = link.dest.replace(/^https?:\/\//i, "");
-          const stripe =
-            STATE_STRIPE[link.state] ?? STATE_STRIPE.draft;
+          const stripe = STATE_STRIPE[link.state] ?? STATE_STRIPE.draft;
           return (
             <li
               key={link.id}
