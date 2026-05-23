@@ -1,4 +1,4 @@
-@import '@fontsource/rubik/index.css';
+@import "@fontsource/rubik/index.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -64,7 +64,7 @@ button {
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   line-height: 1.6;
   /* background-color: #f0f1f6; */
   background-color: rgb(244 244 245 / var(--tw-bg-opacity, 1));
@@ -97,12 +97,12 @@ body.dark {
   white-space: nowrap;
 }
 
-.btn[datatype='narrow'] {
+.btn[datatype="narrow"] {
   background-color: var(--clr-primary-400);
   color: var(--clr-primary-500);
 }
 
-.btn[datatype='wide'] {
+.btn[datatype="wide"] {
   background-color: var(--clr-primary-400);
   color: var(--clr-primary-500);
   width: 100%;
@@ -327,7 +327,7 @@ input.error-input::placeholder {
 }
 
 .statistics .statistics__cards::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 50%;
   top: 0;
@@ -594,7 +594,7 @@ input.error-input::placeholder {
   }
 
   .statistics .statistics__cards::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 3rem;

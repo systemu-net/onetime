@@ -1,9 +1,9 @@
+import "@/components/campaigns/campaigns.css";
 import type { GovernanceLink } from "@/types/governance";
 import { extractDomain } from "@/utils/transformers";
 import { useState } from "react";
 import { LuMousePointerClick } from "react-icons/lu";
 import { TbWorld } from "react-icons/tb";
-import "@/components/campaigns/campaigns.css";
 import { GovernanceBadge } from "./GovernanceBadge";
 import { GOVERNANCE_TABLE_COLUMNS } from "./GovernanceLinksTable";
 
@@ -25,16 +25,17 @@ function splitShort(short: string): { domain: string; slug: string } {
 }
 
 function formatClicks(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "m";
-  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  if (n >= 1_000_000)
+    return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "m";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
   return n.toString();
 }
 
 const STATE_STRIPE: Record<string, string> = {
-  active:   "#2a7a5c",
-  paused:   "#b5613c",
-  expired:  "#b54a31",
-  draft:    "#9a9aa8",
+  active: "#2a7a5c",
+  paused: "#b5613c",
+  expired: "#b54a31",
+  draft: "#9a9aa8",
   archived: "#9a9aa8",
 };
 

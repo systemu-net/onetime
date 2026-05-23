@@ -1,23 +1,23 @@
 import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  TransitionChild,
+    Dialog,
+    DialogBackdrop,
+    DialogPanel,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuItems,
+    TransitionChild,
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import {
-  Bars3Icon,
-  BellIcon,
-  Cog6ToothIcon,
-  HomeIcon,
-  LinkIcon,
-  MegaphoneIcon,
-  QrCodeIcon,
-  XMarkIcon,
+    Bars3Icon,
+    BellIcon,
+    Cog6ToothIcon,
+    HomeIcon,
+    LinkIcon,
+    MegaphoneIcon,
+    QrCodeIcon,
+    XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
@@ -27,23 +27,23 @@ import { Link, useLocation } from "react-router-dom";
 import { getCurrentUserApi, logoutApi } from "../../apis/authentication";
 import Logo from "../../assets/logo.svg";
 import {
-  CAMPAIGNS_ROUTE,
-  DASHBOARD_ROUTE,
-  GOVERNANCE_ROUTE,
-  LANDING_ROUTE,
-  LINKS_ROUTE,
-  PAGES_ROUTE,
-  PLANS_ROUTE,
-  PROFILE_ROUTE,
-  QR_ROUTE,
-  SETTINGS_ROUTE,
+    CAMPAIGNS_ROUTE,
+    DASHBOARD_ROUTE,
+    GOVERNANCE_ROUTE,
+    LANDING_ROUTE,
+    LINKS_ROUTE,
+    PAGES_ROUTE,
+    PLANS_ROUTE,
+    PROFILE_ROUTE,
+    QR_ROUTE,
+    SETTINGS_ROUTE,
 } from "../../routes";
 import { User } from "../../types";
 import {
-  getCachedUser,
-  invalidateUserCache,
-  setCachedUser,
-  USER_CACHE_VERSION_KEY_EXPORT,
+    getCachedUser,
+    invalidateUserCache,
+    setCachedUser,
+    USER_CACHE_VERSION_KEY_EXPORT,
 } from "../../utils/userCache";
 import ThemeToggle from "../ThemeToggle";
 
