@@ -2465,3 +2465,139 @@ html:not(.dark) .cc-check-box.cc-checked {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Mobile / tablet polish (< 768px) — keep campaign cards inside the viewport
+ * and replace truncated 4-up rows with comfortable 2-up grids.
+ * ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Force every direct child of the two-col layout to respect its column
+   * width — without this, CSS Grid uses min-content of the card and the
+   * card spills beyond the viewport. */
+  .cc-two-col {
+    min-width: 0;
+  }
+  .cc-two-col > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Page-level overview cards: 2-up grid */
+  .cc-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Campaign-card outer chrome */
+  .cc-campaign-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .cc-campaign-card > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Right-side insights panel + cards */
+  .cc-right-panel,
+  .cc-panel-card,
+  .cc-panel-body {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .cc-mini-link-button {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .cc-mini-link-bar {
+    display: none; /* reclaim width for the link name */
+  }
+
+  /* Header: tighter padding, drop the inline sparkline (cosmetic only) */
+  .cc-header {
+    padding: 14px 14px 12px;
+    gap: 10px;
+  }
+  .cc-mini-spark {
+    display: none;
+  }
+  .cc-pin-btn {
+    /* Always show on touch — hover doesn't exist */
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+  }
+  .cc-name {
+    font-size: 14.5px;
+  }
+  .cc-desc {
+    font-size: 11.5px;
+    /* Allow two-line wrap on narrow screens instead of clipping */
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: initial;
+  }
+
+  /* In-card stats row: 2x2 instead of 1x4 */
+  .cc-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cc-stat {
+    padding: 10px 12px;
+    border-right: 1px solid rgba(115, 115, 130, 0.2);
+    border-bottom: 1px solid rgba(115, 115, 130, 0.2);
+  }
+  .cc-stat:nth-child(2n) {
+    border-right: none;
+  }
+  .cc-stat:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+  .cc-stat-value-primary {
+    font-size: 24px;
+  }
+  .cc-stat-value {
+    font-size: 14px;
+  }
+  .cc-stat-label,
+  .cc-stat-sub {
+    font-size: 10px;
+  }
+
+  .cc-progress-wrap {
+    padding: 0 14px 12px;
+  }
+
+  /* Footer: stack date above the button cluster so buttons can wrap */
+  .cc-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 14px 12px;
+  }
+  .cc-footer-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .cc-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Toolbar: keep search full-width, filters scroll horizontally */
+  .cc-search-wrap {
+    width: 100%;
+  }
+  .cc-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+

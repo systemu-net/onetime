@@ -1,13 +1,23 @@
 import {
-  assignLinkToCampaign,
-  deleteGovernedLink,
-  transitionLink,
+    assignLinkToCampaign,
+    deleteGovernedLink,
+    transitionLink,
 } from "@/apis/governance";
 import type { Campaign } from "@/types/campaigns";
 import type { GovernanceLink, LinkState } from "@/types/governance";
 import { extractDomain } from "@/utils/transformers";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
+import {
+  LuCheck,
+  LuCopy,
+  LuMousePointerClick,
+  LuPause,
+  LuPlay,
+  LuTrash2,
+  LuEllipsisVertical,
+  LuPencilLine,
+} from "react-icons/lu";
 import { TbWorld } from "react-icons/tb";
 import { GovernanceBadge } from "./GovernanceBadge";
 import { GovernanceDeleteConfirmModal } from "./GovernanceDeleteConfirmModal";
@@ -27,13 +37,33 @@ export const GOVERNANCE_TABLE_COLUMNS: {
   label: string;
   className?: string;
 }[] = [
-  { key: "link",        label: "Link",        className: "w-[220px]" },
-  { key: "status",      label: "Status",      className: "hidden md:table-cell w-[110px]" },
-  { key: "destination", label: "Destination", className: "hidden md:table-cell w-[420px] xl:w-[520px]" },
-  { key: "clicks",      label: "Clicks",      className: "hidden md:table-cell w-[100px]" },
-  { key: "routing",     label: "Routing",     className: "hidden lg:table-cell w-[110px]" },
-  { key: "campaign",    label: "Campaign",    className: "hidden lg:table-cell w-[150px]" },
-  { key: "actions",     label: "",            className: "hidden md:table-cell w-0 p-0" },
+  { key: "link", label: "Link", className: "w-[220px]" },
+  {
+    key: "status",
+    label: "Status",
+    className: "hidden md:table-cell w-[110px]",
+  },
+  {
+    key: "destination",
+    label: "Destination",
+    className: "hidden md:table-cell w-[420px] xl:w-[520px]",
+  },
+  {
+    key: "clicks",
+    label: "Clicks",
+    className: "hidden md:table-cell w-[100px]",
+  },
+  {
+    key: "routing",
+    label: "Routing",
+    className: "hidden lg:table-cell w-[110px]",
+  },
+  {
+    key: "campaign",
+    label: "Campaign",
+    className: "hidden lg:table-cell w-[150px]",
+  },
+  { key: "actions", label: "", className: "hidden md:table-cell w-0 p-0" },
 ];
 
 interface GovernanceLinksTableProps {
@@ -61,6 +91,33 @@ function barPct(clicks: number, cap: number | null) {
     : Math.min(100, (clicks / MAX_CLICKS) * 100);
 }
 
+// Strip protocol and split "host/slug" for the mobile short-link display.
+function splitShort(short: string): { domain: string; slug: string } {
+  const stripped = short.replace(/^https?:\/\//i, "");
+  const idx = stripped.indexOf("/");
+  if (idx === -1) return { domain: stripped, slug: "" };
+  return {
+    domain: stripped.slice(0, idx),
+    slug: stripped.slice(idx + 1),
+  };
+}
+
+// Pretty short numbers: 4324 → "4.3k", 1_200_000 → "1.2m".
+function formatClicks(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "m";
+  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  return n.toString();
+}
+
+// State → left-stripe color, used by the mobile card list.
+const STATE_STRIPE: Record<string, string> = {
+  active:   "#2a7a5c",
+  paused:   "#b5613c",
+  expired:  "#b54a31",
+  draft:    "#9a9aa8",
+  archived: "#9a9aa8",
+};
+
 export function GovernanceLinksTable({
   links,
   campaigns,
@@ -87,6 +144,44 @@ export function GovernanceLinksTable({
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [faviconErrors, setFaviconErrors] = useState<Set<string>>(new Set());
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  // Close the per-card popover menu when the user taps anywhere else.
+  useEffect(() => {
+    if (!openMenuId) return;
+    const onDocPointer = (e: PointerEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("pointerdown", onDocPointer);
+    return () => document.removeEventListener("pointerdown", onDocPointer);
+  }, [openMenuId]);
+
+  const handleCopyShort = async (
+    e: React.MouseEvent,
+    link: GovernanceLink,
+  ) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(link.short);
+      setCopiedId(link.lookup_code);
+      setTimeout(
+        () =>
+          setCopiedId((current) =>
+            current === link.lookup_code ? null : current,
+          ),
+        1200,
+      );
+    } catch {
+      onToast("Couldn't copy to clipboard", "error");
+    }
+  };
 
   // links is already the server-filtered page — use directly
   const filtered = links;
@@ -280,8 +375,9 @@ export function GovernanceLinksTable({
 
   return (
     <div className="rounded-xl border border-neutral-200 dark:border-white/[0.06] overflow-hidden bg-white dark:bg-neutral-900">
-      {/* Table toolbar */}
-      <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-neutral-200 dark:border-white/[0.06] flex flex-col gap-3">
+      {/* Table toolbar — desktop only; on mobile the GovernancePage hosts a
+          minimalistic search + filter-chip header instead. */}
+      <div className="hidden lg:flex px-4 sm:px-5 py-3 sm:py-4 border-b border-neutral-200 dark:border-white/[0.06] flex-col gap-3">
         {/* Row 1: title + search */}
         <div className="flex items-center gap-3">
           <h2 className="font-semibold text-[15px] text-neutral-900 dark:text-white shrink-0">
@@ -354,8 +450,248 @@ export function GovernanceLinksTable({
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile / tablet card list (< lg) — purpose-built for narrow screens */}
+      <ul className="lg:hidden flex flex-col gap-2.5 px-3 sm:px-4 py-3 bg-neutral-50/60 dark:bg-neutral-900/40">
+        {filtered.map((link) => {
+          const isSelected = selectedIds.has(link.id);
+          const isMenuOpen = openMenuId === link.id;
+          const isCopied = copiedId === link.lookup_code;
+          const { domain, slug } = splitShort(link.short);
+          const destDisplay = link.dest.replace(/^https?:\/\//i, "");
+          const stripe =
+            STATE_STRIPE[link.state] ?? STATE_STRIPE.draft;
+          return (
+            <li
+              key={link.id}
+              data-link-id={link.id}
+              onClick={() => onSelect(link)}
+              className={[
+                "relative cursor-pointer rounded-2xl border bg-white dark:bg-neutral-900 overflow-hidden",
+                "pl-4 pr-3 py-3.5",
+                "shadow-[0_1px_0_rgba(0,0,0,0.02),0_2px_8px_rgba(0,0,0,0.03)]",
+                "transition-colors active:bg-neutral-50 dark:active:bg-neutral-800",
+                isSelected
+                  ? "border-violet-400/60 ring-1 ring-violet-400/30"
+                  : "border-neutral-200/80 dark:border-white/[0.06]",
+                link.id === lastOpenedId
+                  ? "ring-1 ring-violet-500/50 border-violet-400/60"
+                  : "",
+                link.id === flashingId ? "gov-link-row--flash" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {/* Left state stripe — full-height, matches campaign-card accent */}
+              <span
+                aria-hidden
+                className="absolute left-0 top-0 bottom-0 w-[4px]"
+                style={{ background: stripe }}
+              />
+
+              {/* ── Section 1: Favicon + short link + copy + menu ── */}
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Favicon */}
+                <div className="shrink-0">
+                  {faviconErrors.has(link.lookup_code) ? (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800">
+                      <TbWorld className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+                    </div>
+                  ) : (
+                    <img
+                      alt={extractDomain(link.dest)}
+                      draggable={false}
+                      loading="lazy"
+                      width="36"
+                      height="36"
+                      className="h-9 w-9 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white object-cover"
+                      src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(link.dest)}`}
+                      onError={() =>
+                        setFaviconErrors((prev) =>
+                          new Set(prev).add(link.lookup_code),
+                        )
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* Short URL */}
+                <div className="min-w-0 flex-1 flex items-center gap-1.5">
+                  <span
+                    className="min-w-0 flex-1 truncate text-[13.5px] leading-tight"
+                    title={link.short}
+                  >
+                    <span className="text-neutral-500 dark:text-neutral-400 font-medium">
+                      {domain}
+                    </span>
+                    <span className="text-neutral-400 dark:text-neutral-600">
+                      /
+                    </span>
+                    <span className="font-bold text-neutral-900 dark:text-neutral-100">
+                      {slug}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={isCopied ? "Copied" : "Copy short link"}
+                    onClick={(e) => handleCopyShort(e, link)}
+                    className={`shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+                      isCopied
+                        ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30"
+                        : "text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                    }`}
+                  >
+                    {isCopied ? (
+                      <LuCheck size={14} strokeWidth={2.5} />
+                    ) : (
+                      <LuCopy size={13} strokeWidth={2} />
+                    )}
+                  </button>
+                </div>
+
+                {/* 3-dot menu */}
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    aria-label="More actions"
+                    aria-haspopup="menu"
+                    aria-expanded={isMenuOpen}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId((current) =>
+                        current === link.id ? null : link.id,
+                      );
+                    }}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100"
+                  >
+                    <LuEllipsisVertical size={17} strokeWidth={2} />
+                  </button>
+                  {isMenuOpen && (
+                    <div
+                      ref={menuRef}
+                      role="menu"
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-9 z-30 w-44 overflow-hidden rounded-xl border border-neutral-200 dark:border-white/[0.08] bg-white dark:bg-neutral-900 shadow-[0_10px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]"
+                    >
+                      <button
+                        role="menuitem"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                        onClick={() => {
+                          setOpenMenuId(null);
+                          onSelect(link);
+                        }}
+                      >
+                        <LuPencilLine size={14} />
+                        Manage
+                      </button>
+                      <button
+                        role="menuitem"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                        onClick={(e) => {
+                          setOpenMenuId(null);
+                          handleQuickTransition(
+                            e,
+                            link,
+                            link.state === "paused" ? "active" : "paused",
+                          );
+                        }}
+                      >
+                        {link.state === "paused" ? (
+                          <>
+                            <LuPlay size={14} /> Resume
+                          </>
+                        ) : (
+                          <>
+                            <LuPause size={14} /> Pause
+                          </>
+                        )}
+                      </button>
+                      <button
+                        role="menuitem"
+                        className="flex w-full items-center gap-2 border-t border-neutral-100 dark:border-white/[0.06] px-3 py-2.5 text-left text-[13px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={(e) => {
+                          setOpenMenuId(null);
+                          handleDeleteLink(e, link);
+                        }}
+                      >
+                        <LuTrash2 size={14} /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Section 2: Destination URL block ── */}
+              <a
+                href={link.dest}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title={link.dest}
+                className="mt-2.5 flex items-start gap-2 rounded-lg bg-neutral-100/80 dark:bg-neutral-800/60 px-3 py-2 text-[12.5px] leading-snug text-neutral-700 dark:text-neutral-300 hover:text-violet-600 dark:hover:text-violet-300 transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className="shrink-0 text-neutral-400 font-medium"
+                >
+                  ↳
+                </span>
+                <span className="min-w-0 flex-1 line-clamp-2 break-all">
+                  {destDisplay}
+                </span>
+              </a>
+
+              {/* ── Section 3: State + campaign + clicks ── */}
+              <div className="mt-2.5 flex items-center gap-1.5 min-w-0">
+                <GovernanceBadge state={link.state} />
+                {link.campaign && (
+                  <span
+                    className="min-w-0 truncate max-w-[40%] rounded-md border border-neutral-200 dark:border-white/[0.08] bg-neutral-50 dark:bg-neutral-800/60 px-2 py-[3px] font-mono text-[10.5px] text-neutral-600 dark:text-neutral-300"
+                    title={link.campaign}
+                  >
+                    {link.campaign}
+                  </span>
+                )}
+                {link.rulesCount > 0 && (
+                  <span className="shrink-0 rounded-md border border-violet-200 dark:border-violet-500/30 bg-violet-50 dark:bg-violet-500/10 px-2 py-[3px] font-mono text-[10.5px] text-violet-600 dark:text-violet-300">
+                    {link.rulesCount} rule{link.rulesCount > 1 ? "s" : ""}
+                  </span>
+                )}
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-200 dark:border-white/[0.08] bg-neutral-50 dark:bg-neutral-800/60 px-2.5 py-[3px] text-[11px] text-neutral-600 dark:text-neutral-300">
+                  <LuMousePointerClick
+                    size={11}
+                    strokeWidth={2}
+                    className="text-[#4a7fb8]"
+                  />
+                  <strong className="font-mono font-bold text-neutral-900 dark:text-neutral-100">
+                    {formatClicks(link.clicks)}
+                  </strong>
+                  {link.clicks === 1 ? "click" : "clicks"}
+                </span>
+              </div>
+
+              {/* Mini cap-progress bar (kept subtle, only when there's data) */}
+              {link.clicks > 0 && (
+                <div className="mt-2.5 h-0.5 overflow-hidden rounded-full bg-neutral-200/70 dark:bg-neutral-800">
+                  <div
+                    className="gov-clicks-bar-fill h-full"
+                    style={{ width: `${barPct(link.clicks, link.cap)}%` }}
+                  />
+                </div>
+              )}
+            </li>
+          );
+        })}
+
+        {filtered.length === 0 && (
+          <li className="px-5 py-12 text-center text-neutral-400">
+            <div className="text-3xl mb-2 opacity-30">⊘</div>
+            <p className="text-sm">No links match your filter</p>
+          </li>
+        )}
+      </ul>
+
+      {/* Table (lg and up) */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full table-fixed min-w-0 md:min-w-[860px] lg:min-w-[1160px] xl:min-w-[1360px]">
           <thead>
             <tr className="border-b border-neutral-100 dark:border-white/[0.04]">
@@ -389,8 +725,10 @@ export function GovernanceLinksTable({
                   selectedIds.has(link.id) ? "bg-violet-500/[0.08]" : "",
                   link.linkCampaignColor ? "gov-link-row--accented" : "",
                   link.id === lastOpenedId ? "gov-link-row--last-opened" : "",
-                  link.id === flashingId  ? "gov-link-row--flash" : "",
-                ].filter(Boolean).join(" ")}
+                  link.id === flashingId ? "gov-link-row--flash" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
                 style={{
                   ["--gov-row-accent" as string]:
                     link.linkCampaignColor ?? "transparent",
@@ -425,7 +763,11 @@ export function GovernanceLinksTable({
                           height="20"
                           className="rounded-full size-5 border border-neutral-200 dark:border-neutral-600"
                           src={`https://www.google.com/s2/favicons?sz=64&domain_url=${extractDomain(link.dest)}`}
-                          onError={() => setFaviconErrors((prev) => new Set(prev).add(link.lookup_code))}
+                          onError={() =>
+                            setFaviconErrors((prev) =>
+                              new Set(prev).add(link.lookup_code),
+                            )
+                          }
                         />
                       )}
                     </div>

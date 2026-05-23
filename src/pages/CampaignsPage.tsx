@@ -304,7 +304,7 @@ export default function CampaignsPage() {
 
   return (
     <MainLayout>
-      <div className="px-4 sm:px-6 lg:px-8 pb-10">
+      <div className="px-4 sm:px-6 lg:px-8 pb-10 min-w-0 overflow-x-clip">
         {/* Page header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
@@ -323,17 +323,17 @@ export default function CampaignsPage() {
               Group, govern, and measure distributed link campaigns
             </p>
           </div>
-          <div className="flex gap-2.5 items-center">
+          <div className="flex gap-2.5 items-center flex-wrap ml-auto">
             <button
               onClick={handlePauseAll}
               disabled={isPausing}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors disabled:opacity-60 whitespace-nowrap"
             >
               {isPausing ? "Pausing…" : "⏸ Pause All Active"}
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors whitespace-nowrap"
               style={{
                 background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
                 boxShadow: "0 0 20px rgba(124,58,237,0.3)",

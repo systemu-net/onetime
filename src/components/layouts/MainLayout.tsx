@@ -412,10 +412,10 @@ const MainLayout = ({ children }) => {
         </div>
 
         <div className="lg:pl-72">
-          <main className="pt-6 flex flex-1 h-full overflow-x-hidden">
+          <main className="pt-6 flex flex-1 h-full overflow-x-clip">
             <div className="flex-grow h-full min-w-0">
               <div className="w-full max-w-none px-4 sm:px-6 lg:px-8">
-                <div className="mb-4 lg:hidden">
+                <div className="sticky top-0 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-4 bg-white/90 dark:bg-neutral-950/90 backdrop-blur supports-[backdrop-filter]:bg-white/75 border-b border-neutral-200/70 dark:border-white/[0.06] lg:hidden flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setSidebarOpen(true)}
@@ -423,6 +423,13 @@ const MainLayout = ({ children }) => {
                   >
                     <Bars3Icon aria-hidden="true" className="size-5" />
                     Menu
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="View notifications"
+                    className="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-2 text-gray-700 dark:text-zinc-100"
+                  >
+                    <BellIcon aria-hidden="true" className="size-5" />
                   </button>
                 </div>
                 {children}
