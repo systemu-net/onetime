@@ -13,7 +13,7 @@ import { shortenApi } from "@/apis/shorten";
 import { useNotification } from "@/Notifications";
 import type { Campaign } from "@/types/campaigns";
 import type { GovernanceLink } from "@/types/governance";
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { Fragment, FormEvent, ReactNode, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layouts/MainLayout";
@@ -1696,41 +1696,56 @@ function InsightCard({
   if (dismissed) return null;
   const names = exampleLinks.map((l) => l.name || l.dest).slice(0, 2);
   return (
-    <div className="relative col-span-12 flex items-center gap-4 overflow-hidden rounded-bento bg-ink px-6 py-5 text-canvas-2 shadow-bento-sm">
+    <div className="relative col-span-12 flex flex-col gap-4 overflow-hidden rounded-bento bg-ink px-5 py-5 text-canvas-2 shadow-bento-sm sm:flex-row sm:items-center sm:gap-4 sm:px-6">
       <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(ellipse_at_center_right,rgba(252,217,184,0.1),transparent_60%)]" />
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-gradient-to-br from-sun to-coral text-lg">
-        💡
+
+      {/* Dismiss button — absolute on mobile, inline on desktop */}
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
+        title="Dismiss"
+        className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full text-lg text-white/40 transition hover:bg-white/10 hover:text-canvas-2 sm:static sm:order-last"
+      >
+        ×
+      </button>
+
+      <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[11px] bg-gradient-to-br from-sun to-coral text-lg">
+          💡
+        </div>
+        <div className="relative z-10 min-w-0 flex-1 pr-8 sm:pr-0">
+          <div className="mb-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-sun">
+            Smart insight
+          </div>
+          <div className="mb-0.5 font-display text-[15px] font-semibold tracking-[-0.01em]">
+            {expiredCount} link{expiredCount === 1 ? "" : "s"} expired — review
+            before they go dark
+          </div>
+          <div className="text-[13px] text-white/60">
+            {names.length > 0 ? (
+              <>
+                {names.map((n, i) => (
+                  <Fragment key={n}>
+                    {i > 0 ? <> and </> : null}
+                    <strong className="text-white">{n}</strong>
+                  </Fragment>
+                ))}
+                {names.length === expiredCount
+                  ? " are "
+                  : ` and ${expiredCount - names.length} more are `}
+                already marked expired. Extend or redirect to recover lost
+                clicks.
+              </>
+            ) : (
+              "Extend or redirect them to recover lost clicks."
+            )}
+          </div>
+        </div>
       </div>
-      <div className="relative z-10 flex-1">
-        <div className="mb-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-sun">
-          Smart insight
-        </div>
-        <div className="mb-0.5 font-display text-[15px] font-semibold tracking-[-0.01em]">
-          {expiredCount} link{expiredCount === 1 ? "" : "s"} expired — review
-          before they go dark
-        </div>
-        <div className="text-[13px] text-white/60">
-          {names.length > 0 ? (
-            <>
-              {names.map((n, i) => (
-                <span key={n}>
-                  {i > 0 && " and "}
-                  <strong className="text-white">{n}</strong>
-                </span>
-              ))}{" "}
-              {names.length === expiredCount
-                ? "are"
-                : `and ${expiredCount - names.length} more are`}{" "}
-              already marked expired. Extend or redirect to recover lost clicks.
-            </>
-          ) : (
-            "Extend or redirect them to recover lost clicks."
-          )}
-        </div>
-      </div>
+
       <Link
         to={`${GOVERNANCE_ROUTE}?state=expired`}
-        className="relative z-10 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-canvas-2 px-4 py-2.5 text-[13px] font-medium text-ink transition hover:-translate-y-px hover:bg-sun"
+        className="relative z-10 inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-canvas-2 px-4 py-2.5 text-[13px] font-medium text-ink transition hover:-translate-y-px hover:bg-sun"
       >
         Review expired
         <svg
@@ -1743,14 +1758,6 @@ function InsightCard({
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </Link>
-      <button
-        type="button"
-        onClick={() => setDismissed(true)}
-        title="Dismiss"
-        className="relative z-10 flex h-7 w-7 items-center justify-center rounded-full text-lg text-white/40 transition hover:bg-white/10 hover:text-canvas-2"
-      >
-        ×
-      </button>
     </div>
   );
 }
