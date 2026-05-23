@@ -12,7 +12,11 @@
 
 html,
 body {
-  overflow-x: hidden;
+  /* Use `clip` rather than `hidden`: `hidden` promotes overflow-y to `auto`
+   * per CSS spec, turning <html>/<body> into a scroll container — which
+   * breaks `position: sticky` (it binds to body instead of the viewport).
+   * `clip` clips horizontal overflow without creating a scrolling box. */
+  overflow-x: clip;
   max-width: 100%;
 }
 

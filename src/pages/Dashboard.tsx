@@ -5,14 +5,17 @@ import {
   type TimelinePeriod,
 } from "@/apis/analytics";
 import { fetchCampaigns, getCampaignType } from "@/apis/campaigns";
+import { SHORT_URL } from "@/apis/config";
 import { fetchGovernanceLinks } from "@/apis/governance";
 import { getPages } from "@/apis/pages";
 import { getQrCodes } from "@/apis/qr_codes";
+import { shortenApi } from "@/apis/shorten";
+import { useNotification } from "@/Notifications";
 import type { Campaign } from "@/types/campaigns";
 import type { GovernanceLink } from "@/types/governance";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "../components/layouts/MainLayout";
 import {
   CAMPAIGNS_ROUTE,
@@ -60,6 +63,8 @@ function campaignIcon(name: string): string {
 
 const DashboardPage = () => {
   const [cookies] = useCookies(["plan", "token", "email"]);
+  const navigate = useNavigate();
+  const { addNotification } = useNotification();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [topLinks, setTopLinks] = useState<GovernanceLink[]>([]);
@@ -70,6 +75,7 @@ const DashboardPage = () => {
     "paste your long URL here…",
   );
   const [shortenerValue, setShortenerValue] = useState("");
+  const [isShortening, setIsShortening] = useState(false);
 
   // fetch live data
   useEffect(() => {
@@ -128,20 +134,70 @@ const DashboardPage = () => {
   // Smart-insight: shown only when something needs attention
   const insightVisible = expiredLinks > 0;
 
-  const handleShortenSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleShortenSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Route to Governance with the pasted URL pre-filled (placeholder UX).
-    if (shortenerValue.trim()) {
-      setShortenerPlaceholder("Opening Governance…");
-      window.location.assign(
-        `${GOVERNANCE_ROUTE}?new=${encodeURIComponent(shortenerValue.trim())}`,
-      );
-    } else {
+    if (isShortening) return;
+
+    const url = shortenerValue.trim();
+    if (!url) {
       setShortenerPlaceholder("paste a URL first…");
       setTimeout(
         () => setShortenerPlaceholder("paste your long URL here…"),
         2000,
       );
+      return;
+    }
+
+    if (!cookies.token) {
+      addNotification("Please sign in to shorten links.", "warning");
+      return;
+    }
+
+    setIsShortening(true);
+    setShortenerPlaceholder("Shortening…");
+    try {
+      const [response, error] = await shortenApi(cookies.token, {
+        link: { original_url: url },
+      });
+
+      if (error || typeof response === "string" || !response.ok) {
+        const msg =
+          (typeof error === "string" && error) || "Could not shorten that URL.";
+        addNotification(msg, "error");
+        setShortenerPlaceholder("paste your long URL here…");
+        setIsShortening(false);
+        return;
+      }
+
+      const data = await response.json();
+      const lookupCode: string | undefined =
+        data?.link?.lookup_code ?? data?.lookup_code;
+
+      if (!lookupCode) {
+        addNotification("Link created but no lookup code returned.", "error");
+        setShortenerPlaceholder("paste your long URL here…");
+        setIsShortening(false);
+        return;
+      }
+
+      const shortUrl = `${SHORT_URL}/${lookupCode}`;
+      try {
+        await navigator.clipboard.writeText(shortUrl);
+        addNotification("Short link copied to clipboard", "success");
+      } catch {
+        addNotification("Link created — copy failed", "warning");
+      }
+
+      setShortenerValue("");
+      setShortenerPlaceholder("Opening Governance…");
+      navigate(`${GOVERNANCE_ROUTE}?lookup=${encodeURIComponent(lookupCode)}`);
+    } catch (err) {
+      addNotification(
+        `Network error: ${(err as Error).message ?? "unknown"}`,
+        "error",
+      );
+      setShortenerPlaceholder("paste your long URL here…");
+      setIsShortening(false);
     }
   };
 
@@ -162,6 +218,7 @@ const DashboardPage = () => {
             onChange={setShortenerValue}
             placeholder={shortenerPlaceholder}
             onSubmit={handleShortenSubmit}
+            loading={isShortening}
           />
 
           {/* ── Bento grid ──────────────────────────────────────────── */}
@@ -220,6 +277,9 @@ const DashboardPage = () => {
             />
 
             <ChartCard token={cookies.token} />
+            <LastClickedCard links={topLinks} loading={statsLoading} />
+
+            <LeaderboardCard campaigns={topCampaigns} loading={statsLoading} />
             <HealthCard
               pct={healthPct}
               active={activeLinks}
@@ -227,12 +287,6 @@ const DashboardPage = () => {
               expired={expiredLinks}
               loading={statsLoading}
             />
-
-            <LeaderboardCard
-              campaigns={topCampaigns}
-              loading={statsLoading}
-            />
-            <LastClickedCard links={topLinks} loading={statsLoading} />
 
             {insightVisible && (
               <InsightCard
@@ -264,8 +318,7 @@ function TopBar({
     <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
       <div className="animate-[fadeIn_0.5s_ease-out_forwards]">
         <h1 className="font-display text-[32px] font-bold leading-[1.05] tracking-[-0.025em] text-ink dark:text-zinc-100">
-          {greeting},{" "}
-          <span className="text-violetBrand">{firstName}</span>{" "}
+          {greeting}, <span className="text-violetBrand">{firstName}</span>{" "}
           <span className="inline-block origin-[70%_70%] animate-wave">👋</span>
         </h1>
         <div className="mt-1 flex items-center gap-2 font-mono text-xs text-ink-3 dark:text-zinc-400">
@@ -273,8 +326,8 @@ function TopBar({
           <span className="text-mint-d">·</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex w-[260px] items-center gap-2 rounded-full border border-dashline bg-canvas-2 px-4 py-2 transition focus-within:border-ink focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-dashline bg-canvas-2 px-4 py-2 transition focus-within:border-ink focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] dark:border-zinc-700 dark:bg-zinc-900 sm:w-[260px] sm:flex-none">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -295,8 +348,8 @@ function TopBar({
           </span>
         </div>
         <Link
-          to={GOVERNANCE_ROUTE}
-          className="inline-flex items-center gap-1.5 rounded-full border border-ink bg-ink px-5 py-2.5 text-sm font-medium text-canvas-2 transition hover:-translate-y-px hover:bg-ink-2"
+          to={`${GOVERNANCE_ROUTE}?new=1`}
+          className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-ink bg-ink px-4 py-2.5 text-sm font-medium text-canvas-2 transition hover:-translate-y-px hover:bg-ink-2 sm:px-5"
         >
           <svg
             viewBox="0 0 24 24"
@@ -321,11 +374,13 @@ function QuickShortener({
   onChange,
   placeholder,
   onSubmit,
+  loading,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  loading: boolean;
 }) {
   return (
     <div className="relative mb-4 overflow-hidden rounded-bento bg-gradient-to-br from-ink to-[#1f1f28] px-4 py-4 text-canvas-2 sm:px-6 sm:py-5">
@@ -359,33 +414,57 @@ function QuickShortener({
         </div>
 
         {/* Form — full-width on mobile, flex-1 alongside the label on sm+ */}
-        <form
-          onSubmit={onSubmit}
-          className="flex min-w-0 gap-2 sm:flex-1"
-        >
+        <form onSubmit={onSubmit} className="flex min-w-0 gap-2 sm:flex-1">
           <input
             value={value}
             onChange={(e) => onChange(e.target.value)}
             type="url"
             placeholder={placeholder}
             aria-label="URL to shorten"
-            className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-[13px] text-canvas-2 outline-none transition placeholder:text-white/35 focus:border-violetBrand-2 focus:bg-white/10"
+            disabled={loading}
+            className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-[13px] text-canvas-2 outline-none transition placeholder:text-white/35 focus:border-violetBrand-2 focus:bg-white/10 disabled:opacity-60"
           />
           <button
             type="submit"
             aria-label="Shorten URL"
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-gradient-to-br from-violetBrand to-violetBrand-2 px-4 py-2.5 text-sm font-semibold shadow-[0_4px_16px_rgba(124,58,237,0.25)] transition hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(124,58,237,0.35)] sm:px-6"
+            disabled={loading}
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-gradient-to-br from-violetBrand to-violetBrand-2 px-4 py-2.5 text-sm font-semibold shadow-[0_4px_16px_rgba(124,58,237,0.25)] transition hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(124,58,237,0.35)] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 sm:px-6"
           >
-            <span className="hidden sm:inline">Shorten</span>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              className="h-3.5 w-3.5 sm:h-3 sm:w-3"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
+            <span className="hidden sm:inline">
+              {loading ? "Shortening…" : "Shorten"}
+            </span>
+            {loading ? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-3.5 w-3.5 animate-spin sm:h-3 sm:w-3"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  opacity="0.25"
+                />
+                <path
+                  d="M21 12a9 9 0 0 0-9-9"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="h-3.5 w-3.5 sm:h-3 sm:w-3"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            )}
           </button>
         </form>
       </div>
@@ -478,20 +557,6 @@ function FeaturedCard() {
           <rect x="48" y="62" width="80" height="4" rx="2" fill="#15151b" />
           <rect x="48" y="76" width="30" height="14" rx="7" fill="#f5a99a" />
         </g>
-        <g
-          transform="translate(115, 100)"
-          className="animate-float [animation-delay:-1.6s]"
-        >
-          <circle cx="0" cy="0" r="14" fill="#15151b" />
-          <path d="M-3,-5 L4,2 L0,2 L1,5 L-1,5 L-2,2 L-5,4 Z" fill="#fff" />
-        </g>
-        <g
-          transform="translate(25, 130)"
-          fill="#15151b"
-          className="animate-float [animation-delay:-3.2s]"
-        >
-          <path d="M0,-7 L2,-2 L7,0 L2,2 L0,7 L-2,2 L-7,0 L-2,-2 Z" />
-        </g>
       </svg>
     </Card>
   );
@@ -517,55 +582,53 @@ function ActivityCard({
         </span>
       </div>
       <div className="flex flex-col gap-2">
-        {loading
-          ? [0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-[10px] bg-mint-3 px-3.5 py-2.5"
-              >
-                <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-canvas-2/60" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-2/3 animate-pulse rounded bg-canvas-2/70" />
-                  <div className="h-2.5 w-1/2 animate-pulse rounded bg-canvas-2/50" />
+        {loading ? (
+          [0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 rounded-[10px] bg-mint-3 px-3.5 py-2.5"
+            >
+              <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-canvas-2/60" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 w-2/3 animate-pulse rounded bg-canvas-2/70" />
+                <div className="h-2.5 w-1/2 animate-pulse rounded bg-canvas-2/50" />
+              </div>
+              <div className="h-6 w-12 animate-pulse rounded bg-canvas-2/60" />
+            </div>
+          ))
+        ) : items.length === 0 ? (
+          <div className="rounded-[10px] bg-mint-3 px-3.5 py-6 text-center text-[13px] text-ink-3">
+            Share your links to see activity here.
+          </div>
+        ) : (
+          items.map((link) => (
+            <Link
+              key={link.lookup_code}
+              to={`${GOVERNANCE_ROUTE}?lookup=${link.lookup_code}`}
+              className="flex items-center gap-3 rounded-[10px] bg-mint-3 px-3.5 py-2.5 transition hover:translate-x-0.5 hover:bg-canvas-2"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas-2 text-sm">
+                🔗
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13.5px] font-medium text-ink">
+                  {link.name || link.dest}
                 </div>
-                <div className="h-6 w-12 animate-pulse rounded bg-canvas-2/60" />
+                <div className="truncate font-mono text-[11px] text-ink-3">
+                  {link.short}
+                </div>
               </div>
-            ))
-          : items.length === 0
-            ? (
-              <div className="rounded-[10px] bg-mint-3 px-3.5 py-6 text-center text-[13px] text-ink-3">
-                Share your links to see activity here.
+              <div className="flex shrink-0 flex-col items-end">
+                <div className="font-display text-[18px] font-bold leading-none text-ink">
+                  {link.clicks.toLocaleString()}
+                </div>
+                <div className="mt-1 font-mono text-[9.5px] uppercase tracking-wider text-ink-3">
+                  clicks
+                </div>
               </div>
-            )
-            : (
-              items.map((link) => (
-                <Link
-                  key={link.lookup_code}
-                  to={`${GOVERNANCE_ROUTE}?lookup=${link.lookup_code}`}
-                  className="flex items-center gap-3 rounded-[10px] bg-mint-3 px-3.5 py-2.5 transition hover:translate-x-0.5 hover:bg-canvas-2"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas-2 text-sm">
-                    🔗
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13.5px] font-medium text-ink">
-                      {link.name || link.dest}
-                    </div>
-                    <div className="truncate font-mono text-[11px] text-ink-3">
-                      {link.short}
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end">
-                    <div className="font-display text-[18px] font-bold leading-none text-ink">
-                      {link.clicks.toLocaleString()}
-                    </div>
-                    <div className="mt-1 font-mono text-[9.5px] uppercase tracking-wider text-ink-3">
-                      clicks
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
+            </Link>
+          ))
+        )}
       </div>
     </Card>
   );
@@ -695,7 +758,7 @@ function StatCard({
   return (
     <Link
       to={href}
-      className={`col-span-6 sm:col-span-3 lg:col-span-2 ${bg} relative flex min-h-[140px] flex-col overflow-hidden rounded-bento px-4 py-4 shadow-bento-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-bento`}
+      className={`col-span-6 sm:col-span-3 lg:col-span-3 ${bg} relative flex min-h-[140px] flex-col overflow-hidden rounded-bento px-4 py-4 shadow-bento-sm transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-bento`}
     >
       <div className="absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-[9px] bg-white/55 text-sm">
         {icon}
@@ -897,10 +960,8 @@ function ChartSvg({
 
   const maxClicks = Math.max(1, ...points.map((p) => p.clicks));
   const coords = points.map((p, i) => {
-    const x =
-      points.length === 1 ? VB_W / 2 : (i / (points.length - 1)) * VB_W;
-    const y =
-      VB_PAD_Y + (1 - p.clicks / maxClicks) * (VB_H - 2 * VB_PAD_Y);
+    const x = points.length === 1 ? VB_W / 2 : (i / (points.length - 1)) * VB_W;
+    const y = VB_PAD_Y + (1 - p.clicks / maxClicks) * (VB_H - 2 * VB_PAD_Y);
     return { x, y, clicks: p.clicks };
   });
 
@@ -939,9 +1000,7 @@ function ChartSvg({
       Math.min(1, (e.clientX - rect.left) / rect.width),
     );
     const idx =
-      points.length === 1
-        ? 0
-        : Math.round(ratio * (points.length - 1));
+      points.length === 1 ? 0 : Math.round(ratio * (points.length - 1));
     setHoveredIdx(idx);
   };
 
@@ -1098,6 +1157,42 @@ function axisLabels(points: ClicksTimeline["points"]): string[] {
 
 // ── Governance Health donut ──────────────────────────────────────────────────
 
+type HealthSegment = {
+  key: "active" | "paused" | "expired";
+  label: string;
+  value: number;
+  color: string;
+};
+
+// Build an SVG arc path for a donut segment between two angles (in radians,
+// measured clockwise from 12 o'clock).
+function describeDonutArc(
+  cx: number,
+  cy: number,
+  rOuter: number,
+  rInner: number,
+  startAngle: number,
+  endAngle: number,
+): string {
+  const polar = (r: number, angle: number) => {
+    // angle 0 = top (12 o'clock); rotate so SVG y-down matches clockwise growth
+    const a = angle - Math.PI / 2;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  };
+  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+  const p1 = polar(rOuter, startAngle);
+  const p2 = polar(rOuter, endAngle);
+  const p3 = polar(rInner, endAngle);
+  const p4 = polar(rInner, startAngle);
+  return [
+    `M ${p1.x} ${p1.y}`,
+    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${p2.x} ${p2.y}`,
+    `L ${p3.x} ${p3.y}`,
+    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${p4.x} ${p4.y}`,
+    "Z",
+  ].join(" ");
+}
+
 function HealthCard({
   pct,
   active,
@@ -1111,15 +1206,49 @@ function HealthCard({
   expired: number;
   loading: boolean;
 }) {
-  const total = active + paused + expired;
-  const C = 2 * Math.PI * 40; // donut circumference
-  const seg = (n: number) => (total > 0 ? (n / total) * C : 0);
-  const activeLen = seg(active);
-  const pausedLen = seg(paused);
-  const expiredLen = seg(expired);
+  const [hovered, setHovered] = useState<HealthSegment | null>(null);
+
+  const segments: HealthSegment[] = [
+    { key: "active", label: "Active", value: active, color: "#2a7a5c" },
+    { key: "paused", label: "Paused", value: paused, color: "#b5613c" },
+    { key: "expired", label: "Expired", value: expired, color: "#b54a31" },
+  ];
+  const total = segments.reduce((s, x) => s + x.value, 0);
+
+  // Donut geometry
+  const SIZE = 240;
+  const CENTER = SIZE / 2;
+  const R_OUTER = 110;
+  const R_INNER = 72;
+  const R_OUTER_HOVER = 116;
+
+  // Pre-compute arc angles
+  let cursor = 0;
+  const arcs = segments.map((seg) => {
+    const angle = total > 0 ? (seg.value / total) * Math.PI * 2 : 0;
+    const start = cursor;
+    const end = cursor + angle;
+    cursor = end;
+    return { seg, start, end, angle };
+  });
+
+  const showSlices = !loading && total > 0;
+  const centerLabel = hovered ? hovered.label.toUpperCase() : "HEALTHY";
+  const centerSubLabel = hovered
+    ? `${hovered.value.toLocaleString()} link${hovered.value === 1 ? "" : "s"}`
+    : pct >= 80
+      ? "HEALTHY"
+      : pct >= 50
+        ? "OK"
+        : "ATTENTION";
+  const centerPct = hovered
+    ? total > 0
+      ? Math.round((hovered.value / total) * 100)
+      : 0
+    : pct;
 
   return (
-    <Card className="col-span-12 bg-lilac px-6 py-5 lg:col-span-4">
+    <Card className="col-span-12 bg-lilac px-6 py-5 lg:col-span-5">
       <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.08em] text-ink-3">
         <span>Governance health</span>
         <Link
@@ -1139,99 +1268,92 @@ function HealthCard({
         </Link>
       </div>
 
-      <svg className="mx-auto my-2 h-[100px] w-[100px]" viewBox="0 0 100 100">
-        <circle
-          cx="50"
-          cy="50"
-          r="40"
-          fill="none"
-          stroke="rgba(255,255,255,0.4)"
-          strokeWidth="14"
-        />
-        {!loading && total > 0 && (
-          <>
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              fill="none"
-              stroke="#2a7a5c"
-              strokeWidth="14"
-              strokeDasharray={`${activeLen} ${C - activeLen}`}
-              strokeDashoffset="0"
-              transform="rotate(-90 50 50)"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              fill="none"
-              stroke="#b5613c"
-              strokeWidth="14"
-              strokeDasharray={`${pausedLen} ${C - pausedLen}`}
-              strokeDashoffset={-activeLen}
-              transform="rotate(-90 50 50)"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              fill="none"
-              stroke="#b54a31"
-              strokeWidth="14"
-              strokeDasharray={`${expiredLen} ${C - expiredLen}`}
-              strokeDashoffset={-(activeLen + pausedLen)}
-              transform="rotate(-90 50 50)"
-            />
-          </>
-        )}
-        <text
-          x="50"
-          y="48"
-          textAnchor="middle"
-          fontFamily="Bricolage Grotesque"
-          fontWeight="800"
-          fontSize="22"
-          fill="#15151b"
+      <div className="relative mx-auto flex flex-1 items-center justify-center">
+        <svg
+          className="block h-auto w-full max-w-[280px]"
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          onMouseLeave={() => setHovered(null)}
         >
-          {loading ? "—" : `${pct}%`}
-        </text>
-        <text
-          x="50"
-          y="62"
-          textAnchor="middle"
-          fontFamily="Geist Mono"
-          fontSize="7"
-          fill="#6a6a78"
-        >
-          {pct >= 80 ? "HEALTHY" : pct >= 50 ? "OK" : "ATTENTION"}
-        </text>
-      </svg>
+          {/* Background ring */}
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r={(R_OUTER + R_INNER) / 2}
+            fill="none"
+            stroke="rgba(255,255,255,0.45)"
+            strokeWidth={R_OUTER - R_INNER}
+          />
 
-      <div className="flex flex-col gap-1.5">
-        <HealthRow color="bg-mint-d" label="Active" value={active} />
-        <HealthRow color="bg-peach-d" label="Paused" value={paused} />
-        <HealthRow color="bg-coral-d" label="Expired" value={expired} />
+          {showSlices &&
+            arcs.map(({ seg, start, end, angle }) => {
+              if (angle <= 0) return null;
+              const isHovered = hovered?.key === seg.key;
+              const rOuter = isHovered ? R_OUTER_HOVER : R_OUTER;
+              // Tiny gap between slices when more than one is visible
+              const gap =
+                arcs.filter((a) => a.angle > 0).length > 1 ? 0.012 : 0;
+              const s = start + gap;
+              const e = Math.max(s, end - gap);
+              return (
+                <path
+                  key={seg.key}
+                  d={describeDonutArc(CENTER, CENTER, rOuter, R_INNER, s, e)}
+                  fill={seg.color}
+                  stroke="#fff"
+                  strokeWidth={isHovered ? 2 : 1}
+                  className="cursor-pointer transition-all duration-200 ease-out"
+                  style={{
+                    filter: isHovered
+                      ? "drop-shadow(0 4px 10px rgba(21,21,27,0.18))"
+                      : undefined,
+                    opacity: hovered && !isHovered ? 0.55 : 1,
+                  }}
+                  onMouseEnter={() => setHovered(seg)}
+                />
+              );
+            })}
+
+          {/* Center label */}
+          <text
+            x={CENTER}
+            y={CENTER - 6}
+            textAnchor="middle"
+            fontFamily="Bricolage Grotesque"
+            fontWeight="800"
+            fontSize="44"
+            fill="#15151b"
+            style={{ pointerEvents: "none" }}
+          >
+            {loading ? "—" : `${centerPct}%`}
+          </text>
+          <text
+            x={CENTER}
+            y={CENTER + 18}
+            textAnchor="middle"
+            fontFamily="Geist Mono"
+            fontSize="10"
+            letterSpacing="1.5"
+            fill={hovered ? hovered.color : "#6a6a78"}
+            style={{ pointerEvents: "none" }}
+          >
+            {loading ? "" : hovered ? centerLabel : centerSubLabel}
+          </text>
+          {hovered && (
+            <text
+              x={CENTER}
+              y={CENTER + 34}
+              textAnchor="middle"
+              fontFamily="Geist Mono"
+              fontSize="9"
+              fill="#6a6a78"
+              style={{ pointerEvents: "none" }}
+            >
+              {centerSubLabel}
+            </text>
+          )}
+        </svg>
       </div>
     </Card>
-  );
-}
-
-function HealthRow({
-  color,
-  label,
-  value,
-}: {
-  color: string;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="flex items-center gap-2.5 text-xs">
-      <div className={`h-[7px] w-[7px] shrink-0 rounded-full ${color}`} />
-      <span className="flex-1 text-ink-2">{label}</span>
-      <span className="font-mono text-[11px] text-ink-2">{value}</span>
-    </div>
   );
 }
 
@@ -1288,86 +1410,82 @@ function LeaderboardCard({
           </tr>
         </thead>
         <tbody>
-          {loading
-            ? [0, 1, 2, 3].map((i) => (
-                <tr key={i} className="border-b border-dashline/40">
-                  <td className="px-2 py-3" />
-                  <td className="px-2 py-3">
-                    <div className="h-3.5 w-32 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
-                  </td>
-                  <td className="px-2 py-3 text-right">
-                    <div className="ml-auto h-4 w-14 animate-pulse rounded-full bg-canvas dark:bg-zinc-800" />
-                  </td>
-                  <td className="px-2 py-3 text-right">
-                    <div className="ml-auto h-3 w-6 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
-                  </td>
-                  <td className="px-2 py-3 text-right">
-                    <div className="ml-auto h-3 w-12 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
-                  </td>
-                </tr>
-              ))
-            : campaigns.length === 0
-              ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-2 py-6 text-center text-sm text-ink-3"
+          {loading ? (
+            [0, 1, 2, 3].map((i) => (
+              <tr key={i} className="border-b border-dashline/40">
+                <td className="px-2 py-3" />
+                <td className="px-2 py-3">
+                  <div className="h-3.5 w-32 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <div className="ml-auto h-4 w-14 animate-pulse rounded-full bg-canvas dark:bg-zinc-800" />
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <div className="ml-auto h-3 w-6 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <div className="ml-auto h-3 w-12 animate-pulse rounded bg-canvas dark:bg-zinc-800" />
+                </td>
+              </tr>
+            ))
+          ) : campaigns.length === 0 ? (
+            <tr>
+              <td
+                colSpan={5}
+                className="px-2 py-6 text-center text-sm text-ink-3"
+              >
+                No campaigns yet.
+              </td>
+            </tr>
+          ) : (
+            campaigns.map((c, i) => (
+              <tr
+                key={c.id}
+                className="cursor-pointer border-b border-dashline/40 last:border-b-0 transition hover:bg-canvas dark:hover:bg-zinc-800/50"
+              >
+                <td className="px-2 py-3 font-mono text-[11px] text-ink-4">
+                  {String(i + 1).padStart(2, "0")}
+                </td>
+                <td className="px-2 py-3">
+                  <Link
+                    to={CAMPAIGNS_ROUTE}
+                    className="flex items-center gap-2.5"
                   >
-                    No campaigns yet.
-                  </td>
-                </tr>
-              )
-              : (
-                campaigns.map((c, i) => (
-                  <tr
-                    key={c.id}
-                    className="cursor-pointer border-b border-dashline/40 last:border-b-0 transition hover:bg-canvas dark:hover:bg-zinc-800/50"
-                  >
-                    <td className="px-2 py-3 font-mono text-[11px] text-ink-4">
-                      {String(i + 1).padStart(2, "0")}
-                    </td>
-                    <td className="px-2 py-3">
-                      <Link
-                        to={CAMPAIGNS_ROUTE}
-                        className="flex items-center gap-2.5"
-                      >
-                        <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm"
-                          style={{ background: c.accentColor || "#ebe2f7" }}
-                          aria-hidden="true"
-                        >
-                          {campaignIcon(c.name)}
-                        </span>
-                        <span className="text-[13.5px] font-medium">
-                          {c.name}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-2 py-3 text-right">
-                      <StateChip state={c.state} />
-                    </td>
-                    <td className="px-2 py-3 text-right font-mono text-[13.5px] font-medium text-ink-2">
-                      {c.linksCount}
-                    </td>
-                    <td className="px-2 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="h-[3px] w-[50px] overflow-hidden rounded bg-dashline dark:bg-zinc-700">
-                          <div
-                            className="h-full rounded"
-                            style={{
-                              width: `${(c.totalClicks / maxClicks) * 100}%`,
-                              background: c.accentColor || "#6b4ba6",
-                            }}
-                          />
-                        </div>
-                        <span className="font-mono text-[13.5px] font-medium text-ink">
-                          {c.totalClicks.toLocaleString()}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm"
+                      style={{ background: c.accentColor || "#ebe2f7" }}
+                      aria-hidden="true"
+                    >
+                      {campaignIcon(c.name)}
+                    </span>
+                    <span className="text-[13.5px] font-medium">{c.name}</span>
+                  </Link>
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <StateChip state={c.state} />
+                </td>
+                <td className="px-2 py-3 text-right font-mono text-[13.5px] font-medium text-ink-2">
+                  {c.linksCount}
+                </td>
+                <td className="px-2 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="h-[3px] w-[50px] overflow-hidden rounded bg-dashline dark:bg-zinc-700">
+                      <div
+                        className="h-full rounded"
+                        style={{
+                          width: `${(c.totalClicks / maxClicks) * 100}%`,
+                          background: c.accentColor || "#6b4ba6",
+                        }}
+                      />
+                    </div>
+                    <span className="font-mono text-[13.5px] font-medium text-ink">
+                      {c.totalClicks.toLocaleString()}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 
@@ -1459,9 +1577,7 @@ function StateChip({ state }: { state: string }) {
           ? "bg-coral-d"
           : "bg-ink-3";
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 text-[11.5px] ${cls}`}
-    >
+    <span className={`inline-flex items-center gap-1.5 text-[11.5px] ${cls}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
       {state}
     </span>
@@ -1478,7 +1594,7 @@ function LastClickedCard({
   loading: boolean;
 }) {
   return (
-    <Card className="col-span-12 bg-peach-2 px-6 py-5 lg:col-span-5">
+    <Card className="col-span-12 h-full bg-peach-2 px-6 py-5 lg:col-span-4">
       <div className="mb-1.5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.08em] text-ink-3">
         <span>Top 5 last clicked</span>
         <Link
@@ -1499,7 +1615,7 @@ function LastClickedCard({
       </div>
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="flex flex-1 flex-col justify-between">
           {[0, 1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -1515,22 +1631,22 @@ function LastClickedCard({
           ))}
         </div>
       ) : links.length === 0 ? (
-        <div className="py-6 text-center text-sm text-ink-3">
+        <div className="flex flex-1 items-center justify-center py-6 text-center text-sm text-ink-3">
           No clicks recorded yet.
         </div>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-1 flex-col justify-between">
           {links.map((link) => (
             <Link
               key={link.lookup_code}
               to={`${GOVERNANCE_ROUTE}?lookup=${link.lookup_code}`}
-              className="flex items-center gap-3 border-b border-black/[0.06] py-3 transition last:border-b-0 hover:translate-x-0.5"
+              className="group -mx-2 flex items-center gap-3 rounded-xl border-b border-black/[0.06] px-2 py-3 transition-all duration-150 last:border-b-0 hover:translate-x-0.5 hover:border-transparent hover:bg-white/70 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] hover:ring-1 hover:ring-black/5"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-canvas-2 text-sm">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-canvas-2 text-sm transition group-hover:bg-violetBrand/10 group-hover:text-violetBrand">
                 🔗
               </div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[13.5px] font-medium text-ink">
+                <div className="truncate text-[13.5px] font-medium text-ink transition group-hover:text-violetBrand">
                   {link.name || link.dest}
                 </div>
                 <div className="truncate font-mono text-[11px] text-ink-3">
@@ -1561,9 +1677,7 @@ function StateChipMini({ state }: { state: string }) {
           ? "bg-coral-2 text-coral-d"
           : "bg-canvas-2 text-ink-3";
   return (
-    <span
-      className={`rounded-full px-2 py-0.5 font-mono text-[10.5px] ${cls}`}
-    >
+    <span className={`rounded-full px-2 py-0.5 font-mono text-[10.5px] ${cls}`}>
       {state}
     </span>
   );
