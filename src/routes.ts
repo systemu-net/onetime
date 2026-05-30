@@ -1,5 +1,7 @@
 export const FEATURES_ROUTE = "/features";
 export const RESOURCES_ROUTE = "/resources";
+export const ABOUT_ROUTE = "/about";
+export const CONTACT_ROUTE = "/contact";
 export const REGISTER_ROUTE = "/register";
 export const LOGIN_ROUTE = "/login";
 export const DASHBOARD_ROUTE = "/";

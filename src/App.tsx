@@ -3,7 +3,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { LinksProvider } from "./context/LinksContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./Notifications";
+import AboutPage from "./pages/AboutPage";
 import AnalyticsPage from "./pages/Analytics";
+import ContactPage from "./pages/ContactPage";
 import CreatePage from "./pages/CreatePage";
 import CreateQrCode from "./pages/CreateQrCode";
 import DashboardPage from "./pages/Dashboard";
@@ -30,8 +32,10 @@ import CampaignsPage from "./pages/CampaignsPage";
 import GovernancePage from "./pages/GovernancePage";
 import PlansPage from "./pages/Plans";
 import {
+  ABOUT_ROUTE,
   ANALYTICS_ROUTE,
   CAMPAIGNS_ROUTE,
+  CONTACT_ROUTE,
   COOKIES_ROUTE,
   CREATE_PAGES_ROUTE,
   CREATE_QR_ROUTE,
@@ -64,6 +68,8 @@ export const App = () => {
               <Route path={FEATURES_ROUTE} element={<FeaturesPage />}></Route>
               <Route path={PLANS_ROUTE} element={<PlansPage />}></Route>
               <Route path={RESOURCES_ROUTE} element={<ResourcesPage />}></Route>
+              <Route path={ABOUT_ROUTE} element={<AboutPage />}></Route>
+              <Route path={CONTACT_ROUTE} element={<ContactPage />}></Route>
               <Route path={REGISTER_ROUTE} element={<RegisterPage />}></Route>
               <Route path={LOGIN_ROUTE} element={<LoginPage />}></Route>
 

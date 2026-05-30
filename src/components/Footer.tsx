@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import {
+  ABOUT_ROUTE,
+  CONTACT_ROUTE,
   COOKIES_ROUTE,
   FEATURES_ROUTE,
   PLANS_ROUTE,
   PRIVACY_ROUTE,
+  RESOURCES_ROUTE,
   TERMS_ROUTE,
   USER_POLICY_ROUTE
 } from "../routes";
@@ -14,7 +17,7 @@ const Footer = () => {
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* About Section */}
           <div className="footer-section">
             <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -48,12 +51,53 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link
+                  to={RESOURCES_ROUTE}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  Resources
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="/blog/"
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  Blog
+                </a>
+              </li>
+              <li>
                 <a
                   href="/api-docs"
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                 >
                   API
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company Section */}
+          <div className="footer-section">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Company
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  to={ABOUT_ROUTE}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={CONTACT_ROUTE}
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  Contact
+                </Link>
               </li>
             </ul>
           </div>
@@ -114,12 +158,12 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a
-                  href="mailto:support@thin.ly"
+                <Link
+                  to={CONTACT_ROUTE}
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                 >
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a
