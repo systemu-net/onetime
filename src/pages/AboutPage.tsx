@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
-import Boost from '@/components/Boost';
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
+import Boost from "@/components/Boost";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import {
   CONTACT_ROUTE,
   FEATURES_ROUTE,
@@ -9,7 +8,8 @@ import {
   REGISTER_ROUTE,
   RESOURCES_ROUTE,
   TERMS_ROUTE,
-} from '@/routes';
+} from "@/routes";
+import { Link } from "react-router-dom";
 
 const AboutPage = () => {
   return (
@@ -23,14 +23,16 @@ const AboutPage = () => {
               About thin.ly
             </p>
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              Short links, built for people who actually measure what they share.
+              Short links, built for people who actually measure what they
+              share.
             </h1>
             <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-              thin.ly is a URL shortening and link management service for creators,
-              marketers, product teams, and developers. We turn long, ugly URLs into
-              short, shareable links — and then give you the analytics, QR codes,
-              routing rules, branded pages and governance tooling you need to actually
-              understand what happens after someone clicks.
+              thin.ly is a URL shortening and link management service for
+              creators, marketers, product teams, and developers. We turn long,
+              ugly URLs into short, shareable links — and then give you the
+              analytics, QR codes, routing rules, branded pages and governance
+              tooling you need to actually understand what happens after someone
+              clicks.
             </p>
           </div>
 
@@ -39,18 +41,19 @@ const AboutPage = () => {
               Why we built thin.ly
             </h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-              Most URL shorteners stop at the redirect. You paste a long link, you
-              get a short one, and that's the end of the conversation. We thought
-              that was a waste of an extremely high-signal moment — every short link
-              is a measurable touchpoint between a brand and a real human being.
+              Most URL shorteners stop at the redirect. You paste a long link,
+              you get a short one, and that's the end of the conversation. We
+              thought that was a waste of an extremely high-signal moment —
+              every short link is a measurable touchpoint between a brand and a
+              real human being.
             </p>
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
               thin.ly was built on the belief that a short link should be a
-              first-class part of a campaign, not an afterthought. Every link you
-              create gets click analytics, geographic breakdown, device and referrer
-              data, an optional QR code, an optional branded landing page, and a
-              governance layer so you can pause, redirect, or expire a link without
-              losing the click history.
+              first-class part of a campaign, not an afterthought. Every link
+              you create gets click analytics, geographic breakdown, device and
+              referrer data, an optional QR code, an optional branded landing
+              page, and a governance layer so you can pause, redirect, or expire
+              a link without losing the click history.
             </p>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               If you've ever printed a QR code on a banner and then had to live
@@ -69,8 +72,8 @@ const AboutPage = () => {
                   Short links with real analytics
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                  Every click is logged with country, device, browser, referrer and
-                  timestamp. You get per-link dashboards and an aggregated
+                  Every click is logged with country, device, browser, referrer
+                  and timestamp. You get per-link dashboards and an aggregated
                   click-timeline across your whole portfolio.
                 </p>
               </div>
@@ -79,9 +82,10 @@ const AboutPage = () => {
                   QR codes for everything physical
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                  Generate QR codes for any short link, customise the styling, and
-                  swap the destination later without reprinting anything. Useful for
-                  packaging, posters, conference booths and direct mail.
+                  Generate QR codes for any short link, customise the styling,
+                  and swap the destination later without reprinting anything.
+                  Useful for packaging, posters, conference booths and direct
+                  mail.
                 </p>
               </div>
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
@@ -89,9 +93,9 @@ const AboutPage = () => {
                   Branded link-in-bio pages
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                  Bundle several links, QR codes and resources onto a single branded
-                  page you can share from a social profile, an email signature or a
-                  print campaign.
+                  Bundle several links, QR codes and resources onto a single
+                  branded page you can share from a social profile, an email
+                  signature or a print campaign.
                 </p>
               </div>
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
@@ -100,8 +104,8 @@ const AboutPage = () => {
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                   Route the same short link to different destinations based on
-                  device, geography or schedule. Pause campaigns, expire links, and
-                  audit every destination change with a full history log.
+                  device, geography or schedule. Pause campaigns, expire links,
+                  and audit every destination change with a full history log.
                 </p>
               </div>
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
@@ -110,8 +114,8 @@ const AboutPage = () => {
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                   Every link is scanned and re-scanned. Destinations that turn
-                  malicious are automatically blocked with a safety interstitial,
-                  protecting both end users and your brand.
+                  malicious are automatically blocked with a safety
+                  interstitial, protecting both end users and your brand.
                 </p>
               </div>
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
@@ -120,8 +124,8 @@ const AboutPage = () => {
                 </h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
                   A JSON HTTP API for creating, updating and analysing links
-                  programmatically, plus webhooks for click events. Designed to be
-                  embedded inside a CMS, a CRM or a CI pipeline.
+                  programmatically, plus webhooks for click events. Designed to
+                  be embedded inside a CMS, a CRM or a CI pipeline.
                 </p>
               </div>
             </div>
@@ -132,13 +136,13 @@ const AboutPage = () => {
               Who thin.ly is for
             </h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-              thin.ly is used by marketers running paid and organic campaigns who
-              need attribution beyond what the destination's own analytics will tell
-              them; by creators who want one short, memorable URL to put in a video
-              description or podcast notes; by product and engineering teams who
-              need governable, auditable links inside transactional email and
-              push notifications; and by small businesses that just want a
-              friendlier-looking link on a flyer.
+              thin.ly is used by marketers running paid and organic campaigns
+              who need attribution beyond what the destination's own analytics
+              will tell them; by creators who want one short, memorable URL to
+              put in a video description or podcast notes; by product and
+              engineering teams who need governable, auditable links inside
+              transactional email and push notifications; and by small
+              businesses that just want a friendlier-looking link on a flyer.
             </p>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               If you currently keep a spreadsheet of "where did this link go and
@@ -162,23 +166,29 @@ const AboutPage = () => {
                 schedule afterwards.
               </li>
               <li>
-                Links whose destinations turn malicious are automatically blocked
-                and replaced with an interstitial safety warning. The end user
-                never reaches the dangerous page.
+                Links whose destinations turn malicious are automatically
+                blocked and replaced with an interstitial safety warning. The
+                end user never reaches the dangerous page.
               </li>
               <li>
-                Click data is collected for analytics, never sold. See our{' '}
-                <Link to={PRIVACY_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+                Click data is collected for analytics, never sold. See our{" "}
+                <Link
+                  to={PRIVACY_ROUTE}
+                  className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+                >
                   Privacy Policy
-                </Link>{' '}
+                </Link>{" "}
                 for the full data-handling story.
               </li>
               <li>
-                We publish clear{' '}
-                <Link to={TERMS_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+                We publish clear{" "}
+                <Link
+                  to={TERMS_ROUTE}
+                  className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+                >
                   Terms of Service
-                </Link>
-                {' '}explaining what the service does, what it doesn't do, and what
+                </Link>{" "}
+                explaining what the service does, what it doesn't do, and what
                 kinds of content are not allowed on the platform.
               </li>
             </ul>
@@ -189,20 +199,32 @@ const AboutPage = () => {
               Where to go next
             </h2>
             <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
-              If you want to see the product in action, the fastest path is to{' '}
-              <Link to={REGISTER_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              If you want to see the product in action, the fastest path is to{" "}
+              <Link
+                to={REGISTER_ROUTE}
+                className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+              >
                 create a free account
-              </Link>{' '}
-              and shorten your first link. From there you can explore the{' '}
-              <Link to={FEATURES_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              </Link>{" "}
+              and shorten your first link. From there you can explore the{" "}
+              <Link
+                to={FEATURES_ROUTE}
+                className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+              >
                 features
               </Link>
-              {', '}browse the{' '}
-              <Link to={RESOURCES_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              {", "}browse the{" "}
+              <Link
+                to={RESOURCES_ROUTE}
+                className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+              >
                 resources
               </Link>
-              , or reach the team via the{' '}
-              <Link to={CONTACT_ROUTE} className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+              , or reach the team via the{" "}
+              <Link
+                to={CONTACT_ROUTE}
+                className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+              >
                 contact page
               </Link>
               .
