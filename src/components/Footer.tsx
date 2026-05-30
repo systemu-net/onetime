@@ -6,7 +6,6 @@ import {
   FEATURES_ROUTE,
   PLANS_ROUTE,
   PRIVACY_ROUTE,
-  RESOURCES_ROUTE,
   TERMS_ROUTE,
   USER_POLICY_ROUTE
 } from "../routes";
@@ -48,14 +47,6 @@ const Footer = () => {
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
                 >
                   Plans
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={RESOURCES_ROUTE}
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
-                >
-                  Resources
                 </Link>
               </li>
               <li>

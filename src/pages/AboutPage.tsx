@@ -6,7 +6,6 @@ import {
   FEATURES_ROUTE,
   PRIVACY_ROUTE,
   REGISTER_ROUTE,
-  RESOURCES_ROUTE,
   TERMS_ROUTE,
 } from "@/routes";
 import { Link } from "react-router-dom";
@@ -213,13 +212,13 @@ const AboutPage = () => {
               >
                 features
               </Link>
-              {", "}browse the{" "}
-              <Link
-                to={RESOURCES_ROUTE}
+              {", "}read the{" "}
+              <a
+                href="/blog/"
                 className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
               >
-                resources
-              </Link>
+                blog
+              </a>
               , or reach the team via the{" "}
               <Link
                 to={CONTACT_ROUTE}
