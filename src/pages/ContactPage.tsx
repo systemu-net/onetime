@@ -1,7 +1,7 @@
 import Boost from '@/components/Boost';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import { ABOUT_ROUTE, RESOURCES_ROUTE } from '@/routes';
+import { ABOUT_ROUTE } from '@/routes';
 import { Link } from 'react-router-dom';
 
 const ContactPage = () => {
@@ -149,14 +149,14 @@ const ContactPage = () => {
               Before you email
             </h2>
             <p className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
-              A lot of common questions are answered faster on{' '}
-              <Link
-                to={RESOURCES_ROUTE}
+              A lot of common questions are answered faster on the{' '}
+              <a
+                href="/blog/"
                 className="text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
               >
-                Resources
-              </Link>
-              {' '}or in our public guides &mdash; how to set a custom domain, how
+                blog
+              </a>
+              {' '}&mdash; how to set a custom domain, how
               click analytics are calculated, the difference between paused and
               expired links, and so on. If you're not sure what thin.ly does in the
               first place, the{' '}

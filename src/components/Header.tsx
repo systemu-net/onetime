@@ -8,7 +8,6 @@ import {
   LOGIN_ROUTE,
   PLANS_ROUTE,
   REGISTER_ROUTE,
-  RESOURCES_ROUTE,
 } from "../routes";
 import { invalidateUserCache } from "../utils/userCache";
 import ThemeToggle from "./ThemeToggle";
@@ -70,12 +69,12 @@ const Header = () => {
                 </Link>
               </li>
               <li>
-                <Link
-                  to={RESOURCES_ROUTE}
+                <a
+                  href="/blog/"
                   className="nav__link dark:text-zinc-100"
                 >
-                  Resources
-                </Link>
+                  Blog
+                </a>
               </li>
             </ul>
           </div>
@@ -158,9 +157,9 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to={RESOURCES_ROUTE} className="nav__link">
-                Resources
-              </Link>
+              <a href="/blog/" className="nav__link">
+                Blog
+              </a>
             </li>
           </ul>
 
