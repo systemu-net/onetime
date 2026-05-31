@@ -614,14 +614,10 @@ export function GovernanceLinksTable({
                 </div>
               </div>
 
-              {/* ── Section 2: Destination URL block ── */}
-              <a
-                href={link.dest}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(e) => e.stopPropagation()}
+              {/* ── Section 2: Destination URL block (display only — open in drawer) ── */}
+              <div
                 title={link.dest}
-                className="mt-2.5 flex items-start gap-2 rounded-lg bg-neutral-100/80 dark:bg-neutral-800/60 px-3 py-2 text-[12.5px] leading-snug text-neutral-700 dark:text-neutral-300 hover:text-violet-600 dark:hover:text-violet-300 transition-colors"
+                className="mt-2.5 flex items-start gap-2 rounded-lg bg-neutral-100/80 dark:bg-neutral-800/60 px-3 py-2 text-[12.5px] leading-snug text-neutral-700 dark:text-neutral-300"
               >
                 <span
                   aria-hidden
@@ -632,7 +628,7 @@ export function GovernanceLinksTable({
                 <span className="min-w-0 flex-1 line-clamp-2 break-all">
                   {destDisplay}
                 </span>
-              </a>
+              </div>
 
               {/* ── Section 3: State + campaign + clicks ── */}
               <div className="mt-2.5 flex items-center gap-1.5 min-w-0">
@@ -783,16 +779,12 @@ export function GovernanceLinksTable({
                         {link.clicks.toLocaleString()} clicks
                       </span>
                     </div>
-                    <a
-                      href={link.dest}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block text-[12.5px] font-mono text-violet-400 break-all leading-relaxed hover:text-violet-500 dark:hover:text-violet-300 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
+                    <span
+                      className="block text-[12.5px] font-mono text-neutral-500 dark:text-neutral-400 break-all leading-relaxed"
                       title={link.dest}
                     >
                       {link.dest}
-                    </a>
+                    </span>
                     {link.campaign ? (
                       <span className="text-xs px-2 py-0.5 rounded font-medium border border-neutral-200 dark:border-white/[0.08] bg-white/80 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-200 self-start">
                         {link.campaign}
@@ -842,20 +834,14 @@ export function GovernanceLinksTable({
                   <GovernanceBadge state={link.state} />
                 </td>
 
-                {/* Destination */}
-                <td
-                  className="px-5 py-3.5 hidden md:table-cell w-[420px] xl:w-[520px]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <a
-                    href={link.dest}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-neutral-500 dark:text-neutral-300 truncate block hover:text-violet-500 dark:hover:text-violet-400 hover:underline"
+                {/* Destination (display only — opens in drawer on row click) */}
+                <td className="px-5 py-3.5 hidden md:table-cell w-[420px] xl:w-[520px]">
+                  <span
+                    className="text-xs text-neutral-500 dark:text-neutral-300 truncate block"
                     title={link.dest}
                   >
                     {link.dest}
-                  </a>
+                  </span>
                 </td>
 
                 {/* Clicks bar */}
