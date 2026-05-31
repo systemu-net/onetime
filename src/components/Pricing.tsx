@@ -253,7 +253,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
 
   return (
     <div
-      className={`bg-white dark:bg-zinc-900 ${inline ? "py-4" : "py-24 sm:py-32"}`}
+      className={`bg-white dark:bg-zinc-950 ${inline ? "py-4" : "py-24 sm:py-32"}`}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-2 mb-12">
         {!inline && (
@@ -292,7 +292,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                   value={option.value}
                   className="relative z-10 cursor-pointer rounded-full px-3 py-2
                              transition-colors duration-300
-                             text-gray-600 dark:text-gray-400
+                             text-gray-600 dark:text-white
                              data-[checked]:text-white"
                 >
                   {option.label}
@@ -313,9 +313,9 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     ? "ring-2 ring-green-500 shadow-2xl"
                     : tier.mostPopular && !disabled
                       ? "ring-2 ring-accent shadow-2xl"
-                      : "ring-1 ring-gray-200 dark:ring-zinc-700 shadow-2xl",
+                      : "ring-1 ring-gray-200 dark:ring-zinc-700/80 shadow-2xl dark:shadow-black/40",
                   !disabled ? "hover:ring-2 hover:ring-accent group" : "",
-                  "rounded-3xl p-8 transition-all duration-200 bg-white dark:bg-zinc-800",
+                  "rounded-3xl p-8 transition-all duration-200 bg-white dark:bg-zinc-900",
                 )}
               >
                 {state === "current" && (
@@ -329,7 +329,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     state === "current"
                       ? "text-green-700 dark:text-green-400"
                       : tier.mostPopular
-                        ? "text-primary dark:text-violet-400"
+                        ? "text-primary dark:text-zinc-100"
                         : "text-gray-900 dark:text-zinc-100",
                     "text-2xl/8 font-semibold",
                   )}
@@ -358,10 +358,10 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                         ? "bg-green-600 text-white cursor-default font-bold"
                         : "bg-gray-200 dark:bg-zinc-700 text-gray-400 dark:text-zinc-500 cursor-default"
                       : state === "downgrade"
-                        ? "text-primary ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 group-hover:bg-gray-100 dark:group-hover:bg-zinc-700"
+                        ? "text-primary dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-zinc-600 group-hover:bg-primary group-hover:text-white group-hover:ring-0"
                         : tier.mostPopular
                           ? "bg-accent text-primary shadow-sm group-hover:bg-primary group-hover:text-white"
-                          : "text-primary ring-1 ring-inset ring-accent group-hover:bg-primary group-hover:text-white group-hover:ring-0",
+                          : "text-primary dark:text-white ring-1 ring-inset ring-accent group-hover:bg-primary group-hover:text-white group-hover:ring-0",
                     "transition-all duration-200 w-full mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600",
                   )}
                 >
@@ -372,12 +372,12 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                     Takes effect at end of billing period
                   </p>
                 )}
-                <p className="mt-8 font-bold text-sm/6 text-gray-600 dark:text-gray-400">
+                <p className="mt-8 font-bold text-sm/6 text-gray-600 dark:text-zinc-200">
                   {tier.description}
                 </p>
                 <ul
                   role="list"
-                  className="mt-2 space-y-3 text-sm/6 text-gray-600 dark:text-gray-400"
+                  className="mt-2 space-y-3 text-sm/6 text-gray-600 dark:text-zinc-300"
                 >
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex gap-x-3">
@@ -385,10 +385,12 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                         aria-hidden="true"
                         className="h-6 w-5 flex-none text-primary"
                       />
-                      <span className="inline-flex items-center">
+                      <span className="inline-flex items-center flex-wrap gap-y-1">
                         {feature}
                         {isCampaignFeature(feature) && (
-                          <span className="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-transparent bg-clip-text bg-[length:200%_100%] bg-gradient-to-r from-rose-500 via-amber-400 to-sky-500 animate-pulse shadow-[0_0_12px_rgba(236,72,153,0.55)]">
+                          <span
+                            className="ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-violet-700 bg-violet-50 ring-1 ring-inset ring-violet-200 dark:text-violet-300 dark:bg-violet-500/10 dark:ring-violet-400/30"
+                          >
                             New
                           </span>
                         )}
@@ -424,7 +426,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                   value={option.value}
                   className="relative z-10 cursor-pointer rounded-full px-3 py-2
                              transition-colors duration-300
-                             text-gray-600 dark:text-gray-400
+                             text-gray-600 dark:text-white
                              data-[checked]:text-white"
                 >
                   {option.label}
