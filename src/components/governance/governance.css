@@ -26,61 +26,85 @@
   flex-shrink: 0;
 }
 
+/* Okabe-Ito colorblind-safe palette (Nature-endorsed, distinguishable under
+   deuteranopia / protanopia / tritanopia). The same hues are reused across
+   tabs, badges, and action buttons for visual consistency. */
+
 .gov-badge-active {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(0, 158, 115, 0.14);
+  color: #007a59; /* slightly darker for AA contrast on light bg */
+  border: 1px solid rgba(0, 158, 115, 0.3);
 }
 .gov-badge-active::before {
-  background: #10b981;
+  background: #009e73;
   animation: pulse-gov-green 2s infinite;
+}
+.dark .gov-badge-active {
+  color: #34d6a8;
+  background: rgba(0, 158, 115, 0.2);
 }
 
 .gov-badge-paused {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: rgba(230, 159, 0, 0.14);
+  color: #b87b00;
+  border: 1px solid rgba(230, 159, 0, 0.3);
 }
 .gov-badge-paused::before {
-  background: #f59e0b;
+  background: #e69f00;
+}
+.dark .gov-badge-paused {
+  color: #f5b942;
+  background: rgba(230, 159, 0, 0.2);
 }
 
 .gov-badge-expired {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(213, 94, 0, 0.14);
+  color: #a84a00;
+  border: 1px solid rgba(213, 94, 0, 0.3);
 }
 .gov-badge-expired::before {
-  background: #ef4444;
+  background: #d55e00;
+}
+.dark .gov-badge-expired {
+  color: #ff8a3d;
+  background: rgba(213, 94, 0, 0.2);
 }
 
 .gov-badge-draft {
   background: rgba(107, 114, 128, 0.12);
-  color: #9ca3af;
-  border: 1px solid rgba(107, 114, 128, 0.2);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.22);
 }
 .gov-badge-draft::before {
   background: #9ca3af;
 }
+.dark .gov-badge-draft {
+  color: #a3a3af;
+  background: rgba(160, 160, 175, 0.16);
+}
 
 .gov-badge-archived {
-  background: rgba(59, 130, 246, 0.12);
-  color: #3b82f6;
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: rgba(0, 114, 178, 0.14);
+  color: #005f95;
+  border: 1px solid rgba(0, 114, 178, 0.3);
 }
 .gov-badge-archived::before {
-  background: #3b82f6;
+  background: #0072b2;
+}
+.dark .gov-badge-archived {
+  color: #4ea8e0;
+  background: rgba(0, 114, 178, 0.22);
 }
 
 @keyframes pulse-gov-green {
   0%,
   100% {
-    box-shadow: 0 0 4px #10b981;
+    box-shadow: 0 0 4px #009e73;
   }
   50% {
     box-shadow:
-      0 0 10px #10b981,
-      0 0 18px #10b981;
+      0 0 10px #009e73,
+      0 0 18px #009e73;
   }
 }
 
@@ -564,18 +588,20 @@ html:not(.dark) .gov-link-row--accented:hover > td {
 }
 
 /* ── Copy button sheen ─────────────────────────────────────────────────────── */
+/* Sky blue (Okabe-Ito #56B4E9) — utility/safe action, distinct from the
+   bluish-green "Active" status so the two are never confused. */
 .gov-copy-btn {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   font-weight: 700;
   letter-spacing: 0.01em;
-  border-color: rgba(16, 185, 129, 0.5);
-  color: #065f46;
+  border-color: rgba(86, 180, 233, 0.55);
+  color: #1d6fa5;
   background: linear-gradient(
     135deg,
-    rgba(16, 185, 129, 0.16),
-    rgba(16, 185, 129, 0.08)
+    rgba(86, 180, 233, 0.18),
+    rgba(86, 180, 233, 0.08)
   );
   transition:
     transform 0.12s ease,
@@ -599,8 +625,8 @@ html:not(.dark) .gov-link-row--accented:hover > td {
 
 .gov-copy-btn:hover {
   box-shadow:
-    0 0 0 1px rgba(16, 185, 129, 0.16),
-    0 8px 18px rgba(16, 185, 129, 0.14);
+    0 0 0 1px rgba(86, 180, 233, 0.2),
+    0 8px 18px rgba(86, 180, 233, 0.18);
 }
 
 .gov-copy-btn:hover::before {
@@ -625,28 +651,31 @@ html:not(.dark) .gov-link-row--accented:hover > td {
 }
 
 .dark .gov-copy-btn {
-  color: #a7f3d0;
-  border-color: rgba(16, 185, 129, 0.55);
+  color: #b3dcf5;
+  border-color: rgba(86, 180, 233, 0.6);
   background: linear-gradient(
     135deg,
-    rgba(16, 185, 129, 0.2),
-    rgba(16, 185, 129, 0.1)
+    rgba(86, 180, 233, 0.22),
+    rgba(86, 180, 233, 0.1)
   );
 }
 
 /* ── Delete button sheen ───────────────────────────────────────────────────── */
+/* Vermillion (Okabe-Ito #D55E00) — destructive cue that remains readable
+   under all common color-vision deficiencies and reads as clearly different
+   from the orange "Paused" badge. */
 .gov-delete-btn {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   font-weight: 700;
   letter-spacing: 0.01em;
-  border-color: rgba(239, 68, 68, 0.45);
-  color: #b91c1c;
+  border-color: rgba(213, 94, 0, 0.5);
+  color: #a84a00;
   background: linear-gradient(
     135deg,
-    rgba(239, 68, 68, 0.16),
-    rgba(239, 68, 68, 0.08)
+    rgba(213, 94, 0, 0.16),
+    rgba(213, 94, 0, 0.08)
   );
   transition:
     transform 0.12s ease,
@@ -670,8 +699,8 @@ html:not(.dark) .gov-link-row--accented:hover > td {
 
 .gov-delete-btn:hover {
   box-shadow:
-    0 0 0 1px rgba(239, 68, 68, 0.18),
-    0 8px 18px rgba(239, 68, 68, 0.16);
+    0 0 0 1px rgba(213, 94, 0, 0.2),
+    0 8px 18px rgba(213, 94, 0, 0.18);
 }
 
 .gov-delete-btn:hover::before {
@@ -687,12 +716,12 @@ html:not(.dark) .gov-link-row--accented:hover > td {
 }
 
 .dark .gov-delete-btn {
-  color: #fecaca;
-  border-color: rgba(239, 68, 68, 0.55);
+  color: #ffb88a;
+  border-color: rgba(213, 94, 0, 0.6);
   background: linear-gradient(
     135deg,
-    rgba(239, 68, 68, 0.22),
-    rgba(239, 68, 68, 0.12)
+    rgba(213, 94, 0, 0.24),
+    rgba(213, 94, 0, 0.12)
   );
 }
 

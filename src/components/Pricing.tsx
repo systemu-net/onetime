@@ -388,9 +388,7 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                       <span className="inline-flex items-center flex-wrap gap-y-1">
                         {feature}
                         {isCampaignFeature(feature) && (
-                          <span
-                            className="ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-violet-700 bg-violet-50 ring-1 ring-inset ring-violet-200 dark:text-violet-300 dark:bg-violet-500/10 dark:ring-violet-400/30"
-                          >
+                          <span className="ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-violet-700 bg-violet-50 ring-1 ring-inset ring-violet-200 dark:text-violet-300 dark:bg-violet-500/10 dark:ring-violet-400/30">
                             New
                           </span>
                         )}

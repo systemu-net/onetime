@@ -29,15 +29,63 @@ import { GovernanceDeleteConfirmModal } from "./GovernanceDeleteConfirmModal";
 import { GovernanceLinkAnalyticsPanel } from "./GovernanceLinkAnalyticsPanel";
 import { RoutingRulesPanel } from "./RoutingRulesPanel";
 import { SchedulePanel } from "./SchedulePanel";
+import {
+  LuShield,
+  LuChartColumn,
+  LuRoute,
+  LuCalendar,
+  LuScrollText,
+} from "react-icons/lu";
+import type { IconType } from "react-icons";
 
 type DrawerTab = "governance" | "routing" | "schedule" | "audit" | "analytics";
 
-const TABS: { id: DrawerTab; label: string; icon: string }[] = [
-  { id: "governance", label: "Governance", icon: "🛡" },
-  { id: "analytics", label: "Analytics", icon: "📊" },
-  { id: "routing", label: "Routing", icon: "⇄" },
-  { id: "schedule", label: "Schedule", icon: "🗓" },
-  { id: "audit", label: "Audit", icon: "🧾" },
+// Okabe-Ito colorblind-safe palette (deuteranopia/protanopia/tritanopia friendly).
+// Each tab gets a distinct hue mapped to its semantic meaning.
+// Single alpha (0.18) on the tint reads as a soft pastel on white and a subtle
+// glow on dark zinc-900 — works in both modes without conditional styling.
+const TABS: {
+  id: DrawerTab;
+  label: string;
+  Icon: IconType;
+  color: string; // active accent (text, icon, underline)
+  tint: string; // active background fill
+}[] = [
+  {
+    id: "governance",
+    label: "Governance",
+    Icon: LuShield,
+    color: "#0072B2", // blue — trust, safety
+    tint: "rgba(0, 114, 178, 0.18)",
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    Icon: LuChartColumn,
+    color: "#009E73", // bluish green — growth, data
+    tint: "rgba(0, 158, 115, 0.18)",
+  },
+  {
+    id: "routing",
+    label: "Routing",
+    Icon: LuRoute,
+    color: "#CC79A7", // reddish purple — branching paths
+    tint: "rgba(204, 121, 167, 0.20)",
+  },
+  {
+    id: "schedule",
+    label: "Schedule",
+    Icon: LuCalendar,
+    color: "#E69F00", // orange — time, attention
+    tint: "rgba(230, 159, 0, 0.18)",
+  },
+  {
+    id: "audit",
+    label: "Audit",
+    Icon: LuScrollText,
+    color: "#D55E00", // vermillion — record, history
+    tint: "rgba(213, 94, 0, 0.18)",
+  },
 ];
 
 interface GovernanceDrawerProps {
@@ -420,10 +468,32 @@ export function GovernanceDrawer({
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/25 text-violet-400">
-                {localLink.short}
-              </span>
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <a
+                href={localLink.short}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Open short link in new tab"
+                className="group inline-flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-md bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/60 text-violet-600 dark:text-violet-300 hover:text-violet-700 dark:hover:text-violet-200 shadow-sm hover:shadow transition-all"
+              >
+                <span className="truncate max-w-[18rem] sm:max-w-none">
+                  {localLink.short}
+                </span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 12 12"
+                  className="h-3 w-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4.5 2.5h5v5" />
+                  <path d="M9.5 2.5l-7 7" />
+                </svg>
+              </a>
             </div>
           </div>
           <button
@@ -451,27 +521,56 @@ export function GovernanceDrawer({
         </div>
 
         {/* Tab strip */}
-        <div className="px-4 sm:px-6 py-3 border-b border-neutral-200 dark:border-white/[0.06] shrink-0">
-          <div className="gov-tab-strip bg-neutral-100 dark:bg-neutral-800">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`gov-tab ${
-                  tab === t.id
-                    ? "bg-white dark:bg-neutral-700 text-neutral-900 dark:text-white border border-neutral-200 dark:border-neutral-600"
-                    : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
-                }`}
-                aria-label={t.label}
-                title={t.label}
-              >
-                <span className="sm:hidden" aria-hidden="true">
-                  {t.icon}
-                </span>
-                <span className="hidden sm:inline">{t.label}</span>
-                <span className="sr-only sm:hidden">{t.label}</span>
-              </button>
-            ))}
+        <div
+          className="px-4 sm:px-6 pt-3 border-b border-neutral-200 dark:border-white/[0.06] shrink-0"
+          role="tablist"
+          aria-label="Link details sections"
+        >
+          <div className="flex gap-1 overflow-x-auto -mb-px">
+            {TABS.map((t) => {
+              const Icon = t.Icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={t.label}
+                  onClick={() => setTab(t.id)}
+                  className={[
+                    "group relative inline-flex items-center justify-center gap-1.5 flex-1 sm:flex-initial shrink-0 px-2 sm:px-4 py-2 text-[12.5px] font-medium rounded-t-md",
+                    "border-b-2 transition-all duration-150 cursor-pointer",
+                    active
+                      ? ""
+                      : "text-neutral-400 dark:text-neutral-500 border-transparent opacity-70 hover:opacity-100 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/60",
+                  ].join(" ")}
+                  style={
+                    active
+                      ? {
+                          color: t.color,
+                          borderBottomColor: t.color,
+                          backgroundColor: t.tint,
+                        }
+                      : undefined
+                  }
+                  title={t.label}
+                >
+                  <Icon
+                    size={18}
+                    strokeWidth={active ? 2.5 : 2}
+                    aria-hidden
+                    style={active ? { color: t.color } : undefined}
+                    className={
+                      active
+                        ? "scale-110 sm:scale-100 transition-transform"
+                        : "text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-200"
+                    }
+                  />
+                  <span className="hidden sm:inline">{t.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -549,9 +648,21 @@ export function GovernanceDrawer({
                     </button>
                   </div>
                 ) : (
-                  <p className="font-mono text-[12.5px] text-violet-400 break-all leading-relaxed">
-                    {localLink.dest}
-                  </p>
+                  <a
+                    href={localLink.dest}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={`Open ${localLink.dest} in a new tab`}
+                    className="group inline-flex items-start gap-1.5 font-mono text-[12.5px] text-violet-500 dark:text-violet-400 hover:text-violet-600 dark:hover:text-violet-300 hover:underline break-all leading-relaxed"
+                  >
+                    <span className="min-w-0 break-all">{localLink.dest}</span>
+                    <span
+                      aria-hidden
+                      className="shrink-0 mt-0.5 text-neutral-400 group-hover:text-violet-500 dark:group-hover:text-violet-300 transition-colors"
+                    >
+                      ↗
+                    </span>
+                  </a>
                 )}
                 <p className="text-xs text-neutral-400 mt-2">
                   All existing short links instantly point to the new

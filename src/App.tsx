@@ -20,6 +20,8 @@ import LinksPage from "./pages/LinksPage";
 import LoginPage from "./pages/LoginPage";
 import SinglePage from "./pages/Page";
 import PagesPage from "./pages/Pages";
+import PagesMockup from "./pages/PagesMockup";
+import PageEditorMockup from "./pages/PageEditorMockup";
 import ProfilePage from "./pages/ProfilePage";
 import QrCodePage from "./pages/QrCode";
 import QrCodesPage from "./pages/QrCodesPage";
@@ -152,6 +154,22 @@ export const App = () => {
                 element={
                   <ProtectedRoute allowedRoles={["admin"]}>
                     <SinglePage />
+                  </ProtectedRoute>
+                }
+              ></Route>
+              <Route
+                path="/pages-mockup"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <PagesMockup />
+                  </ProtectedRoute>
+                }
+              ></Route>
+              <Route
+                path="/pages-mockup/edit"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <PageEditorMockup />
                   </ProtectedRoute>
                 }
               ></Route>
