@@ -48,6 +48,40 @@ export const getPages = async (jwtToken) => {
   }
 };
 
+// Generate (but do not persist) a page design from an AI prompt.
+// `images` is an optional array of { key, url } from uploadImageToS3 (max 3).
+// Returns the spec: { title, description, content, links: [...], social? }.
+export const generatePage = async (jwtToken, prompt, name, images = [], template = 'links') => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: jwtToken,
+    },
+    body: JSON.stringify({ prompt, name, images, template }),
+  };
+
+  const response = await fetch(`${API_URL}/api/v1/brand_pages/generate`, requestOptions);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to generate page');
+  }
+  return data.page;
+};
+
+// Render template HTML (e.g. the portfolio template) from arbitrary content
+// WITHOUT persisting — used for live iframe previews. Returns an HTML string.
+export const renderPreview = async (jwtToken, { title, description, content }) => {
+  const response = await fetch(`${API_URL}/api/v1/brand_pages/preview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: jwtToken },
+    body: JSON.stringify({ title, description, content }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Preview failed');
+  return data.html;
+};
+
 export const getPage = async (jwtToken, lookup_code) => {
   const requestOptions = {
     method: 'GET',

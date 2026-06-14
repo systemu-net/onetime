@@ -1,279 +1,627 @@
-import { createPage } from '@/apis/pages';
-
-import Box from '@/components/Box';
-import { Button } from '@/components/elements/button';
-import { Divider } from '@/components/elements/divider';
-import { Heading, Subheading } from '@/components/elements/heading';
-import { Input } from '@/components/elements/input';
-import { blankTemplateBase64, bluePinkTemplateBase64, pinkGradientTemplateBase64 } from '@/components/images/templateBase64Images';
+/**
+ * CreatePage — AI-driven page creation wizard (/pages/create).
+ * Describe the page in natural language → Claude generates a full design
+ * (theme, copy, link buttons, socials) → live preview → refine → create.
+ *
+ * Generation is server-side (POST /api/v1/brand_pages/generate, backed by
+ * Claude). On "Create", the spec is persisted via the normal createPage +
+ * resources APIs, then we jump straight into the editor.
+ */
+import { createPage, generatePage } from '@/apis/pages';
+import { createResource } from '@/apis/resources';
+import { uploadImageToS3 } from '@/apis/uploads';
+import MainLayout from '@/components/layouts/MainLayout';
+import Preview from '@/components/sections/Preview';
+import PortfolioPreview from '@/components/sections/PortfolioPreview';
 import { useNotification } from '@/Notifications';
 import { PAGES_ROUTE } from '@/routes';
-import { useState } from 'react';
+import type { Page, PageLink } from '@/types';
+import { ArrowLeft, ImagePlus, Paperclip, RefreshCw, Sparkles, Wand2, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '../components/layouts/MainLayout';
 
-const designTemplates = [
+import '@/components/pages-mockup/pages-mockup.css';
+import '@/components/pages-mockup/create-wizard.css';
 
-  {
-    id: 1,
-    name: 'Minimalist Design',
-    description: 'A clean and modern design template to highlight your links.',
-    image: bluePinkTemplateBase64,
-    content: {
-      fontFamily: 'rubik',
-      button: 'rounded',
-      buttonColor: '#596289',
-      social: {
-        fb: 'https://www.facebook.com/TaylorSwift/',
-        linkedin: 'https://www.linkedin.com/in/sdemian'
-      },
-      backgroundType: 'gradient',
-      gradientStart: '#5b90bc',
-      gradientEnd: '#d8b0c8',
-      gradientDirection: 'to bottom',
-      textColor: '#fff',
-    },
-  },
-  {
-    id: 2,
-    name: 'Professional Design',
-    description: 'Perfect for showcasing links in a formal and elegant style.',
-    image: pinkGradientTemplateBase64,
-    content: {
-      button: 'rounded',
-      buttonColor: '#fff',
-      animation: 'Gradient 15s ease infinite',
-      textColor: 'white',
-      social: {
-        fb: 'https://www.facebook.com/TaylorSwift/',
-        ig: 'https://www.instagram.com/taylorswift/',
-      },
-      backgroundType: 'gradient',
-      gradientDirection: 'to bottom right',
-      gradientStart: '#8f7aac',
-      gradientEnd: '#e94975',
-    },
-  },
-  {
-    id: 0,
-    name: 'Blank',
-    image: blankTemplateBase64,
-    description: "Design your own page from scratch with a blank template.",
-    content: {
-      button: 'rounded',
-    }
-  },
-  // {
-  //   id: 3,
-  //   name: 'Bold Design',
-  //   description: 'Make a statement with this vibrant and colorful template.',
-  //   image: '/templates/pink-gradient.png',
-  //   content: {
-  //     button: 'rounded',
-  //     background: 'linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB)',
-  //     animation: 'Gradient 15s ease infinite',
-  //     textColor: 'white',
-  //     social: {
-  //       fb: 'https://facebook.com/smariana',
-  //     },
-  //   },
-  // },
+// Shape returned by the generate endpoint.
+type GeneratedLink = { title: string; url: string; color: string };
+type GeneratedSpec = {
+  title: string;
+  description?: string;
+  content: Page['content'];
+  links?: GeneratedLink[];
+  social?: Page['content']['social'];
+};
+
+type TemplateKind = 'links' | 'portfolio';
+
+const EXAMPLES = [
+  'An indie coffee roastery in Portland — warm and earthy. Links to the online shop, the cafe menu, wholesale enquiries, and Instagram.',
+  "A techno DJ's link page — dark and neon. Links to Spotify, SoundCloud, upcoming gigs, and a booking email.",
+  'A wedding photographer — soft, elegant, romantic. Portfolio, packages, booking calendar, and Instagram.',
+  'A SaaS product launch — clean and modern. Demo video, pricing, docs, and a join-the-waitlist button.',
+  'A personal trainer — bold and energetic. Free workout plan, 1:1 coaching, transformation gallery, TikTok.',
 ];
+
+type Stage = 'compose' | 'generating' | 'result';
+
+// Soft cap: typing past it is allowed, but a counter appears and generation is
+// blocked until trimmed. Kept invisible below the cap so the field feels limitless.
+const MAX_PROMPT = 500;
+
 const CreatePage = () => {
   const [cookies] = useCookies(['token']);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [title, setTitle] = useState('');
-  const [step, setStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<number>(0);
-  const { addNotification } = useNotification();
   const navigate = useNavigate();
+  const { addNotification } = useNotification();
 
-  const create = async () => {
-    if (!title) {
-      return;
+  const [stage, setStage] = useState<Stage>('compose');
+  const [template, setTemplate] = useState<TemplateKind>('links');
+  const [prompt, setPrompt] = useState('');
+  const [name, setName] = useState('');
+  const [refine, setRefine] = useState('');
+  const [spec, setSpec] = useState<GeneratedSpec | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState('');
+
+  // Up to 3 reference images. Each is an optimistic attachment "chip" (Anthropic
+  // style) that shows a preview + progress immediately, then resolves to its S3
+  // key/url once the direct upload finishes.
+  type Upload = {
+    id: string;
+    name: string;
+    previewUrl: string;
+    status: 'uploading' | 'done' | 'error';
+    key?: string;
+    url?: string;
+    error?: string;
+  };
+  const [uploads, setUploads] = useState<Upload[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragDepth = useRef(0);
+
+  const MAX_IMAGES = 3;
+  const activeCount = uploads.filter((u) => u.status !== 'error').length;
+  const isUploading = uploads.some((u) => u.status === 'uploading');
+  const readyImages = uploads
+    .filter((u) => u.status === 'done' && u.key && u.url)
+    .map((u) => ({ key: u.key as string, url: u.url as string }));
+
+  const handleFiles = (files: File[] | FileList | null) => {
+    if (!files) return;
+    const list = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    const room = MAX_IMAGES - activeCount;
+    if (room <= 0 || list.length === 0) return;
+    setError('');
+
+    for (const file of list.slice(0, room)) {
+      const id = `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 8)}`;
+      const previewUrl = URL.createObjectURL(file);
+      setUploads((prev) => [...prev, { id, name: file.name, previewUrl, status: 'uploading' }]);
+
+      uploadImageToS3(cookies.token, file)
+        .then(({ key, url }) =>
+          setUploads((prev) =>
+            prev.map((u) => (u.id === id ? { ...u, status: 'done', key, url } : u)),
+          ),
+        )
+        .catch((e) =>
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.id === id ? { ...u, status: 'error', error: e instanceof Error ? e.message : 'Upload failed' } : u,
+            ),
+          ),
+        );
     }
+  };
+
+  const removeUpload = (id: string) =>
+    setUploads((prev) => {
+      const target = prev.find((u) => u.id === id);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((u) => u.id !== id);
+    });
+
+  const onDragEnter = (e: React.DragEvent) => {
+    if (!Array.from(e.dataTransfer.types || []).includes('Files')) return;
+    e.preventDefault();
+    dragDepth.current += 1;
+    setDragActive(true);
+  };
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragDepth.current -= 1;
+    if (dragDepth.current <= 0) {
+      dragDepth.current = 0;
+      setDragActive(false);
+    }
+  };
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragDepth.current = 0;
+    setDragActive(false);
+    handleFiles(e.dataTransfer.files);
+  };
+  const onPaste = (e: React.ClipboardEvent) => {
+    const files = Array.from(e.clipboardData?.items || [])
+      .filter((i) => i.type.startsWith('image/'))
+      .map((i) => i.getAsFile())
+      .filter((f): f is File => !!f);
+    if (files.length) {
+      e.preventDefault();
+      handleFiles(files);
+    }
+  };
+
+  const promptOverLimit = prompt.length > MAX_PROMPT;
+
+  const runGenerate = async (fullPrompt: string) => {
+    if (!fullPrompt.trim() || fullPrompt.length > MAX_PROMPT) return;
+    setError('');
+    setStage('generating');
     try {
-      setErrorMessage('');
+      const result: GeneratedSpec = await generatePage(cookies.token, fullPrompt.trim(), name.trim(), readyImages, template);
+      setSpec(result);
+      setStage('result');
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : 'Generation failed. Please try again.');
+      setStage(spec ? 'result' : 'compose');
+    }
+  };
+
+  const onRefine = async () => {
+    if (!refine.trim() || !spec) return;
+    const combined = `${prompt}\n\nRefinement to apply to the existing design: ${refine.trim()}`;
+    setRefine('');
+    await runGenerate(combined);
+  };
+
+  const isPortfolio = spec?.content?.template === 'portfolio';
+
+  const previewContent = useMemo<Page['content'] | null>(() => {
+    if (!spec) return null;
+    return { ...spec.content, social: spec.social ?? spec.content.social ?? {} };
+  }, [spec]);
+
+  const previewLinks = useMemo<PageLink[]>(() => {
+    if (!spec) return [];
+    return (spec.links ?? []).map((l, i) => ({
+      id: String(i),
+      label: l.title,
+      color: l.color,
+      link: l.url,
+    }));
+  }, [spec]);
+
+  const createTheRealPage = async () => {
+    if (!spec || !previewContent) return;
+    setCreating(true);
+    setError('');
+    try {
       const page = await createPage(cookies.token, {
         brand_page: {
-          title: title,
-          content: designTemplates.filter(
-            (template) => template.id === selectedTemplate
-          )[0].content,
+          title: spec.title,
+          description: spec.description,
+          content: previewContent,
         },
       });
+
+      // Create the generated link buttons as resources, preserving order.
+      // (Portfolio pages have no link resources — their content is self-contained.)
+      const links = spec.links ?? [];
+      for (let i = 0; i < links.length; i++) {
+        const l = links[i];
+        try {
+          await createResource(cookies.token, page.lookup_code, {
+            link: { original_url: l.url, title: l.title },
+            resource: { sort_order: i, color: l.color },
+          });
+        } catch (linkErr) {
+          console.error('Failed to create link', l, linkErr);
+        }
+      }
+
+      addNotification('Page created with AI ✨', 'success');
       navigate(`${PAGES_ROUTE}/${page.lookup_code}`);
-      addNotification('Page created', 'success');
-    } catch (error: unknown) {
-      console.error(error);
-      setErrorMessage('An error occurred while creating new page.');
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : 'Could not create the page.');
+      setCreating(false);
     }
   };
 
   return (
     <MainLayout>
-      <div className="px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
-        <Heading>Create Your Link Hub</Heading>
-        <Subheading>
-          Design a stunning, customizable page to showcase and manage all your
-          important links. Thin.ly empowers creators and businesses worldwide to
-          share content seamlessly. Discover More.
-        </Subheading>
-      </div>
+      <div className="cw-shell">
+        {stage === 'compose' && (
+          <>
+            <div className="cw-hero">
+              <span className="cw-eyebrow">
+                <Sparkles size={14} strokeWidth={2.5} /> AI page builder
+              </span>
+              <h1 className="cw-h1">
+                Describe it. We'll <span className="cw-h1-accent">design it.</span>
+              </h1>
+              <p className="cw-subtitle">
+                Tell us about your page in a sentence or two — Claude builds a complete,
+                on-brand {template === 'portfolio' ? 'portfolio site' : 'link-in-bio'} you can preview, tweak, and publish.
+              </p>
+              <div className="cw-template-toggle">
+                <button
+                  type="button"
+                  className={`cw-tpl${template === 'links' ? ' cw-tpl--on' : ''}`}
+                  onClick={() => setTemplate('links')}
+                >
+                  🔗 Link-in-bio
+                </button>
+                <button
+                  type="button"
+                  className={`cw-tpl${template === 'portfolio' ? ' cw-tpl--on' : ''}`}
+                  onClick={() => setTemplate('portfolio')}
+                >
+                  ✦ Portfolio site
+                </button>
+              </div>
+            </div>
 
-      <div>
-        <div aria-hidden="true" className="mt-6 w-full lg:w-2/3 px-4 lg:px-8">
-          <div className="overflow-hidden rounded-full bg-gray-200">
             <div
-              style={{ width: `${33.3 * step}%` }}
-              className="h-2 rounded-full bg-violet-600 transition-all duration-500 ease-in-out"
-            />
-          </div>
-          <div className="mt-4 hidden grid-cols-3 text-sm font-medium text-gray-600 sm:grid">
-            <div className={step === 1 ? 'text-violet-600' : ''}>
-              Creating Page
-            </div>
-            <div
-              className={`text-center ${step === 2 ? 'text-violet-600' : ''}`}
+              className={`cw-composer${dragActive ? ' cw-composer--drag' : ''}`}
+              onDragEnter={onDragEnter}
+              onDragOver={(e) => {
+                if (Array.from(e.dataTransfer.types || []).includes('Files')) e.preventDefault();
+              }}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
             >
-              Choosing Design
-            </div>
-            <div
-              className={`text-right ${step === 3 ? 'text-violet-600' : ''}`}
-            >
-              Publishing Page
-            </div>
-          </div>
-        </div>
-      </div>
+              {dragActive && (
+                <div className="cw-drop-overlay">
+                  <ImagePlus size={26} strokeWidth={2} />
+                  <span>Drop images to blend into your design</span>
+                </div>
+              )}
 
-      <div className="pt-2">
-        <div className="mt-2 flow-root">
-          {step == 1 && (
-            <Box>
-              <section className="grid gap-x-8">
-                <div className="space-y-1">
-                  <Subheading>Choose Your Page Name</Subheading>
-                  <div className="mt-4 flex max-w-xl gap-4">
-                    <Input
-                      className="flex-1"
-                      aria-label="name"
-                      name="name"
-                      placeholder="Company or Name"
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
-                    <div>
-                      <Button
-                        className="float-right cursor-pointer"
-                        onClick={() => setStep(2)}
+              <textarea
+                className="cw-textarea"
+                autoFocus
+                placeholder="e.g. A link page for my ceramics studio — calm, minimal, earthy tones. Links to my shop, upcoming workshops, my newsletter, and Instagram."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onPaste={onPaste}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runGenerate(prompt);
+                }}
+              />
+
+              {promptOverLimit && (
+                <div className="cw-counter" aria-live="polite">
+                  {prompt.length}/{MAX_PROMPT}
+                </div>
+              )}
+
+              {uploads.length > 0 && (
+                <div className="cw-attachments">
+                  {uploads.map((u) => (
+                    <div
+                      key={u.id}
+                      className={`cw-attach${u.status === 'error' ? ' cw-attach--error' : ''}`}
+                      title={u.status === 'error' ? u.error : u.name}
+                    >
+                      <div className="cw-attach-thumb" style={{ backgroundImage: `url("${u.previewUrl}")` }}>
+                        {u.status === 'uploading' && <span className="cw-attach-spin" />}
+                      </div>
+                      <div className="cw-attach-meta">
+                        <div className="cw-attach-name">{u.name}</div>
+                        <div className="cw-attach-sub">
+                          {u.status === 'uploading' ? 'Uploading…' : u.status === 'error' ? 'Failed' : 'Image'}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="cw-attach-x"
+                        onClick={() => removeUpload(u.id)}
+                        aria-label="Remove image"
                       >
-                        Create Page
-                      </Button>
+                        <X size={13} strokeWidth={2.5} />
+                      </button>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                multiple
+                hidden
+                onChange={(e) => {
+                  handleFiles(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+
+              <div className="cw-composer-foot">
+                <button
+                  type="button"
+                  className="cw-attach-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={activeCount >= MAX_IMAGES}
+                  title={activeCount >= MAX_IMAGES ? 'Up to 3 images' : 'Attach images'}
+                  aria-label="Attach images"
+                >
+                  <Paperclip size={18} strokeWidth={2} />
+                </button>
+                <input
+                  className="cw-name-input"
+                  placeholder="Page name (optional)"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="cw-generate-btn"
+                  onClick={() => runGenerate(prompt)}
+                  disabled={!prompt.trim() || isUploading || promptOverLimit}
+                >
+                  <Wand2 size={17} strokeWidth={2.4} />
+                  {isUploading ? 'Uploading…' : 'Generate my page'}
+                </button>
+              </div>
+            </div>
+
+            <div className="cw-examples">
+              <div className="cw-examples-label">Need inspiration? Try one of these:</div>
+              <div className="cw-chips">
+                {EXAMPLES.map((ex) => (
+                  <button key={ex} type="button" className="cw-chip" onClick={() => setPrompt(ex)}>
+                    {ex.split(' — ')[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && (
+              <p className="cw-error" style={{ textAlign: 'center' }}>
+                {error}
+              </p>
+            )}
+          </>
+        )}
+
+        {stage === 'generating' && <GeneratingState template={template} />}
+
+        {stage === 'result' && spec && previewContent && (
+          <>
+            <div className="cw-hero" style={{ marginBottom: 18 }}>
+              <h1 className="cw-h1" style={{ fontSize: 'clamp(24px, 4vw, 34px)' }}>
+                Here's your <span className="cw-h1-accent">page</span>
+              </h1>
+              <p className="cw-subtitle">Fine-tune the basics or ask for changes, then create it.</p>
+            </div>
+
+            <div className={`cw-result${isPortfolio ? ' cw-result--wide' : ''}`}>
+              <div>
+                <div className="cw-panel">
+                  <h3 className="cw-panel-title">Basics</h3>
+                  <div className="cw-field">
+                    <label className="cw-field-label">Title</label>
+                    <input
+                      className="cw-input"
+                      maxLength={40}
+                      value={spec.title}
+                      onChange={(e) => setSpec({ ...spec, title: e.target.value })}
+                    />
+                  </div>
+                  <div className="cw-field" style={{ marginBottom: 0 }}>
+                    <label className="cw-field-label">Tagline</label>
+                    <input
+                      className="cw-input"
+                      maxLength={40}
+                      value={spec.description ?? ''}
+                      onChange={(e) => setSpec({ ...spec, description: e.target.value })}
+                    />
                   </div>
                 </div>
-              </section>
 
-              <Divider className="my-8" soft />
-              <section className="mb-10">
-                <Subheading className="mb-4">
-                  Share Everything with One Simple Link
-                </Subheading>
-                Thin.ly Pages offer a sleek, organized way to display all your
-                links in one place. With the reliability of Thin.ly short links,
-                you can connect your audience to your content effortlessly.
-                Check out these inspiring examples!
-                <div></div>
-              </section>
-            </Box>
-          )}
-
-          {step == 2 && (
-            <Box>
-              <section className="grid gap-x-8">
-                <div>
-                  <Subheading>Choose your Design</Subheading>
-                  <div className="my-4">
-                    {/* <fieldset>
-                    <legend className="text-sm/6 font-semibold text-gray-900">Select a mailing list</legend>
-                    <RadioGroup
-                      value={selectedTemplate}
-                      onChange={setSelectedTemplate}
-                      className="mt-6 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4"
-                    >
-                      {designTemplates.map((mailingList) => (
-                        <Radio
-                          key={mailingList.id}
-                          value={mailingList}
-                          aria-label={mailingList.title}
-                          aria-description={`${mailingList.description}`}
-                          className="group relative flex cursor-pointer rounded-lg border border-gray-300 bg-white p-4 shadow-sm focus:outline-none data-[focus]:border-indigo-600 data-[focus]:ring-2 data-[focus]:ring-indigo-600"
-                        >
-                          <span className="flex flex-1">
-                            <span className="flex flex-col">
-                              <span className="block text-sm font-medium text-gray-900">{mailingList.title}</span>
-                              <span className="mt-1 flex items-center text-sm text-gray-500">{mailingList.description}</span>
-                            </span>
-                          </span>
-                          <CheckCircleIcon
-                            aria-hidden="true"
-                            className="size-5 text-indigo-600 group-[&:not([data-checked])]:invisible"
-                          />
-                          <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent group-data-[focus]:border group-data-[checked]:border-indigo-600"
-                          />
-                        </Radio>
-                      ))}
-                    </RadioGroup>
-                  </fieldset> */}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {designTemplates.map((template) => (
-                        <div
-                          key={template.id}
-                          className={`w-full bg-white border rounded-[26px] shadow dark:bg-gray-800 dark:border-gray-700 hover:ring-2 hover:ring-violet-600 cursor-pointer ${selectedTemplate === template.id
-                            ? 'ring-2 ring-violet-600 '
-                            : ''
-                            }`}
-                          onClick={() => setSelectedTemplate(template.id)}
-                        >
-                          <img
-                            className="rounded-t-[26px] w-full h-auto"
-                            src={template.image}
-                            alt={template.name}
-                          />
-                          <div className="p-5">
-                            <h5 className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                              {template.name}
-                            </h5>
-                            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                              {template.description}
-                            </p>
-                            {selectedTemplate === template.id && (
-                              <Button
-                                className="mt-3 cursor-pointer"
-                                onClick={create}
-                              >
-                                Use This Design
-                              </Button>
-                            )}
+                {isPortfolio ? (
+                  <div className="cw-panel">
+                    <h3 className="cw-panel-title">What's inside</h3>
+                    <div className="cw-linklist">
+                      <div className="cw-link-chip">
+                        <span className="cw-link-dot" style={{ background: spec.content.accent || '#e8541e' }} />
+                        <div className="cw-link-meta">
+                          <div className="cw-link-title">{spec.content.portfolio?.work?.length ?? 0} projects · {spec.content.portfolio?.capabilities?.length ?? 0} capabilities</div>
+                          <div className="cw-link-url">{spec.content.portfolio?.eyebrow}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="cw-panel">
+                    <h3 className="cw-panel-title">{(spec.links ?? []).length} generated links</h3>
+                    <div className="cw-linklist">
+                      {(spec.links ?? []).map((l, i) => (
+                        <div key={i} className="cw-link-chip">
+                          <span className="cw-link-dot" style={{ background: l.color }} />
+                          <div className="cw-link-meta">
+                            <div className="cw-link-title">{l.title}</div>
+                            <div className="cw-link-url">{l.url}</div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
+                )}
+
+                <div className="cw-panel">
+                  <h3 className="cw-panel-title">Refine with AI</h3>
+                  <div className="cw-refine-row">
+                    <input
+                      className="cw-input"
+                      placeholder='e.g. "make it darker" or "add a podcast link"'
+                      value={refine}
+                      onChange={(e) => setRefine(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') onRefine();
+                      }}
+                    />
+                    <button type="button" className="cw-ghost-btn" onClick={onRefine} disabled={!refine.trim()}>
+                      <Sparkles size={15} strokeWidth={2.4} /> Apply
+                    </button>
+                  </div>
                 </div>
-              </section>
-            </Box>
-          )}
-        </div>
+
+                <div className="cw-actions">
+                  <button type="button" className="cw-generate-btn" onClick={createTheRealPage} disabled={creating}>
+                    {creating ? 'Creating…' : 'Create this page →'}
+                  </button>
+                  <button type="button" className="cw-ghost-btn" onClick={() => runGenerate(prompt)} disabled={creating}>
+                    <RefreshCw size={15} strokeWidth={2.4} /> Regenerate
+                  </button>
+                  <button
+                    type="button"
+                    className="cw-ghost-btn"
+                    onClick={() => {
+                      setStage('compose');
+                      setSpec(null);
+                      setError('');
+                    }}
+                    disabled={creating}
+                  >
+                    <ArrowLeft size={15} strokeWidth={2.4} /> Start over
+                  </button>
+                </div>
+
+                {error && <p className="cw-error">{error}</p>}
+              </div>
+
+              <div className="cw-preview-side">
+                {isPortfolio ? (
+                  <div className="cw-browser">
+                    <div className="cw-browser-bar">
+                      <span className="cw-dot" /><span className="cw-dot" /><span className="cw-dot" />
+                      <span className="cw-browser-url">{spec.title.toLowerCase().replace(/\s+/g, '') || 'portfolio'}.thin.ly</span>
+                    </div>
+                    <PortfolioPreview
+                      title={spec.title}
+                      description={spec.description}
+                      content={previewContent}
+                      device="desktop"
+                      className="cw-browser-frame"
+                    />
+                  </div>
+                ) : (
+                  <div className="cw-preview-frame">
+                    <Preview
+                      title={spec.title}
+                      description={spec.description}
+                      content={previewContent}
+                      links={previewLinks}
+                    />
+                  </div>
+                )}
+                <p className="cw-preview-hint">Live preview · you can edit everything after creating</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
     </MainLayout>
   );
 };
+
+// ─── Generating state — a template-aware "the AI is designing" experience ──────
+
+const GEN_STEPS: Record<TemplateKind, string[]> = {
+  links: ['Choosing a palette', 'Composing the layout', 'Writing your bio', 'Placing your links', 'Polishing the details'],
+  portfolio: ['Art-directing your site', 'Choosing the typography', 'Curating selected work', 'Composing the sections', 'Adding the finishing motion'],
+};
+
+function GeneratingState({ template }: { template: TemplateKind }) {
+  const steps = GEN_STEPS[template];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setI((v) => (v + 1) % steps.length), 1500);
+    return () => clearInterval(id);
+  }, [steps.length]);
+
+  return (
+    <div className="cw-gen">
+      <div className="cw-gen-aura" aria-hidden>
+        <span className="cw-aura cw-aura-1" />
+        <span className="cw-aura cw-aura-2" />
+        <span className="cw-aura cw-aura-3" />
+      </div>
+
+      <div className="cw-gen-inner">
+        <div className="cw-gen-eyebrow">
+          <span className="cw-gen-orb" /> {template === 'portfolio' ? 'Designing your portfolio' : 'Designing your page'}
+        </div>
+
+        {template === 'portfolio' ? <SkeletonBrowser /> : <SkeletonPhone />}
+
+        <div className="cw-gen-status">
+          <span key={i} className="cw-gen-step">
+            <span className="cw-gen-spark">✦</span> {steps[i]}…
+          </span>
+        </div>
+
+        <div className="cw-gen-bar" aria-hidden>
+          <span />
+        </div>
+
+        <div className="cw-gen-dots" aria-hidden>
+          {steps.map((_, n) => (
+            <span key={n} className={`cw-gen-dot${n === i ? ' on' : ''}${n < i ? ' done' : ''}`} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonPhone() {
+  return (
+    <div className="cw-sk-phone">
+      <div className="cw-sk-notch" />
+      <div className="cw-sk sk-avatar" style={{ animationDelay: '0s' }} />
+      <div className="cw-sk sk-title" style={{ animationDelay: '.08s' }} />
+      <div className="cw-sk sk-sub" style={{ animationDelay: '.14s' }} />
+      <div className="cw-sk-socials">
+        <div className="cw-sk sk-dot" style={{ animationDelay: '.2s' }} />
+        <div className="cw-sk sk-dot" style={{ animationDelay: '.26s' }} />
+        <div className="cw-sk sk-dot" style={{ animationDelay: '.32s' }} />
+      </div>
+      <div className="cw-sk sk-btn" style={{ animationDelay: '.4s' }} />
+      <div className="cw-sk sk-btn" style={{ animationDelay: '.5s' }} />
+      <div className="cw-sk sk-btn" style={{ animationDelay: '.6s' }} />
+      <div className="cw-sk sk-btn" style={{ animationDelay: '.7s' }} />
+    </div>
+  );
+}
+
+function SkeletonBrowser() {
+  return (
+    <div className="cw-sk-browser">
+      <div className="cw-sk-bar">
+        <span /><span /><span />
+      </div>
+      <div className="cw-sk-screen">
+        <div className="cw-sk sk-hero" style={{ animationDelay: '.05s' }} />
+        <div className="cw-sk sk-hero2" style={{ animationDelay: '.18s' }} />
+        <div className="cw-sk sk-line" style={{ animationDelay: '.3s' }} />
+        <div className="cw-sk-row">
+          <div className="cw-sk sk-chip" style={{ animationDelay: '.42s' }} />
+          <div className="cw-sk sk-chip" style={{ animationDelay: '.48s' }} />
+          <div className="cw-sk sk-chip" style={{ animationDelay: '.54s' }} />
+        </div>
+        <div className="cw-sk sk-wide" style={{ animationDelay: '.66s' }} />
+        <div className="cw-sk sk-wide" style={{ animationDelay: '.76s' }} />
+      </div>
+    </div>
+  );
+}
 
 export default CreatePage;

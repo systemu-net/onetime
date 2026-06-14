@@ -206,7 +206,11 @@
   border-left: 1px solid var(--pm-line);
   display: flex;
   flex-direction: column;
-  position: relative;
+  /* Stay in view while the (often very tall) editor column scrolls. */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
 }
 
 html.dark .em-right {
@@ -251,6 +255,8 @@ html.dark .em-right {
     max-width: none;
     border-left: none;
     border-top: 1px solid var(--pm-line);
+    position: static;
+    height: auto;
   }
   .em-handle {
     display: none;
@@ -1070,3 +1076,43 @@ html.dark .em-link-clicks {
   color: var(--pm-mute);
   font-style: italic;
 }
+
+/* ── Portfolio editor ── */
+.pf-row { display: flex; gap: 12px; }
+@media (max-width: 560px) { .pf-row { flex-direction: column; gap: 0; } }
+.pf-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 0; border-bottom: 1px solid var(--pm-line);
+}
+.pf-item:last-of-type { border-bottom: none; }
+.pf-item .em-link-drag { padding-top: 10px; }
+.em-portfolio-frame { width: 100%; max-height: 100%; border-radius: 12px; }
+
+/* ── Portfolio preview device frames (match the dashboard mockup style) ── */
+.em-dev-phone {
+  position: relative;
+  width: min(86%, 340px);
+  margin: 0 auto;
+  border-radius: 44px;
+  padding: 9px;
+  background: linear-gradient(160deg, #1a1a26 0%, #0a0a14 100%);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 24px 50px -18px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+.em-dev-notch {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  width: 62px; height: 17px; border-radius: 999px; background: #0a0a14; z-index: 3;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.em-dev-screen { position: relative; border-radius: 35px; overflow: hidden; background: #efeae0; }
+.em-dev-shine {
+  position: absolute; inset: 0; border-radius: 35px; pointer-events: none; z-index: 4;
+  background: linear-gradient(160deg, rgba(255,255,255,0.16) 0%, transparent 20%, transparent 80%, rgba(255,255,255,0.07) 100%);
+}
+.em-dev-browser {
+  width: 100%; border: 1px solid var(--pm-line); border-radius: 14px; overflow: hidden; background: var(--pm-card, #fff);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 24px 50px -22px rgba(20,20,40,0.4);
+}
+.em-dev-bar { display: flex; align-items: center; gap: 7px; padding: 10px 13px; border-bottom: 1px solid var(--pm-line); background: var(--pm-bg, #f4f4f5); }
+.em-dev-bar span { width: 9px; height: 9px; border-radius: 50%; background: var(--pm-line); }
+.em-dev-url { margin-left: 12px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--pm-mute); }
+.em-dev-fill { width: 100%; }

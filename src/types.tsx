@@ -202,6 +202,27 @@ export type Resource = {
     linkable: ResourceLink; // Can be expanded to include QrCode and Image types later
 };
 
+export type PortfolioWork = { title: string; category?: string; year?: string; image?: string; url?: string };
+export type PortfolioCapability = { title: string; description?: string };
+export type PortfolioContent = {
+    monogram?: string;
+    eyebrow?: string;
+    firstName?: string;
+    lastName?: string;
+    tagline?: string;
+    location?: string;
+    timezone?: string;
+    coordinates?: string;
+    availability?: string;
+    statement?: string;
+    about?: string[];
+    services?: string[];
+    work?: PortfolioWork[];
+    capabilities?: PortfolioCapability[];
+    email?: string;
+    social?: Page['content']['social'];
+};
+
 export type Page = {
     id?: number;
     lookup_code: string;
@@ -242,11 +263,17 @@ export type Page = {
         | 'to bottom left'; // Gradient direction
         fontFamily: string;
         profileImage?: string; // Profile/avatar image URL or base64
+        backgroundImage?: string; // Full-bleed background image URL (when backgroundType === 'image')
         social: {
             fb?: string;
             tiktok?: string;
             ig?: string;
             linkedin?: string;
+            x?: string;
         };
+        // Which template renders this page. Defaults to the link-in-bio card.
+        template?: 'links' | 'portfolio';
+        accent?: string; // Portfolio accent (hex)
+        portfolio?: PortfolioContent;
     };
 };
