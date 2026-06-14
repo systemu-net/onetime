@@ -1,5 +1,7 @@
+import { uploadImageToS3 } from '@/apis/uploads';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import React, { useCallback, useRef, useState } from 'react';
+import { useCookies } from 'react-cookie';
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -16,36 +18,45 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   currentImage,
   title = 'Add image'
 }) => {
+  const [cookies] = useCookies(['token']);
   const [imageUrl, setImageUrl] = useState<string>(currentImage || '');
   const [urlInput, setUrlInput] = useState<string>('');
   const [dragActive, setDragActive] = useState(false);
   const [previewImage, setPreviewImage] = useState<string>(currentImage || '');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = useCallback((file: File) => {
+  // Files are uploaded to S3; the S3 URL (not base64) is what gets saved.
+  const handleFileChange = useCallback(async (file: File) => {
     if (!file) return;
+    setUploadError('');
 
-    // Validate file type
-    if (!file.type.match(/^image\/(png|jpg|jpeg|svg|gif)$/)) {
-      alert('Please select a valid image file (PNG, JPG, SVG, or GIF)');
+    if (!file.type.match(/^image\/(png|jpe?g|gif|webp)$/)) {
+      setUploadError('Please use a PNG, JPG, GIF, or WebP image.');
       return;
     }
-
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      setUploadError('File size must be less than 5MB.');
       return;
     }
 
-    // Read file and convert to base64 or object URL for preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setPreviewImage(result);
-      setImageUrl(result);
-    };
-    reader.readAsDataURL(file);
-  }, []);
+    // Immediate local preview while the upload runs.
+    setPreviewImage(URL.createObjectURL(file));
+    setImageUrl('');
+    setUploading(true);
+    try {
+      const { url } = await uploadImageToS3(cookies.token, file);
+      setImageUrl(url);
+      setPreviewImage(url);
+    } catch (e) {
+      console.error(e);
+      setUploadError(e instanceof Error ? e.message : 'Upload failed.');
+      setPreviewImage('');
+    } finally {
+      setUploading(false);
+    }
+  }, [cookies.token]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -165,12 +176,12 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif"
+                  accept="image/png,image/jpeg,image/gif,image/webp"
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Use PNG, JPG, SVG or GIF. (max. 5MB, 2500x2500px)
+                  Use PNG, JPG, GIF or WebP. (max. 5MB)
                 </p>
                 {/*FUTURE*/}
                 {/* <a
@@ -216,6 +227,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
               </div>
             </div>
           </div>
+          {uploadError && (
+            <p className="mt-4 text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+          )}
         </div>
 
         {/* Footer */}
@@ -228,10 +242,10 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           </button>
           <button
             onClick={handleSave}
-            disabled={!imageUrl}
+            disabled={!imageUrl || uploading}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
-            Save
+            {uploading ? 'Uploading…' : 'Save'}
           </button>
         </div>
       </div>

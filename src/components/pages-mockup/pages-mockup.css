@@ -150,6 +150,13 @@ html.dark .pm-shell {
   transform: translateY(0);
 }
 
+.pm-btn-disabled,
+.pm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .pm-btn-primary {
   background: linear-gradient(135deg, #ec4899 0%, #7c3aed 60%, #6366f1 100%);
   color: white;
