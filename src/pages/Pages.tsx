@@ -2,19 +2,21 @@
  * Pages — the live /pages dashboard.
  * Visual design ported from PagesMockup (/pages-mockup); wired to real data.
  *
- * Real & wired: page list (getPages), inline rename (updatePage), delete
- * (deletePage), edit navigation, "view live" (published_url), create page.
+ * Real & wired: page list (getPages), publish status (getPageStatus), inline
+ * rename (updatePage), delete (deletePage), edit navigation, "view live"
+ * (published_url), create page, and traffic analytics — real page views, the
+ * 14-day window, trend and daily sparkline (getPagesAnalytics, backed by
+ * BrandPageAnalyticsService). Per-link click counts are NOT tracked for
+ * brand-page links, so there is no per-link breakdown.
  * Client-only niceties: search / status filter / sort / pin (not persisted).
- * Visual stubs (analytics not yet exposed by the API): per-page clicks, trend,
- * sparkline, top-link, and the derived totals in the stats row & insights panel.
- * Replace `stubAnalytics()` once a page-analytics endpoint exists.
  */
 import MainLayout from '@/components/layouts/MainLayout';
 import Preview from '@/components/sections/Preview';
 import PortfolioThumb from '@/components/sections/PortfolioThumb';
-import { deletePage, getPages, updatePage } from '@/apis/pages';
+import { deletePage, getPages, getPagesAnalytics, updatePage } from '@/apis/pages';
 import { CREATE_PAGES_ROUTE } from '@/routes';
 import type { Page, PageLink } from '@/types';
+import { getPageStatus, isPagePublished, type PageStatus } from '@/utils/pageStatus';
 import {
   ExternalLink,
   MoreVertical,
@@ -39,38 +41,27 @@ import '@/components/pages-mockup/pages-mockup.css';
 
 // ─── Display model ───────────────────────────────────────────────────────────
 
-type DisplayPage = Page & {
-  clicks: number;
-  trend: number;
-  topLink: { name: string; clicks: number };
+// Real per-page traffic, fetched from GET /api/v1/brand_pages/analytics.
+// `views` is all-time page views; `views_window` the last 14 days; `trend_pct`
+// the change vs the preceding 14 days; `spark` the 14 daily counts.
+type PageAnalytics = {
+  views: number;
+  views_window: number;
+  trend_pct: number;
   spark: number[];
+};
+type AnalyticsMap = Record<string, PageAnalytics>;
+
+const EMPTY_SPARK = Array(14).fill(0) as number[];
+
+type DisplayPage = Page & {
+  clicks: number; // all-time page views
+  views14d: number; // page views in the last 14 days
+  trend: number; // % change of the 14-day window vs the previous one
+  spark: number[]; // daily page views, last 14 days (oldest → newest)
   updatedRel: string;
   isPrimary?: boolean;
 };
-
-// Deterministic placeholder analytics keyed off the page id, so the redesigned
-// UI reads as "alive" without inventing different numbers on every render.
-// TODO: replace with real metrics once a page-analytics endpoint is available.
-function stubAnalytics(page: Page): Pick<DisplayPage, 'clicks' | 'trend' | 'topLink' | 'spark'> {
-  const seedBase = (page.id ?? 0) * 2654435761;
-  let s = (seedBase % 2147483647 + 2147483647) % 2147483647 || 1;
-  const next = () => (s = (s * 16807) % 2147483647) / 2147483647;
-
-  const isDraft = page.status === 'DRAFT';
-  if (isDraft) {
-    return { clicks: 0, trend: 0, topLink: { name: '—', clicks: 0 }, spark: Array(14).fill(0) };
-  }
-
-  const clicks = Math.round(80 + next() * 1400);
-  const trend = Math.round((next() * 60 - 20));
-  const spark = Array.from({ length: 14 }, () => Math.round(10 + next() * 90));
-  const firstLink = page.links?.[0];
-  const topLink = {
-    name: firstLink?.label ?? page.title.split(' ').slice(0, 2).join(' '),
-    clicks: Math.round(clicks * (0.15 + next() * 0.2)),
-  };
-  return { clicks, trend, topLink, spark };
-}
 
 function relTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -88,10 +79,13 @@ function relTime(iso: string): string {
   return `${Math.floor(mo / 12)}y ago`;
 }
 
-function toDisplay(page: Page): DisplayPage {
+function toDisplay(page: Page, analytics?: PageAnalytics): DisplayPage {
   return {
     ...page,
-    ...stubAnalytics(page),
+    clicks: analytics?.views ?? 0,
+    views14d: analytics?.views_window ?? 0,
+    trend: analytics?.trend_pct ?? 0,
+    spark: analytics?.spark?.length ? analytics.spark : EMPTY_SPARK,
     updatedRel: relTime(page.updated_at),
   };
 }
@@ -115,9 +109,11 @@ function previewLinks(page: Page): PageLink[] {
   return Array.isArray(page.links) ? page.links : [];
 }
 
-function StatusBadge({ status }: { status: Page['status'] }) {
-  if (status === 'PUBLISHED')
+function StatusBadge({ status }: { status: PageStatus }) {
+  if (status === 'published')
     return <span className="pm-badge pm-badge-published">● Live</span>;
+  if (status === 'publishing')
+    return <span className="pm-badge pm-badge-publishing">◌ Publishing…</span>;
   return <span className="pm-badge pm-badge-draft">✎ Draft</span>;
 }
 
@@ -125,12 +121,12 @@ function StatusBadge({ status }: { status: Page['status'] }) {
 
 function StatsRow({ pages }: { pages: DisplayPage[] }) {
   const total = pages.length;
-  const published = pages.filter((p) => p.status === 'PUBLISHED').length;
-  const drafts = pages.filter((p) => p.status === 'DRAFT').length;
+  const published = pages.filter(isPagePublished).length;
+  const drafts = total - published;
   const totalLinks = pages.reduce((sum, p) => sum + previewLinks(p).length, 0);
-  const totalClicks = pages.reduce((sum, p) => sum + p.clicks, 0);
+  const totalViews = pages.reduce((sum, p) => sum + p.clicks, 0);
   const topPage = [...pages].sort((a, b) => b.clicks - a.clicks)[0];
-  const avgClicks = total ? Math.round(totalClicks / total) : 0;
+  const avgViews = total ? Math.round(totalViews / total) : 0;
 
   const tiles = [
     {
@@ -151,8 +147,8 @@ function StatsRow({ pages }: { pages: DisplayPage[] }) {
     },
     {
       icon: '⇗',
-      label: 'Total Clicks',
-      value: totalClicks.toLocaleString(),
+      label: 'Total Views',
+      value: totalViews.toLocaleString(),
       sub: 'all time',
       bg: 'linear-gradient(135deg, #84cc16, #10b981)',
       shadow: 'rgba(16, 185, 129, 0.35)',
@@ -161,15 +157,15 @@ function StatsRow({ pages }: { pages: DisplayPage[] }) {
       icon: '★',
       label: 'Top Page',
       value: topPage?.title.split(' ').slice(0, 2).join(' ') ?? '—',
-      sub: topPage ? `${topPage.clicks.toLocaleString()} clicks` : '—',
+      sub: topPage ? `${topPage.clicks.toLocaleString()} views` : '—',
       bg: 'linear-gradient(135deg, #f59e0b, #ec4899)',
       shadow: 'rgba(236, 72, 153, 0.35)',
     },
     {
       icon: '≈',
       label: 'Avg / Page',
-      value: avgClicks.toLocaleString(),
-      sub: 'clicks',
+      value: avgViews.toLocaleString(),
+      sub: 'views',
       bg: 'linear-gradient(135deg, #a855f7, #6366f1)',
       shadow: 'rgba(99, 102, 241, 0.35)',
     },
@@ -184,9 +180,11 @@ function StatsRow({ pages }: { pages: DisplayPage[] }) {
           style={{ '--pm-tile-bg': t.bg, '--pm-tile-shadow': t.shadow } as CSSProperties}
         >
           <div className="pm-stat-tile-icon">{t.icon}</div>
-          <div className="pm-stat-tile-label">{t.label}</div>
-          <div className="pm-stat-tile-value">{t.value}</div>
-          <div className="pm-stat-tile-sub">{t.sub}</div>
+          <div className="pm-stat-tile-text">
+            <div className="pm-stat-tile-label">{t.label}</div>
+            <div className="pm-stat-tile-value">{t.value}</div>
+            <div className="pm-stat-tile-sub">{t.sub}</div>
+          </div>
         </div>
       ))}
     </div>
@@ -244,16 +242,15 @@ function InsightsPanel({ pages }: { pages: DisplayPage[] }) {
   const topPages = [...pages].sort((a, b) => b.clicks - a.clicks).slice(0, 5);
   const topPeak = Math.max(1, ...topPages.map((p) => p.clicks));
 
-  const topButtons = pages
-    .filter((p) => p.topLink.clicks > 0)
-    .map((p) => ({ name: p.topLink.name, clicks: p.topLink.clicks, page: p.title }))
-    .sort((a, b) => b.clicks - a.clicks)
+  const trending = [...pages]
+    .filter((p) => p.views14d > 0)
+    .sort((a, b) => b.views14d - a.views14d)
     .slice(0, 5);
-  const btnPeak = Math.max(1, ...topButtons.map((b) => b.clicks));
+  const trendPeak = Math.max(1, ...trending.map((p) => p.views14d));
 
   const counts = pages.reduce(
     (acc, p) => {
-      if (p.status === 'PUBLISHED') acc.pub++;
+      if (isPagePublished(p)) acc.pub++;
       else acc.draft++;
       return acc;
     },
@@ -296,22 +293,24 @@ function InsightsPanel({ pages }: { pages: DisplayPage[] }) {
       <div className="pm-panel">
         <h3 className="pm-panel-title">
           <span className="pm-panel-title-dot" />
-          Top Buttons (all pages)
+          Trending · last 14 days
         </h3>
-        {topButtons.length === 0 ? (
-          <div className="pm-rank-sub" style={{ padding: '6px 2px' }}>No data yet</div>
+        {trending.length === 0 ? (
+          <div className="pm-rank-sub" style={{ padding: '6px 2px' }}>No views yet</div>
         ) : (
-          topButtons.map((b, i) => (
-            <div key={`${b.page}-${b.name}`} className="pm-rank-row">
+          trending.map((p, i) => (
+            <div key={p.id} className="pm-rank-row">
               <div className="pm-rank">{i + 1}</div>
               <div className="pm-rank-info">
-                <div className="pm-rank-name">{b.name}</div>
-                <div className="pm-rank-sub">{b.page}</div>
+                <div className="pm-rank-name">{p.title}</div>
+                <div className="pm-rank-sub">
+                  {p.trend === 0 ? 'vs prev 14d' : `${p.trend > 0 ? '▲' : '▼'} ${Math.abs(p.trend)}% vs prev`}
+                </div>
               </div>
               <div>
-                <div className="pm-rank-clicks">{b.clicks.toLocaleString()}</div>
+                <div className="pm-rank-clicks">{p.views14d.toLocaleString()}</div>
                 <div className="pm-rank-bar">
-                  <div className="pm-rank-bar-fill" style={{ width: `${(b.clicks / btnPeak) * 100}%` }} />
+                  <div className="pm-rank-bar-fill" style={{ width: `${(p.views14d / trendPeak) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -460,7 +459,7 @@ function PageCard({
                   ? page.published_url.replace('https://', '')
                   : `thin.ly/${page.lookup_code}`}
               </span>
-              <StatusBadge status={page.status} />
+              <StatusBadge status={getPageStatus(page)} />
               {isPinned && (
                 <span className="pm-badge pm-badge-pinned">
                   <Pin size={10} strokeWidth={2.5} /> Pinned
@@ -479,33 +478,31 @@ function PageCard({
 
               <div className="pm-pill" style={{ '--pm-pill-accent': '#7c3aed' } as CSSProperties}>
                 <div className="pm-pill-label">
-                  <span className="pm-pill-dot" /> Clicks
+                  <span className="pm-pill-dot" /> Views
                 </div>
                 <div className="pm-pill-value">{page.clicks.toLocaleString()}</div>
+                <div className="pm-pill-sub">all time</div>
+              </div>
+
+              <div className="pm-pill" style={{ '--pm-pill-accent': '#ec4899' } as CSSProperties}>
+                <div className="pm-pill-label">
+                  <span className="pm-pill-dot" /> Views · 14d
+                </div>
+                <div className="pm-pill-value">{page.views14d.toLocaleString()}</div>
                 <div
                   className={`pm-pill-sub ${
                     page.trend > 0 ? 'pm-pill-sub-up' : page.trend < 0 ? 'pm-pill-sub-down' : ''
                   }`}
                 >
                   {page.trend === 0
-                    ? 'no data yet'
+                    ? 'vs prev 14d'
                     : `${page.trend > 0 ? '▲' : '▼'} ${Math.abs(page.trend)}% vs prev`}
-                </div>
-              </div>
-
-              <div className="pm-pill" style={{ '--pm-pill-accent': '#ec4899' } as CSSProperties}>
-                <div className="pm-pill-label">
-                  <span className="pm-pill-dot" /> Top Link
-                </div>
-                <div className="pm-pill-value">{page.topLink.name}</div>
-                <div className="pm-pill-sub">
-                  {page.topLink.clicks > 0 ? `${page.topLink.clicks} clicks` : 'no data'}
                 </div>
               </div>
 
               <div className="pm-pill pm-pill-trend" style={{ '--pm-pill-accent': '#84cc16' } as CSSProperties}>
                 <div className="pm-pill-label">
-                  <span className="pm-pill-dot" /> Last 14 days
+                  <span className="pm-pill-dot" /> Daily · 14d
                 </div>
                 <div className="pm-spark" aria-hidden>
                   {page.spark.map((v, i) => (
@@ -598,7 +595,7 @@ const STATE_LABEL: Record<(typeof STATE_FILTERS)[number], string> = {
 
 type SortKey = 'clicks' | 'updated' | 'alpha';
 const SORT_LABEL: Record<SortKey, string> = {
-  clicks: 'Most clicks',
+  clicks: 'Most views',
   updated: 'Recently updated',
   alpha: 'A → Z',
 };
@@ -618,7 +615,14 @@ const PagesPage = () => {
   const retrievePages = useCallback(async () => {
     try {
       const res: Page[] = await getPages(cookies.token);
-      setPages((res || []).map(toDisplay));
+      // Real traffic is a best-effort enrichment — never block the page list on it.
+      let analytics: AnalyticsMap = {};
+      try {
+        analytics = (await getPagesAnalytics(cookies.token)) as AnalyticsMap;
+      } catch (analyticsError) {
+        console.error('Could not load page analytics:', analyticsError);
+      }
+      setPages((res || []).map((p) => toDisplay(p, analytics[p.lookup_code])));
     } catch (error: unknown) {
       console.error(error);
       setErrorMessage('An error occurred while fetching pages.');
@@ -667,7 +671,8 @@ const PagesPage = () => {
     const pinned: DisplayPage[] = [];
     const rest: DisplayPage[] = [];
     for (const p of pages) {
-      if (stateFilter !== 'all' && p.status !== stateFilter) continue;
+      if (stateFilter === 'PUBLISHED' && !isPagePublished(p)) continue;
+      if (stateFilter === 'DRAFT' && isPagePublished(p)) continue;
       if (q.length > 0) {
         const hay = `${p.title} ${p.description ?? ''} ${p.lookup_code}`.toLowerCase();
         if (!hay.includes(q)) continue;

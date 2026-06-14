@@ -445,14 +445,10 @@ html.dark .pm-shell {
   align-items: center;
 }
 
-@container pm-card (max-width: 540px) {
-  .pm-card-body {
-    grid-template-columns: 1fr;
-    gap: 22px;
-    justify-items: center;
-    text-align: center;
-  }
-}
+/* NOTE: all compact-mobile card overrides live in the consolidated
+ * `@container pm-card (max-width: 540px)` block far below — it must come AFTER
+ * the base .pm-phone / .pm-meta / .pm-title definitions, otherwise those base
+ * rules (equal specificity, later source order) override the container query. */
 
 /* ── Phone ──────────────────────────────────────────────────────────────── */
 
@@ -657,6 +653,13 @@ html.dark .pm-shell {
   border-color: rgba(99, 102, 241, 0.3);
 }
 
+/* Transient state: publish requested, async job hasn't produced a URL yet */
+.pm-badge-publishing {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
 .pm-badge-primary {
   background: linear-gradient(135deg, #ec4899, #7c3aed);
   color: white;
@@ -679,6 +682,9 @@ html.dark .pm-badge-draft {
 html.dark .pm-badge-archived {
   color: #a5b4fc;
 }
+html.dark .pm-badge-publishing {
+  color: #93c5fd;
+}
 
 /* ── Stat pills row inside card ─────────────────────────────────────────── */
 
@@ -692,12 +698,6 @@ html.dark .pm-badge-archived {
 @container pm-card (max-width: 780px) {
   .pm-stat-pills {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@container pm-card (max-width: 420px) {
-  .pm-stat-pills {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -851,9 +851,104 @@ html.dark .pm-badge-archived {
 }
 
 @container pm-card (max-width: 540px) {
+  /* Compact mobile card:
+   *   row 1 — title (full width)
+   *   row 2 — slug + status (full width)
+   *   row 3 — phone preview (~75%)  |  stats (~25%)
+   * display:contents lifts .pm-meta's children into the card-body grid so the
+   * title spans full width while the phone & stats share the row below.
+   * NB: this block sits after the base .pm-phone/.pm-meta/.pm-title rules so
+   * its overrides win on source order (container queries add no specificity). */
+  .pm-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .pm-card-body {
+    grid-template-columns: clamp(150px, 70cqw, 240px) minmax(64px, 1fr);
+    grid-template-areas:
+      "title title"
+      "slug  slug"
+      "phone stats";
+    gap: 8px 10px;
+    align-items: start;
+    justify-items: stretch;
+    text-align: left;
+  }
+  .pm-meta {
+    display: contents;
+  }
+  .pm-title-row {
+    grid-area: title;
+  }
+  .pm-slug-row {
+    grid-area: slug;
+    margin-bottom: 2px;
+  }
+  .pm-phone-wrap {
+    grid-area: phone;
+  }
+  /* Phone width matches its grid column so the preview fills ~75% with no gap */
+  .pm-phone {
+    --pm-phone-w: clamp(150px, 70cqw, 240px);
+    transform: none;
+  }
+  .pm-title {
+    font-size: 20px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  /* Rename is hover-only (no touch affordance) — reclaim its width on mobile */
+  .pm-rename-btn {
+    display: none;
+  }
+
+  /* Narrow (~25%) stats column: tiny stacked pills, centered beside the phone */
+  .pm-stat-pills {
+    grid-area: stats;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    gap: 7px;
+  }
+  .pm-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    padding: 7px 9px;
+    border-radius: 11px;
+  }
+  .pm-pill-label {
+    font-size: 8.5px;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
+  .pm-pill-value {
+    margin-top: 1px;
+    font-size: 14px;
+    text-align: left;
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* Drop the secondary line to keep each pill tight */
+  .pm-pill-sub {
+    display: none;
+  }
+  /* Sparkline pill keeps its label above a shorter chart */
+  .pm-pill-trend {
+    align-items: stretch;
+    gap: 4px;
+  }
+  .pm-spark {
+    height: 20px;
+  }
+
   .pm-card-foot {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
   }
   .pm-foot-actions {
     justify-content: center;
@@ -1102,12 +1197,109 @@ html.dark .pm-badge-archived {
 }
 
 @media (max-width: 560px) {
-  .pm-stats-row {
-    grid-template-columns: 1fr;
+  /* Tighter shell — give the page list more room */
+  .pm-shell {
+    padding: 16px 14px 48px;
+  }
+
+  /* Smaller hero, less vertical real estate before the pages */
+  .pm-page-header {
+    margin-bottom: 16px;
+    gap: 12px;
+    align-items: stretch;
   }
   .pm-h1 {
-    font-size: 28px;
+    font-size: 26px;
   }
+  .pm-subtitle {
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  /* Make page creation the prominent action */
+  .pm-header-actions {
+    width: 100%;
+    gap: 8px;
+  }
+  .pm-header-actions .pm-btn-primary {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .pm-header-actions .pm-btn-ghost {
+    flex: 0 0 auto;
+  }
+
+  /* Stats: one compact, horizontally-scrollable line instead of huge cards */
+  .pm-stats-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .pm-stats-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pm-stat-tile {
+    flex: 0 0 auto;
+    min-width: 124px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    scroll-snap-align: start;
+  }
+  .pm-stat-tile:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .pm-stat-tile::before {
+    width: 90px;
+    height: 90px;
+    inset: -30% -20% auto auto;
+    filter: blur(28px);
+  }
+
+  .pm-stat-tile-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 14px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .pm-stat-tile-text {
+    min-width: 0;
+  }
+  .pm-stat-tile-label {
+    margin-top: 0;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pm-stat-tile-value {
+    margin-top: 2px;
+    font-size: 19px;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Drop the secondary line on mobile to keep the strip slim */
+  .pm-stat-tile-sub {
+    display: none;
+  }
+
   .pm-card {
     padding: 20px;
   }

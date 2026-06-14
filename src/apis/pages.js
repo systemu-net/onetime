@@ -48,6 +48,30 @@ export const getPages = async (jwtToken) => {
   }
 };
 
+// Real per-page traffic for the dashboard (page views, 14-day spark, trend).
+// Returns a map keyed by the page's lookup_code:
+//   { [lookup_code]: { views, views_window, trend_pct, spark } }
+export const getPagesAnalytics = async (jwtToken) => {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: jwtToken,
+    },
+  };
+
+  const response = await fetch(`${API_URL}/api/v1/brand_pages/analytics`, requestOptions);
+  if (!response.ok) {
+    throw new Error('Failed to load page analytics');
+  }
+  const res = await response.json();
+  const byLookup = {};
+  for (const entry of res.pages || []) {
+    byLookup[entry.lookup_code] = entry;
+  }
+  return byLookup;
+};
+
 // Generate (but do not persist) a page design from an AI prompt.
 // `images` is an optional array of { key, url } from uploadImageToS3 (max 3).
 // Returns the spec: { title, description, content, links: [...], social? }.
