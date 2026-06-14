@@ -247,16 +247,35 @@ html.dark .em-right {
 }
 
 @media (max-width: 880px) {
+  /* Single-column editor on mobile/tablet. `display: contents` dissolves
+     .em-body so its children (preview + form) join .em-shell's flex column,
+     letting us reorder the whole page: topbar → preview → tabs → form. */
   .em-body {
-    flex-direction: column;
+    display: contents;
   }
+  .em-topbar { order: 0; }
+  .em-right  { order: 1; } /* live preview right under the View live / Publish bar */
+  .em-tabbar { order: 2; } /* then Content / Design / Social / Analytics */
+  .em-center { order: 3; } /* then the editing panels */
+
   .em-right {
     width: 100%;
+    min-width: 0;
     max-width: none;
     border-left: none;
-    border-top: 1px solid var(--pm-line);
+    border-bottom: 1px solid var(--pm-line);
     position: static;
     height: auto;
+    align-self: stretch;
+  }
+  /* Let the page scroll as one column instead of nesting a scroll area. */
+  .em-center {
+    flex: none;
+    overflow: visible;
+    padding: 20px clamp(14px, 4vw, 24px);
+  }
+  .em-preview-stage {
+    padding: 18px 16px;
   }
   .em-handle {
     display: none;
@@ -1077,6 +1096,43 @@ html.dark .em-link-clicks {
   font-style: italic;
 }
 
+/* ── Mobile: stack the editor top bar ───────────────────────────────────────
+ * On a single flex row the actions squeeze the title to "E.." and crush the
+ * status pill into a circle (its text wraps inside the 999px radius). Stacking
+ * gives each part full width: back · title · meta (status/slug/saved) · actions. */
+@media (max-width: 600px) {
+  .em-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .em-back {
+    align-self: flex-start;
+    margin-left: -6px;
+  }
+  .em-title-block {
+    flex: none;
+    width: 100%;
+  }
+  .em-title {
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .em-meta-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .em-topbar-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .em-topbar-actions > * {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
+
 /* ── Portfolio editor ── */
 .pf-row { display: flex; gap: 12px; }
 @media (max-width: 560px) { .pf-row { flex-direction: column; gap: 0; } }
@@ -1116,3 +1172,15 @@ html.dark .em-link-clicks {
 .em-dev-bar span { width: 9px; height: 9px; border-radius: 50%; background: var(--pm-line); }
 .em-dev-url { margin-left: 12px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--pm-mute); }
 .em-dev-fill { width: 100%; }
+
+/* Mobile preview sizing — must live after the base .em-preview-phone /
+   .em-dev-phone rules above so these win on source order (container/media
+   queries add no specificity). Keeps the top-of-page preview compact. */
+@media (max-width: 880px) {
+  .em-preview-phone {
+    --pm-phone-w: clamp(180px, 50vw, 230px);
+  }
+  .em-dev-phone {
+    width: clamp(180px, 50vw, 230px);
+  }
+}

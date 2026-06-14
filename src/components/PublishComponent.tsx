@@ -10,6 +10,7 @@ import React, { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
 import { publishPage, unpublishPage } from "../apis/publish.js";
 import { Page } from "../types";
+import { isPagePublished, hasUnpublishedChanges as computeUnpublishedChanges } from "../utils/pageStatus";
 
 interface PublishComponentProps {
   page: Page;
@@ -31,16 +32,14 @@ const PublishComponent: React.FC<PublishComponentProps> = ({
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
-  // Simple logic: page is published if it has a published_url
-  const isPublished = !!page.published_url;
+  // Publish state comes from the shared helper so the editor, dashboard badge
+  // and "View live" link all agree (see src/utils/pageStatus.ts).
+  const isPublished = isPagePublished(page);
   const publishedUrl = page.published_url;
   const lastPublishedAt = page.published_at;
 
-  // Check if there are unpublished changes
-  const hasUnpublishedChanges =
-    page.updated_at &&
-    page.published_at &&
-    new Date(page.updated_at) > new Date(page.published_at);
+  // Check if there are unpublished changes (live page edited since last publish)
+  const hasUnpublishedChanges = computeUnpublishedChanges(page);
 
   const handlePublish = useCallback(async () => {
     if (isLoading || !page.lookup_code) return;

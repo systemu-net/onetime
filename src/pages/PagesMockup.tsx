@@ -330,9 +330,11 @@ function StatsRow({ pages }: { pages: MockPage[] }) {
           }
         >
           <div className="pm-stat-tile-icon">{t.icon}</div>
-          <div className="pm-stat-tile-label">{t.label}</div>
-          <div className="pm-stat-tile-value">{t.value}</div>
-          <div className="pm-stat-tile-sub">{t.sub}</div>
+          <div className="pm-stat-tile-text">
+            <div className="pm-stat-tile-label">{t.label}</div>
+            <div className="pm-stat-tile-value">{t.value}</div>
+            <div className="pm-stat-tile-sub">{t.sub}</div>
+          </div>
         </div>
       ))}
     </div>
