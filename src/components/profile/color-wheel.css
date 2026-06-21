@@ -1,0 +1,61 @@
+/* ColorWheel — custom HSV accent picker (ColorWheel.tsx). */
+.cw { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+.cw-wheel {
+  position: relative;
+  width: clamp(150px, 42vw, 188px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  cursor: crosshair;
+  touch-action: none;
+  /* white centre (low saturation) over the full hue ring */
+  background:
+    radial-gradient(circle at center, #fff 0%, rgba(255, 255, 255, 0) 70%),
+    conic-gradient(
+      from 0deg,
+      hsl(0 100% 50%), hsl(60 100% 50%), hsl(120 100% 50%),
+      hsl(180 100% 50%), hsl(240 100% 50%), hsl(300 100% 50%), hsl(360 100% 50%)
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 10px 30px -12px rgba(15, 15, 23, 0.4);
+}
+
+.cw-knob {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.cw-controls { display: flex; align-items: center; gap: 12px; width: 100%; }
+.cw-swatch {
+  width: 40px; height: 40px; flex: none; border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+}
+.cw-controls-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.cw-hex {
+  font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--ink-2);
+}
+
+/* Brightness slider */
+.cw-value {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 10px; border-radius: 999px; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.cw-value::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%; background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.cw-value::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%; background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}

@@ -195,6 +195,8 @@
   transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), background var(--dur-base);
 }
 .tlp-btn:hover { transform: translateY(-2px); }
+.tlp-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.tlp-btn:disabled:hover { transform: none; }
 .tlp-btn--accent { background: var(--ink-1); color: #fff; box-shadow: 0 8px 20px -8px rgba(15, 15, 23, 0.5); }
 .tlp-btn--ghost { background: transparent; color: var(--ink-1); border-color: var(--line-1); }
 .tlp-btn--ghost:hover { border-color: var(--ink-1); }
@@ -289,9 +291,9 @@
 /* Pinned link: a beautiful golden crown — no upsized card, no "pinned" label */
 .tlp-row-crown { flex: none; color: #e0a92e; filter: drop-shadow(0 1px 1px rgba(176, 124, 17, 0.35)); }
 .tlp-row--pinned { border-color: color-mix(in srgb, #e0a92e 36%, var(--line-1)); }
-.tlp-row-slug { font-family: var(--font-mono); font-size: 12px; color: var(--ink-4); display: inline-flex; align-items: center; gap: 8px; }
+.tlp-row-slug { font-family: var(--font-mono); font-size: 12px; color: var(--ink-4); display: inline-flex; align-items: center; gap: 0; }
 .tlp-row-slug b { color: var(--accent-d); font-weight: 600; }
-.tlp-row-tag { font-style: normal; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line-1); color: var(--ink-3); }
+.tlp-row-tag { font-style: normal; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; margin-left: 8px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line-1); color: var(--ink-3); }
 .tlp-row-clicks { flex: none; display: flex; flex-direction: column; align-items: flex-end; }
 .tlp-row-clicks b { font-family: var(--font-display); font-weight: 800; font-size: 16px; }
 .tlp-row-clicks i { font-family: var(--font-mono); font-style: normal; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-4); }

@@ -24,6 +24,7 @@ export type ProfileUpdate = Partial<{
   website: string;
   accent: string;
   socials: ProfileSocials;
+  social_order: string[];
   privacy: Partial<ProfilePrivacy>;
 }>;
 
