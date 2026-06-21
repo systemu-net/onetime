@@ -11,11 +11,17 @@ export const DASHBOARD_ROUTE = "/";
 export const LOGOUT_ROUTE = "/logout";
 export const LANDING_ROUTE = "/branding";
 export const HOME_ROUTE = "/home";
-export const LINKS_ROUTE = "/links";
-export const QR_ROUTE = "/qr";
-export const CREATE_QR_ROUTE = "/qr/create";
 export const CREATE_PAGES_ROUTE = "/pages/create";
 export const PROFILE_ROUTE = "/settings/profile";
+
+// Public @handle profile (serves both the public view and, for the owner,
+// the editor — see PublicProfilePage). React Router v6 can't put a static
+// prefix ("@") in the same segment as a param, so we match the whole segment
+// and the page itself checks for the leading "@". This dynamic segment ranks
+// below all the static routes and above the "*" fallback.
+export const PROFILE_HANDLE_PATTERN = "/:handle";
+export const profilePath = (handle: string) => `/@${handle.replace(/^@/, "")}`;
+
 export const PAGES_ROUTE = "/pages";
 export const ANALYTICS_ROUTE = "/analytics";
 export const PLANS_ROUTE = "/plans";

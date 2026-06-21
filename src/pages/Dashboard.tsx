@@ -22,8 +22,14 @@ import {
   GOVERNANCE_ROUTE,
   PAGES_ROUTE,
   PLANS_ROUTE,
-  QR_ROUTE,
+  profilePath,
 } from "../routes";
+import { getCurrentUserApi } from "@/apis/authentication";
+import {
+  getCachedUser,
+  setCachedUser,
+  USER_CACHE_VERSION_KEY_EXPORT,
+} from "@/utils/userCache";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -76,6 +82,34 @@ const DashboardPage = () => {
   );
   const [shortenerValue, setShortenerValue] = useState("");
   const [isShortening, setIsShortening] = useState(false);
+  const [handle, setHandle] = useState<string | undefined>(
+    () => getCachedUser()?.handle,
+  );
+
+  // Keep the current @handle fresh: cache-first, fetch on miss (e.g. after a
+  // handle rename invalidates the cache), and resync on cross-tab invalidation.
+  useEffect(() => {
+    if (!cookies.token) return;
+    const sync = async () => {
+      const cached = getCachedUser();
+      if (cached?.handle) {
+        setHandle(cached.handle);
+        return;
+      }
+      const [response, error] = await getCurrentUserApi(cookies.token);
+      if (!error && response && typeof response !== "string") {
+        const data = await response.json();
+        setHandle(data.user?.handle);
+        setCachedUser(data.user);
+      }
+    };
+    sync();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === USER_CACHE_VERSION_KEY_EXPORT) sync();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [cookies.token]);
 
   // fetch live data
   useEffect(() => {
@@ -209,6 +243,7 @@ const DashboardPage = () => {
           <TopBar
             greeting={greeting}
             firstName={firstName}
+            handle={handle}
             todayLabel={todayLabel}
           />
 
@@ -263,7 +298,7 @@ const DashboardPage = () => {
               sub="generated"
               spark={[25, 38, 45, 55, 60, 78, 70]}
               peakIndex={5}
-              href={QR_ROUTE}
+              href={GOVERNANCE_ROUTE}
             />
             <StatCard
               tone="sun"
@@ -308,17 +343,30 @@ const DashboardPage = () => {
 function TopBar({
   greeting,
   firstName,
+  handle,
   todayLabel,
 }: {
   greeting: string;
   firstName: string;
+  handle?: string;
   todayLabel: string;
 }) {
   return (
     <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
       <div className="animate-[fadeIn_0.5s_ease-out_forwards]">
         <h1 className="font-display text-[32px] font-bold leading-[1.05] tracking-[-0.025em] text-ink dark:text-zinc-100">
-          {greeting}, <span className="text-violetBrand">{firstName}</span>{" "}
+          {greeting},{" "}
+          {handle ? (
+            <Link
+              to={profilePath(handle)}
+              className="text-violetBrand hover:underline"
+              title={`View your profile · thin.ly/@${handle}`}
+            >
+              @{handle}
+            </Link>
+          ) : (
+            <span className="text-violetBrand">{firstName}</span>
+          )}{" "}
           <span className="inline-block origin-[70%_70%] animate-wave">👋</span>
         </h1>
         <div className="mt-1 flex items-center gap-2 font-mono text-xs text-ink-3 dark:text-zinc-400">

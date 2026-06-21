@@ -1,4 +1,5 @@
 import { fetchCampaigns } from "@/apis/campaigns";
+import { createQrCode } from "@/apis/qr_codes";
 import {
   assignLinkToCampaign,
   createRoutingRule,
@@ -118,6 +119,15 @@ export function GovernanceDrawer({
 
   const [tab, setTab] = useState<DrawerTab>("governance");
   const [localLink, setLocalLink] = useState<GovernanceLink>(link);
+  // QR data is enriched asynchronously by the parent; sync it in if it arrives
+  // after the drawer opened. Targeted to qrImageUrl so in-progress local edits
+  // (name / destination / state) aren't clobbered.
+  useEffect(() => {
+    setLocalLink((l) =>
+      l.qrImageUrl === link.qrImageUrl ? l : { ...l, qrImageUrl: link.qrImageUrl },
+    );
+  }, [link.qrImageUrl]);
+  const [qrBusy, setQrBusy] = useState(false);
   const [nameDraft, setNameDraft] = useState(link.name);
   const [dest, setDest] = useState(link.dest);
   const [pausedFallbackUrl, setPausedFallbackUrl] = useState(
@@ -358,6 +368,26 @@ export function GovernanceDrawer({
       setTimeout(() => setCopiedShortUrl(false), 2000);
     } catch {
       onToast("Failed to copy link. Please try again.", "error");
+    }
+  };
+
+  // Generate a complementary QR for a link that has none, and propagate it to
+  // the parent so the table/cache pick it up immediately.
+  const handleGenerateQr = async () => {
+    setQrBusy(true);
+    try {
+      const res = await createQrCode(token, {
+        qr_code: { lookup_code: localLink.lookup_code, title: localLink.name },
+      });
+      const imageUrl = res?.qr_code?.image_url;
+      if (!imageUrl) throw new Error("QR code response was empty");
+      setLocalLink((l) => ({ ...l, qrImageUrl: imageUrl }));
+      onUpdate(localLink.id, { qrImageUrl: imageUrl });
+      onToast("QR code generated", "success");
+    } catch (err) {
+      onToast(`Couldn't generate the QR code: ${(err as Error).message}`, "error");
+    } finally {
+      setQrBusy(false);
     }
   };
 
@@ -700,9 +730,20 @@ export function GovernanceDrawer({
                     </a>
                   </div>
                 ) : (
-                  <p className="text-xs text-neutral-400">
-                    No complementary QR code is currently assigned to this link.
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-xs text-neutral-400">
+                      No complementary QR code yet — generate one for offline
+                      scans to this link.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleGenerateQr}
+                      disabled={qrBusy}
+                      className="text-xs px-3 py-1.5 rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 transition disabled:opacity-50 self-start sm:self-auto whitespace-nowrap"
+                    >
+                      {qrBusy ? "Generating…" : "Generate QR code"}
+                    </button>
+                  </div>
                 )}
               </SectionCard>
 

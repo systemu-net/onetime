@@ -18,6 +18,7 @@ import MainLayout from "@/components/layouts/MainLayout";
 import { GOVERNANCE_ROUTE } from "@/routes";
 import type { QrCode } from "@/types";
 import type { Campaign } from "@/types/campaigns";
+import { GOV_SORT_OPTIONS } from "@/types/governance";
 import type {
     CreateGovernedLinkPayload,
     GovernanceLink,
@@ -75,6 +76,7 @@ export default function GovernancePage() {
   // ── Filter / page state (lifted from table) ─────────────────────────────────
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sort, setSort] = useState("created_at:desc");
   const [filterState, setFilterState] = useState<LinkState | "all">(() => {
     const s = new URLSearchParams(window.location.search).get("state");
     return (s as LinkState) || "all";
@@ -190,10 +192,10 @@ export default function GovernancePage() {
     return () => clearTimeout(t);
   }, [search]);
 
-  // Reset page when filter changes
+  // Reset page when filter or sort changes
   useEffect(() => {
     setPage(1);
-  }, [filterState]);
+  }, [filterState, sort]);
 
   // ── Load campaigns + QR codes once ─────────────────────────────────────────
   useEffect(() => {
@@ -206,11 +208,22 @@ export default function GovernancePage() {
     ]).then(([campaignList, qrCodes]) => {
       campaignsRef.current = campaignList;
       setCampaigns(campaignList);
-      qrMapRef.current = new Map(
+      const qrMap = new Map(
         (qrCodes as QrCode[])
           .filter((qr) => qr?.link?.lookup_code)
           .map((qr) => [qr.link.lookup_code, qr.image_url]),
       );
+      qrMapRef.current = qrMap;
+      // The first link fetch may have already rendered before QR data arrived,
+      // leaving qrImageUrl null. Re-apply it to the loaded links AND the open
+      // drawer so QR codes show immediately instead of only after the next
+      // page/filter change (the cause of QR codes "randomly" appearing).
+      const withQr = (l: GovernanceLink): GovernanceLink => ({
+        ...l,
+        qrImageUrl: qrMap.get(l.lookup_code) ?? l.qrImageUrl ?? null,
+      });
+      setLinks((current) => current.map(withQr));
+      setSelected((sel) => (sel ? withQr(sel) : sel));
     });
   }, [token]);
 
@@ -242,10 +255,13 @@ export default function GovernancePage() {
     if (!token) return;
     setLoading(true);
     try {
+      const [sortBy, order] = sort.split(":");
       const result = await fetchGovernanceLinks(token, {
         page,
         search: debouncedSearch || undefined,
         state: filterState !== "all" ? filterState : undefined,
+        sortBy,
+        order,
       });
       setLinks(enrich(result.links));
       setPagination(result.pagination);
@@ -255,7 +271,7 @@ export default function GovernancePage() {
     } finally {
       setLoading(false);
     }
-  }, [token, page, debouncedSearch, filterState, enrich, onToast]);
+  }, [token, page, debouncedSearch, filterState, sort, enrich, onToast]);
 
   useEffect(() => {
     loadLinks();
@@ -477,21 +493,18 @@ export default function GovernancePage() {
                 <span className="font-mono text-neutral-500 dark:text-neutral-400">
                   {stats.total} {stats.total === 1 ? "link" : "links"}
                 </span>
-                <span className="inline-flex items-center gap-1 text-neutral-500 dark:text-neutral-400">
-                  Newest first
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="size-4"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </span>
+                <select
+                  aria-label="Sort links"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  className="text-sm rounded-md border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 py-1 pl-2 pr-1 focus:outline-none focus:border-violet-500"
+                >
+                  {GOV_SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
@@ -536,10 +549,12 @@ export default function GovernancePage() {
               campaigns={campaigns}
               search={search}
               filterState={filterState}
+              sort={sort}
               lastOpenedId={lastOpenedLink?.id ?? null}
               flashingId={flashingId}
               onSearchChange={setSearch}
               onFilterChange={setFilterStateWithUrl}
+              onSortChange={setSort}
               onSelect={handleSelect}
               onUpdate={updateLink}
               onRemove={removeLink}
