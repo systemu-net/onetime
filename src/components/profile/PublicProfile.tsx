@@ -25,17 +25,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { type CSSProperties, type MouseEvent, useRef, useState } from "react";
-import type { IconType } from "react-icons";
-import {
-  FaGlobe,
-  FaInstagram,
-  FaSpotify,
-  FaTiktok,
-  FaXTwitter,
-  FaYoutube,
-} from "react-icons/fa6";
+import { FaGlobe } from "react-icons/fa6";
 import { Link as RouterLink } from "react-router-dom";
 
+import { SOCIAL_PLATFORM_MAP, SOCIAL_PLATFORMS, socialHref } from "./socialPlatforms";
 import "./profile.css";
 
 export type ProfileView = {
@@ -47,20 +40,13 @@ export type ProfileView = {
   accent: Accent;
   verified?: boolean;
   socials?: ProfileSocials;
+  social_order?: string[];
   avatar_url?: string | null;
   created_at?: string;
   links?: ProfileLinkRow[];
 };
 
 const TONES: Accent[] = ["lilac", "mint", "coral", "peach", "sun", "sky"];
-const SOCIAL_ICONS: Record<string, IconType> = {
-  instagram: FaInstagram,
-  youtube: FaYoutube,
-  spotify: FaSpotify,
-  tiktok: FaTiktok,
-  x: FaXTwitter,
-  website: FaGlobe,
-};
 
 function initials(text: string): string {
   const cleaned = text.replace(/[^a-zA-Z0-9 ]/g, " ").trim();
@@ -211,9 +197,15 @@ export default function PublicProfile({
   ];
   const totalClicks = live.reduce((sum, l) => sum + (l.clicks || 0), 0);
 
-  const socials = Object.entries(profile.socials ?? {}).filter(
-    ([, v]) => typeof v === "string" && v.length > 0,
-  ) as [string, string][];
+  // Present socials, ordered by the owner's saved order (social_order), with any
+  // remaining platforms appended in the canonical order.
+  const socialKeyOrder = [
+    ...(profile.social_order ?? []),
+    ...SOCIAL_PLATFORMS.map((p) => p.key).filter((k) => !(profile.social_order ?? []).includes(k)),
+  ];
+  const socials = socialKeyOrder
+    .map((key) => [key, profile.socials?.[key]] as const)
+    .filter(([, v]) => typeof v === "string" && v.trim().length > 0) as [string, string][];
 
   const shareUrl = `https://thin.ly/@${profile.handle}`;
   const onShare = () => {
@@ -234,11 +226,18 @@ export default function PublicProfile({
     <div
       className={`tlp tlp-profile${narrow ? " tlp-profile--narrow" : ""}`}
       style={
-        {
-          "--accent": `var(--${accent})`,
-          "--accent-3": `var(--${accent}-3)`,
-          "--accent-d": `var(--${accent}-d)`,
-        } as CSSProperties
+        (accent.startsWith("#")
+          ? {
+              // Custom hex from the color wheel — derive a light tint + dark shade.
+              "--accent": accent,
+              "--accent-3": `color-mix(in srgb, ${accent} 14%, #fff)`,
+              "--accent-d": `color-mix(in srgb, ${accent} 72%, #000)`,
+            }
+          : {
+              "--accent": `var(--${accent})`,
+              "--accent-3": `var(--${accent}-3)`,
+              "--accent-d": `var(--${accent}-d)`,
+            }) as CSSProperties
       }
     >
       <div className="tlp-grain" aria-hidden />
@@ -312,19 +311,16 @@ export default function PublicProfile({
               <div className="tlp-socials">
                 <div className="tlp-socials-row">
                   {socials.map(([key, value]) => {
-                    const Icon = SOCIAL_ICONS[key] ?? FaGlobe;
-                    const href =
-                      key === "website"
-                        ? `https://${value.replace(/^https?:\/\//, "")}`
-                        : `https://${key}.com/${value.replace(/^@/, "")}`;
+                    const platform = SOCIAL_PLATFORM_MAP[key];
+                    const Icon = platform?.Icon ?? FaGlobe;
                     return (
                       <a
                         key={key}
                         className="tlp-social-chip"
-                        href={href}
+                        href={socialHref(key, value)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={key}
+                        title={platform?.label ?? key}
                       >
                         <Icon size={17} />
                       </a>

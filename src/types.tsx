@@ -15,8 +15,11 @@ export type User = {
 
 // ─── Public @handle profile (link-in-bio) ──────────────────────────────────
 
-export type Accent =
+export type NamedAccent =
     | 'violet' | 'mint' | 'coral' | 'peach' | 'lilac' | 'sun' | 'sky';
+// A preset name OR a custom hex color (#rrggbb), chosen via the color wheel.
+// The `& {}` keeps autocomplete for the named presets while allowing any string.
+export type Accent = NamedAccent | (string & {});
 
 export type LinkState = 'active' | 'paused' | 'expired' | 'draft';
 
@@ -27,9 +30,9 @@ export type ProfilePrivacy = {
     allow_messages: boolean;
 };
 
-export type ProfileSocials = Partial<
-    Record<'instagram' | 'youtube' | 'spotify' | 'tiktok' | 'x' | 'website', string>
->;
+// Keyed by social platform id (see socialPlatforms.tsx). Open-ended so new
+// platforms can be added without a type change.
+export type ProfileSocials = Partial<Record<string, string>>;
 
 // A curated governed link as shown on the profile / in the editor.
 export type ProfileLinkRow = {
@@ -70,6 +73,7 @@ export type Profile = {
     accent: Accent;
     verified: boolean;
     socials: ProfileSocials;
+    social_order?: string[];
     avatar_url: string | null;
     public_url: string;
     published: boolean;
