@@ -1,6 +1,7 @@
 import { API_URL } from "@/apis/config";
 import { Radio, RadioGroup } from "@headlessui/react";
-import { CheckIcon } from "@heroicons/react/20/solid";
+import { CheckBadgeIcon, CheckIcon } from "@heroicons/react/20/solid";
+import { Crown } from "lucide-react";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +62,7 @@ const tiers: Tier[] = [
     price: { monthly: "$9", annually: "$90" },
     description: "Everything in Free, plus:",
     features: [
+      "Verified checkmark",
       "300 links/month",
       "300 QR Codes/month",
       "3 custom landing pages",
@@ -79,6 +81,7 @@ const tiers: Tier[] = [
     price: { monthly: "$29", annually: "$290" },
     description: "Everything in Creator, plus:",
     features: [
+      "Verified checkmark",
       "1000 links/month",
       "1000 QR Codes/month",
       "10 custom landing pages",
@@ -98,6 +101,7 @@ const tiers: Tier[] = [
     price: { monthly: "$99", annually: "$990" },
     description: "Everything in Influencer, plus:",
     features: [
+      "Verified checkmark",
       "3000 links/month",
       "3000 QR Codes/month",
       "30 custom landing pages",
@@ -134,6 +138,10 @@ const tiers: Tier[] = [
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
+}
+
+function isVerifiedFeature(feature: string) {
+  return feature === "Verified checkmark";
 }
 
 function isCampaignFeature(feature: string) {
@@ -381,16 +389,30 @@ export default function Pricing({ inline }: { inline?: boolean }) {
                 >
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex gap-x-3">
-                      <CheckIcon
-                        aria-hidden="true"
-                        className="h-6 w-5 flex-none text-primary"
-                      />
+                      {isVerifiedFeature(feature) ? (
+                        <CheckBadgeIcon
+                          aria-hidden="true"
+                          className="h-6 w-5 flex-none text-[#1d9bf0]"
+                        />
+                      ) : (
+                        <CheckIcon
+                          aria-hidden="true"
+                          className="h-6 w-5 flex-none text-primary"
+                        />
+                      )}
                       <span className="inline-flex items-center flex-wrap gap-y-1">
-                        {feature}
+                        {isVerifiedFeature(feature) ? (
+                          <span className="font-semibold text-[#1d9bf0]">{feature}</span>
+                        ) : (
+                          feature
+                        )}
                         {isCampaignFeature(feature) && (
-                          <span className="ml-2 inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-violet-700 bg-violet-50 ring-1 ring-inset ring-violet-200 dark:text-violet-300 dark:bg-violet-500/10 dark:ring-violet-400/30">
-                            New
-                          </span>
+                          <Crown
+                            size={15}
+                            fill="currentColor"
+                            className="ml-2 inline-block shrink-0 text-[#e0a92e]"
+                            aria-label="Featured"
+                          />
                         )}
                       </span>
                     </li>

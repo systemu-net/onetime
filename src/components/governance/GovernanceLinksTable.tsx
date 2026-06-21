@@ -4,6 +4,7 @@ import {
     transitionLink,
 } from "@/apis/governance";
 import type { Campaign } from "@/types/campaigns";
+import { GOV_SORT_OPTIONS } from "@/types/governance";
 import type { GovernanceLink, LinkState } from "@/types/governance";
 import { extractDomain } from "@/utils/transformers";
 import { useEffect, useRef, useState } from "react";
@@ -71,10 +72,12 @@ interface GovernanceLinksTableProps {
   campaigns: Campaign[];
   search: string;
   filterState: LinkState | "all";
+  sort: string;
   lastOpenedId?: string | null;
   flashingId?: string | null;
   onSearchChange: (v: string) => void;
   onFilterChange: (v: LinkState | "all") => void;
+  onSortChange: (v: string) => void;
   onSelect: (link: GovernanceLink) => void;
   onUpdate: (id: string, patch: Partial<GovernanceLink>) => void;
   onRemove: (id: string) => void;
@@ -124,10 +127,12 @@ export function GovernanceLinksTable({
   campaigns,
   search,
   filterState,
+  sort,
   lastOpenedId,
   flashingId,
   onSearchChange,
   onFilterChange,
+  onSortChange,
   onSelect,
   onUpdate,
   onRemove,
@@ -389,6 +394,18 @@ export function GovernanceLinksTable({
               className="pl-7 pr-3 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-violet-500 transition-colors w-full"
             />
           </div>
+          <select
+            aria-label="Sort links"
+            value={sort}
+            onChange={(e) => onSortChange(e.target.value)}
+            className="shrink-0 py-1.5 px-2.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 focus:outline-none focus:border-violet-500 transition-colors cursor-pointer"
+          >
+            {GOV_SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Row 2: state filters — horizontally scrollable on small screens */}

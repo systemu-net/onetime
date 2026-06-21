@@ -1,13 +1,12 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { LinksProvider } from "./context/LinksContext";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./Notifications";
 import AboutPage from "./pages/AboutPage";
 import AnalyticsPage from "./pages/Analytics";
 import ContactPage from "./pages/ContactPage";
 import CreatePage from "./pages/CreatePage";
-import CreateQrCode from "./pages/CreateQrCode";
 import DashboardPage from "./pages/Dashboard";
 import FeaturesPage from "./pages/FeaturesPage";
 import HomePage from "./pages/HomePage";
@@ -15,16 +14,12 @@ import CookiesPage from "./pages/legal/CookiesPage";
 import PrivacyPage from "./pages/legal/PrivacyPage";
 import TermsPage from "./pages/legal/TermsPage";
 import UserPolicyPage from "./pages/legal/UserPolicyPage";
-import LinkPage from "./pages/Link";
-import LinksPage from "./pages/LinksPage";
 import LoginPage from "./pages/LoginPage";
 import SinglePage from "./pages/Page";
 import PagesPage from "./pages/Pages";
 import PagesMockup from "./pages/PagesMockup";
 import PageEditorMockup from "./pages/PageEditorMockup";
 import ProfilePage from "./pages/ProfilePage";
-import QrCodePage from "./pages/QrCode";
-import QrCodesPage from "./pages/QrCodesPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SettingsPage from "./pages/Settings";
@@ -40,17 +35,15 @@ import {
   CONTACT_ROUTE,
   COOKIES_ROUTE,
   CREATE_PAGES_ROUTE,
-  CREATE_QR_ROUTE,
   DASHBOARD_ROUTE,
   FEATURES_ROUTE,
   GOVERNANCE_ROUTE,
-  LINKS_ROUTE,
   LOGIN_ROUTE,
   PAGES_ROUTE,
   PLANS_ROUTE,
   PRIVACY_ROUTE,
+  PROFILE_HANDLE_PATTERN,
   PROFILE_ROUTE,
-  QR_ROUTE,
   REGISTER_ROUTE,
   RESOURCES_ROUTE,
   SETTINGS_ROUTE,
@@ -63,9 +56,10 @@ export const App = () => {
   return (
     <ThemeProvider>
       <NotificationProvider>
-        <LinksProvider>
-          <Router>
-            <Routes>
+        <Router>
+          <Routes>
+              {/* Public @handle profile (serves owner editor + public view) */}
+              <Route path={PROFILE_HANDLE_PATTERN} element={<PublicProfilePage />}></Route>
               {/* Public routes */}
               <Route path={FEATURES_ROUTE} element={<FeaturesPage />}></Route>
               <Route path={PLANS_ROUTE} element={<PlansPage />}></Route>
@@ -101,46 +95,6 @@ export const App = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path={LINKS_ROUTE}
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <LinksPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="links/:lookup_code"
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <LinkPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path={QR_ROUTE}
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <QrCodesPage />
-                  </ProtectedRoute>
-                }
-              ></Route>
-              <Route
-                path={CREATE_QR_ROUTE}
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <CreateQrCode />
-                  </ProtectedRoute>
-                }
-              ></Route>
-              <Route
-                path={`${QR_ROUTE}/:qr_code`}
-                element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
-                    <QrCodePage />
-                  </ProtectedRoute>
-                }
-              ></Route>
               <Route
                 path={PAGES_ROUTE}
                 element={
@@ -233,7 +187,6 @@ export const App = () => {
               <Route path="*" element={<HomePage />}></Route>
             </Routes>
           </Router>
-        </LinksProvider>
       </NotificationProvider>
     </ThemeProvider>
   );

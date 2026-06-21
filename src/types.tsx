@@ -1,6 +1,7 @@
 export type User = {
     id: number;
     email: string;
+    handle?: string;
     avatar_url: string | null;
     role: string;
     plan: {
@@ -10,6 +11,101 @@ export type User = {
     created_at: string;
     updated_at: string;
     jti: string;
+};
+
+// ─── Public @handle profile (link-in-bio) ──────────────────────────────────
+
+export type Accent =
+    | 'violet' | 'mint' | 'coral' | 'peach' | 'lilac' | 'sun' | 'sky';
+
+export type LinkState = 'active' | 'paused' | 'expired' | 'draft';
+
+export type ProfilePrivacy = {
+    is_public: boolean;
+    show_followers: boolean;
+    allow_follow: boolean;
+    allow_messages: boolean;
+};
+
+export type ProfileSocials = Partial<
+    Record<'instagram' | 'youtube' | 'spotify' | 'tiktok' | 'x' | 'website', string>
+>;
+
+// A curated governed link as shown on the profile / in the editor.
+export type ProfileLinkRow = {
+    id: number;
+    link_id: number;
+    title: string;
+    title_override: string | null;
+    slug: string;
+    url: string;
+    host: string | null;
+    clicks: number;
+    state: LinkState;
+    tag: string | null;
+    pinned: boolean;
+    visible: boolean;
+    position: number;
+    spark: number[];
+};
+
+// One of the user's links not yet on the profile (the "add" picker).
+export type AvailableLink = {
+    link_id: number;
+    title: string;
+    slug: string;
+    url: string;
+    host: string | null;
+    clicks: number;
+    state: LinkState;
+};
+
+export type Profile = {
+    id: number;
+    handle: string;
+    display_name: string | null;
+    bio: string | null;
+    location: string | null;
+    website: string | null;
+    accent: Accent;
+    verified: boolean;
+    socials: ProfileSocials;
+    avatar_url: string | null;
+    public_url: string;
+    published: boolean;
+    is_owner: boolean;
+    private?: false;
+    created_at: string;
+    updated_at: string;
+    // owner-only
+    privacy?: ProfilePrivacy;
+    published_at?: string | null;
+    following_count?: number;
+    // present on the public read + (gated) owner read
+    followers_count?: number | null;
+    links?: ProfileLinkRow[];
+};
+
+// Placeholder payload returned by the public endpoint for a private profile.
+export type PrivateProfile = {
+    handle: string;
+    display_name: string | null;
+    accent: Accent;
+    is_owner: boolean;
+    private: true;
+};
+
+export type PublicProfileResponse = Profile | PrivateProfile;
+
+export type ProfileLinksResponse = {
+    links: ProfileLinkRow[];
+    available_links: AvailableLink[];
+};
+
+export type HandleCheck = {
+    handle: string;
+    available: boolean;
+    reason: string | null;
 };
 
 export type QrCode = {

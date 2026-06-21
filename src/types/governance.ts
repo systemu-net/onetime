@@ -74,3 +74,13 @@ export const STATE_CONFIG: Record<
   draft: { label: "Draft", color: "#6b7280", emoji: "◌" },
   archived: { label: "Archived", color: "#3b82f6", emoji: "⬡" },
 };
+
+// Sort options for the governance list (label + `sort_by:order` value).
+export const GOV_SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: "created_at:desc", label: "Newest first" },
+  { value: "created_at:asc", label: "Oldest first" },
+  { value: "clicks:desc", label: "Most clicks" },
+  { value: "clicks:asc", label: "Fewest clicks" },
+  { value: "last_clicked:desc", label: "Recently clicked" },
+  { value: "last_clicked:asc", label: "Least recently clicked" },
+];
