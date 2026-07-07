@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 import { initials, useSession } from "../auth";
 
-const GITHUB = "https://github.com/atom-plus-plus/levelcode";
+const GITHUB = "https://github.com/levelcodeai/levelcode";
 // Marketing / download lives on the separate Vercel site.
 const MARKETING = "https://levelcode.ai";
 // Bare launch deep-link (NO credential in the URL). The editor handles it: it focuses
 // and, if not signed in, runs its own PKCE sign-in — which this already-authenticated
 // browser completes silently (see LoginPage auto-complete). Keeping the credential out
 // of the custom-scheme URL is the fix for the interceptable-unbound-code issue.
-const IDE_LAUNCH = "atom-plus-plus://levelcode.atom-ai/launch";
+const IDE_LAUNCH = "levelcode://levelcode.levelcode-ai/launch";
 
 // Account-app top nav (paper-and-ink). Probes the Devise session to render an
 // avatar when signed in, else a Sign-in link.
@@ -19,7 +19,7 @@ export default function LevelNav() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-rule bg-paper/85 backdrop-blur-md">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
         <Link to="/" className="font-display text-[15px] font-bold tracking-tightest">
-          Atom<span className="pp">++</span> <span className="font-medium text-faint">Cloud</span>
+          LevelCode <span className="font-medium text-faint">Cloud</span>
         </Link>
 
         <div className="flex items-center gap-3">

@@ -43,7 +43,9 @@ export default function EmailSignIn({
       });
       if (!d.redirect) throw new ApiError(422, "That code is invalid or has expired.");
 
-      if (d.redirect.startsWith("atom-plus-plus:")) {
+      // A path (/ai/account) → in-app navigation; anything else is the editor's custom-scheme
+      // deep-link (levelcode://…) — scheme-agnostic so it survives the editor's urlProtocol rename.
+      if (!d.redirect.startsWith("/")) {
         // Editor deep-link (custom scheme): navigating to it is a no-op if the
         // editor isn't installed on this device — arm a fallback so the button
         // doesn't freeze on "Verifying…". pagehide firing means the OS handler

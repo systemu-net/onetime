@@ -91,7 +91,7 @@ body {
   .pretty {
     text-wrap: pretty;
   }
-  /* The signature: the literal "++" mark */
+  /* Accent emphasis (brand violet) */
   .pp {
     color: rgb(var(--accent-rgb));
     font-feature-settings: "ss01";

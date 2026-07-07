@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import LevelNav from "../components/LevelNav";
 
-// Minimal branded index for /ai. The full marketing landing (AtomCanvas /
-// Showcase) stays on the Vercel site for now; this is the account-app entry.
+// Minimal branded index for /ai. The full marketing landing stays on the
+// Vercel site (levelcode.ai) for now; this is the account-app entry.
 export default function LandingPage() {
   return (
     <>

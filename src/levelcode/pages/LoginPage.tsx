@@ -5,7 +5,7 @@ import { useSession } from "../auth";
 import LevelNav from "../components/LevelNav";
 import EmailSignIn from "./EmailSignIn";
 
-// The editor opens {endpoint}/ai/login?redirect_uri=atom-plus-plus://…&code_challenge=…
+// The editor opens {endpoint}/ai/login?redirect_uri=levelcode://…&code_challenge=…
 // We thread redirect_uri + PKCE challenge through the OAuth start route so the
 // callback bounces the one-time code back into the editor instead of the web session.
 function oauthHref(provider: string, redirectUri: string | null, codeChallenge: string | null): string {
