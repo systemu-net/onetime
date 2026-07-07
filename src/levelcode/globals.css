@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LevelCode Cloud — paper-and-ink, ported from levelcode `site/`. Scoped to the
+   levelcode.html entry (this file is imported only by src/levelcode/main.tsx). */
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* signature accent — the editor's agent purple (space-separated RGB so
+     Tailwind's `flame`/`flamedeep` alpha utilities work). */
+  --accent-rgb: 124 92 214;
+  --accent-deep-rgb: 104 71 184;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f4f1ea;
+  color: #1b1a17;
+  overflow-x: hidden;
+  /* watercolor washes: blue mist, warm blush, moss */
+  background-image:
+    radial-gradient(55rem 26rem at 12% -4rem, rgba(148, 181, 205, 0.18), transparent 70%),
+    radial-gradient(50rem 24rem at 88% 2rem, rgba(230, 179, 156, 0.16), transparent 70%),
+    radial-gradient(40rem 22rem at 70% 30rem, rgba(159, 185, 138, 0.1), transparent 70%);
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgb(var(--accent-rgb));
+  color: #f4f1ea;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent-rgb));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f1ea;
+}
+::-webkit-scrollbar-thumb {
+  background: #d8d3c4;
+  border: 3px solid #f4f1ea;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c4bda9;
+}
+
+@layer components {
+  /* Line-number style eyebrow label */
+  .lineno {
+    @apply font-mono text-[11px] tracking-tight text-faint/70 tabular-nums;
+  }
+
+  /* Raised light surface (cards) */
+  .surface {
+    @apply rounded-xl border border-rule bg-card;
+    box-shadow:
+      0 1px 0 #fff inset,
+      0 22px 48px -30px rgba(27, 26, 23, 0.4);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-full bg-flame px-6 py-3 text-[15px] font-semibold text-paper transition-colors hover:bg-flamedeep disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-full border border-rule bg-card px-6 py-3 text-[15px] font-medium text-ink transition-colors hover:border-ink disabled:opacity-60;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .pretty {
+    text-wrap: pretty;
+  }
+  /* The signature: the literal "++" mark */
+  .pp {
+    color: rgb(var(--accent-rgb));
+    font-feature-settings: "ss01";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
