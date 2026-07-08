@@ -27,7 +27,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "22.14.0"
+          node-version: "24.17.0"
       - name: Install dependencies
         run: npm ci
       - name: Lint UI
@@ -50,8 +50,15 @@ jobs:
           ref: develop
           repository: "systemu-net/thin.ly"
           token: ${{ steps.create_token.outputs.token }}
-      - name: Copy UI to API
-        run: cp ./dist/index.html /home/runner/work/onetime/onetime/api/app/views/static/ui.html && rm -rf /home/runner/work/onetime/onetime/api/app/assets/interface/* && cp -r ./dist/assets/* /home/runner/work/onetime/onetime/api/app/assets/interface
+      - name: Sync built UI into API (shells + assets)
+        # `npm run sync:thinly` writes ui.html AND ui_levelcode.html.erb (with <%= csrf_meta_tags %>
+        # + window.__ENV__.BRAND) plus the hashed bundles — the same logic devs run locally. Assets
+        # go to the git-tracked app/assets/interface (nginx-aliased, committed in the PR below), not
+        # the local-dev public/assets default.
+        run: npm run sync:thinly
+        env:
+          THINLY_DIR: ${{ github.workspace }}/api
+          THINLY_ASSETS_DIR: app/assets/interface
       - name: Create PR
         uses: googleapis/code-suggester@v2
         with:
