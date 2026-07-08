@@ -2,16 +2,22 @@
 const plugin = require("tailwindcss/plugin")
 
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: ['./index.html', './atompp.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       fontFamily: {
         rubik: ['Rubik', 'sans-serif'],
-        // Dashboard mockup typography
-        display: ['"Bricolage Grotesque"', 'sans-serif'],
-        sans: ['Geist', 'sans-serif'],
-        mono: ['"Geist Mono"', 'monospace'],
+        // CSS-var driven with per-app fallbacks: the thin.ly app leaves the vars
+        // unset (→ Bricolage/Geist), the Atom++ Cloud app (atompp.html) sets them
+        // in src/atompp/globals.css (→ Space Grotesk / Inter / JetBrains Mono).
+        display: ['var(--font-display, "Bricolage Grotesque")', 'sans-serif'],
+        sans: ['var(--font-sans, Geist)', 'sans-serif'],
+        mono: ['var(--font-mono, "Geist Mono")', 'monospace'],
+        cyber: ['var(--font-cyber, system-ui)', 'sans-serif'],
+      },
+      letterSpacing: {
+        tightest: '-0.045em',
       },
 
       colors: {
@@ -45,6 +51,24 @@ export default {
         rose: '#f4a4c0',
         forest: '#1f3a32',
         violetBrand: { DEFAULT: '#7c3aed', 2: '#a855f7' },
+
+        // ── Atom++ Cloud (atompp.html) — paper-and-ink, ported from site/. The
+        // `ink` token above (near-black #15151b) is reused as the atompp text ink
+        // (site's was #1b1a17 — imperceptibly different); the rest are additive.
+        paper: '#f4f1ea', // canvas
+        card: '#fbfaf6', // raised light surface
+        sub: '#3f3c34', // secondary text
+        faint: '#807a6b', // captions, line numbers
+        rule: '#e2ddd0', // hairlines, borders
+        // Signature accent — CSS-var driven (default: editor agent purple)
+        flame: 'rgb(var(--accent-rgb) / <alpha-value>)',
+        flamedeep: 'rgb(var(--accent-deep-rgb) / <alpha-value>)',
+        leaf: '#5f8a4e',
+        blossom: '#c2679d',
+        pane: '#22262e', // dark editor pane
+        paneink: '#b9c0cb',
+        panedim: '#7d8695',
+        syn: { key: '#c678dd', fn: '#61afef', str: '#98c379', num: '#d19a66', com: '#7f848e', cls: '#e5c07b' },
       },
       borderRadius: {
         bento: '18px',
