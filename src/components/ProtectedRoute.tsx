@@ -7,13 +7,16 @@ import { useNavigate } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   children: JSX.Element;
-  allowedRoles: ('admin' | 'staff')[]; // Set the user roles
+  // Restrict to specific roles. OMIT to allow any authenticated user — the default for a
+  // user's own pages, since every account is a `member` by default. Reserve an explicit
+  // list (e.g. ["admin"]) for a genuinely admin-only surface.
+  allowedRoles?: ('admin' | 'staff' | 'member')[];
 };
 
 interface UserInfo {
   id: number;
   email: string;
-  role: 'admin' | 'staff';
+  role: 'admin' | 'staff' | 'member';
   created_at: string;
   updated_at: string;
 }
@@ -67,11 +70,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return ''; // Loading state while fetching user info
   }
 
-  return user && allowedRoles.includes(user.role) ? (
-    children
-  ) : (
-    <h1>Error 404 -- Page Not Found</h1>
-  );
+  // Unauthenticated users were already redirected to login by the effect above; this is a
+  // fallback. An authenticated user passes when the route names no roles, or names one it holds.
+  if (!user) {
+    return <h1>Error 404 -- Page Not Found</h1>;
+  }
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <h1>Error 404 -- Page Not Found</h1>;
+  }
+  return children;
 };
 
 export default ProtectedRoute;

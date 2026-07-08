@@ -82,7 +82,7 @@ export const App = () => {
               <Route
                 path={SETTINGS_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <SettingsPage />
                   </ProtectedRoute>
                 }
@@ -90,7 +90,7 @@ export const App = () => {
               <Route
                 path={DASHBOARD_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <DashboardPage />
                   </ProtectedRoute>
                 }
@@ -98,7 +98,7 @@ export const App = () => {
               <Route
                 path={PAGES_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <PagesPage />
                   </ProtectedRoute>
                 }
@@ -106,7 +106,7 @@ export const App = () => {
               <Route
                 path={`${PAGES_ROUTE}/:lookup_code`}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <SinglePage />
                   </ProtectedRoute>
                 }
@@ -114,7 +114,7 @@ export const App = () => {
               <Route
                 path="/pages-mockup"
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <PagesMockup />
                   </ProtectedRoute>
                 }
@@ -122,7 +122,7 @@ export const App = () => {
               <Route
                 path="/pages-mockup/edit"
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <PageEditorMockup />
                   </ProtectedRoute>
                 }
@@ -130,7 +130,7 @@ export const App = () => {
               <Route
                 path={CREATE_PAGES_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <CreatePage />
                   </ProtectedRoute>
                 }
@@ -138,7 +138,7 @@ export const App = () => {
               <Route
                 path={ANALYTICS_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <AnalyticsPage />
                   </ProtectedRoute>
                 }
@@ -146,7 +146,7 @@ export const App = () => {
               <Route
                 path={PLANS_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <PlansPage />
                   </ProtectedRoute>
                 }
@@ -154,7 +154,7 @@ export const App = () => {
               <Route
                 path={PROFILE_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <ProfilePage />
                   </ProtectedRoute>
                 }
@@ -162,7 +162,7 @@ export const App = () => {
               <Route
                 path={STATS_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <StatsPage />
                   </ProtectedRoute>
                 }
@@ -170,7 +170,7 @@ export const App = () => {
               <Route
                 path={GOVERNANCE_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <GovernancePage />
                   </ProtectedRoute>
                 }
@@ -178,7 +178,7 @@ export const App = () => {
               <Route
                 path={CAMPAIGNS_ROUTE}
                 element={
-                  <ProtectedRoute allowedRoles={["admin"]}>
+                  <ProtectedRoute>
                     <CampaignsPage />
                   </ProtectedRoute>
                 }
