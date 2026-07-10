@@ -167,26 +167,38 @@ export default function AccountPage() {
 
 // Credit balance meter + the plan's model roster with credit multipliers + ≈ turns-left.
 function CreditsRoster({ models }: { models: AccountModels }) {
-  const budget = models.budget_micros || 0;
+  const full = models.budget_micros || 0;
+  // Meter against what's usable NOW (the unlocked ceiling), not the full monthly budget — so the bar
+  // matches enforcement. With rolling windows off, ceiling == full and this reads exactly as before.
+  const ceiling = models.ceiling_micros ?? full;
   const spent = models.spent_micros || 0;
-  const pct = budget > 0 ? Math.min(Math.round((spent / budget) * 100), 100) : 0;
+  const remaining = models.credits_remaining_micros || 0;
+  const tranched = ceiling < full;
+  const unlockAt = models.next_unlock_at ? new Date(models.next_unlock_at) : null;
+  const pct = ceiling > 0 ? Math.min(Math.round((spent / ceiling) * 100), 100) : 0;
+  const usd = (m: number) => `$${(m / 1_000_000).toFixed(2)}`;
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
 
   return (
     <div className="surface mt-5 p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div className="lineno">compute credits</div>
+        <div className="lineno">{tranched ? "usage available now" : "compute credits"}</div>
         <div className="font-mono text-[12px] tabular-nums text-sub">
-          ${(spent / 1_000_000).toFixed(2)} / ${(budget / 1_000_000).toFixed(2)} · {pct}%
+          {usd(spent)} / {usd(ceiling)} · {pct}%
         </div>
       </div>
       <div className="mt-1 font-display text-2xl font-semibold tracking-tightest tabular-nums">
-        ${((models.credits_remaining_micros || 0) / 1_000_000).toFixed(2)}
-        <span className="text-sm font-normal text-faint"> left this period</span>
+        {usd(remaining)}
+        <span className="text-sm font-normal text-faint"> {tranched ? "available now" : "left this period"}</span>
       </div>
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-rule">
         <div className={`h-full rounded-full ${pct >= 100 ? "bg-flamedeep" : "bg-flame"}`} style={{ width: `${pct}%` }} />
       </div>
+      {tranched && unlockAt ? (
+        <div className="mt-2 font-mono text-[11px] text-faint">
+          More unlocks {unlockAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {usd(full)} total this cycle
+        </div>
+      ) : null}
 
       <div className="mt-6 lineno">models on your plan</div>
       <div className="mt-3 overflow-x-auto">

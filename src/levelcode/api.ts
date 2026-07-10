@@ -132,9 +132,11 @@ export type RosterModel = {
 export type AccountModels = {
   plan: string;
   default_model: string;
-  budget_micros: number;
+  budget_micros: number; // full monthly allowance
+  ceiling_micros?: number; // currently-unlocked ceiling (rolling windows); == budget when tranching is off
   spent_micros: number;
-  credits_remaining_micros: number;
+  credits_remaining_micros: number; // remaining vs the ceiling
+  next_unlock_at?: string | null; // when more unlocks (null if none / tranching off)
   models: RosterModel[];
 };
 
