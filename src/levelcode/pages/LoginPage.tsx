@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, API_BASE, navigateTo } from "../api";
 import { useSession } from "../auth";
 import LevelNav from "../components/LevelNav";
@@ -144,9 +144,13 @@ export default function LoginPage() {
 
           <p className="mt-5 font-mono text-[12px] text-faint">
             By continuing you agree to the{" "}
-            <a href="https://levelcode.ai/terms" className="underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
+            <Link to="/terms" className="underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
               terms
-            </a>
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
+              privacy policy
+            </Link>
             . Bring your own key — we never resell provider access.
           </p>
         </div>
