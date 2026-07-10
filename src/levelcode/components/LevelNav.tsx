@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 import { initials, useSession } from "../auth";
 
 const GITHUB = "https://github.com/levelcodeai/levelcode";
-// Marketing / download lives on the separate Vercel site.
-const MARKETING = "https://levelcode.ai";
 // Bare launch deep-link (NO credential in the URL). The editor handles it: it focuses
 // and, if not signed in, runs its own PKCE sign-in — which this already-authenticated
 // browser completes silently (see LoginPage auto-complete). Keeping the credential out
@@ -34,12 +32,12 @@ export default function LevelNav() {
           >
             GitHub
           </a>
-          <a
-            href={MARKETING}
+          <Link
+            to="/download"
             className="rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-paper transition-colors hover:bg-flame"
           >
             Download
-          </a>
+          </Link>
 
           {profile ? (
             <>
