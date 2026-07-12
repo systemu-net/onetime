@@ -2,9 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, navigateTo, type PricingTier } from "../api";
 
-// 4-card grid. Checkout goes through /ai/checkout (CSRF-protected, session-authed),
-// which calls Stripe and returns { url } (SPEC §3). tier.key IS the Stripe
-// lookup_key (server truth) — send it verbatim.
+// 4-card grid. Checkout goes through /ai/checkout (CSRF-protected, session-authed).
+// tier.key IS the Stripe lookup_key (server truth) — send it verbatim. The server
+// returns one of two shapes:
+//   • first purchase   → { url }                       — redirect to Stripe Checkout
+//   • plan change       → { status: "plan_changed", … } — Stripe prorated it in place
+//     (no redirect); we land on the account page, which reflects the new plan once
+//     the Stripe webhook syncs.
 //
 // `currentPlan` is the signed-in user's friendly plan NAME (AccountProfile.plan,
 // e.g. "Pro" / "Free"); the tier whose name matches is marked as current and its
@@ -33,13 +37,20 @@ export default function PricingCards({
     }
     setBusy(tier.key);
     try {
-      const d = await api<{ url?: string }>("/ai/checkout", { body: { lookup_key: tier.key } });
-      if (!d.url) {
-        setErr("Could not start checkout.");
-        setBusy(null);
+      const d = await api<{ url?: string; status?: string }>("/ai/checkout", { body: { lookup_key: tier.key } });
+      // First purchase → redirect to Stripe Checkout.
+      if (d.url) {
+        navigateTo(d.url);
         return;
       }
-      navigateTo(d.url);
+      // Upgrade / downgrade → Stripe prorated it in place, no redirect. Go to the account
+      // page (it refetches usage + plan; the change lands once the webhook syncs).
+      if (d.status === "plan_changed") {
+        navigate("/account?checkout=changed");
+        return;
+      }
+      setErr("Could not start checkout.");
+      setBusy(null);
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Could not start checkout.");
       setBusy(null);
