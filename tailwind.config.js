@@ -69,6 +69,19 @@ export default {
         paneink: '#b9c0cb',
         panedim: '#7d8695',
         syn: { key: '#c678dd', fn: '#61afef', str: '#98c379', num: '#d19a66', com: '#7f848e', cls: '#e5c07b' },
+
+        // ── levelcode.dev "LevelCode Rise" aliases, mapped onto the cream
+        // paper-and-ink palette so the ported landing components render in the
+        // Atom++/LevelCode account theme (NOT the .dev dark theme). void→paper,
+        // abyss→card, frost→ink, ghost→sub, line→rule, electric→flame.
+        void: '#f4f1ea',
+        abyss: '#fbfaf6',
+        frost: '#1b1a17',
+        ghost: '#3f3c34',
+        line: '#e2ddd0',
+        electric: 'rgb(var(--accent-rgb) / <alpha-value>)',
+        electricdeep: 'rgb(var(--accent-deep-rgb) / <alpha-value>)',
+        ice: '#2e7fd0', // secondary highlight, AA-readable on cream
       },
       borderRadius: {
         bento: '18px',
@@ -103,6 +116,9 @@ export default {
         wave: 'wave 2.5s ease-in-out infinite',
         float: 'floatY 5s ease-in-out infinite',
         'pulse-live': 'pulse-live 1.8s infinite',
+        // Ported from levelcode.dev — the marquee keyframe lives in
+        // src/levelcode/globals.css (running providers + hero tool ticker).
+        marquee: 'marquee 36s linear infinite',
       },
       scale: {
         'preview': '0.20'
