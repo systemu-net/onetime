@@ -4,6 +4,7 @@ import { api, navigateTo } from "../api";
 import { useSession } from "../auth";
 import LevelNav from "../components/LevelNav";
 import EmailSignIn from "./EmailSignIn";
+import ProviderSignIn from "./ProviderSignIn";
 
 // Sign-in error codes bounced back here with ?error= (editor link-expiry, or a stale session).
 const SIGNIN_ERRORS: Record<string, string> = {
@@ -108,6 +109,14 @@ export default function LoginPage() {
               </div>
             ) : null}
             <EmailSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
+
+            <div className="my-5 flex items-center gap-3 text-faint" aria-hidden="true">
+              <span className="flex-1 border-t border-rule" />
+              <span className="font-mono text-[11px] uppercase tracking-widest">or</span>
+              <span className="flex-1 border-t border-rule" />
+            </div>
+
+            <ProviderSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
           </div>
 
           <p className="mt-5 font-mono text-[12px] text-faint">
