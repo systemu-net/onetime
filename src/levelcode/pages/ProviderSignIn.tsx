@@ -1,0 +1,64 @@
+import { API_BASE } from "../api";
+
+// "Continue with Google" for the LevelCode Cloud login.
+//
+// A real <a> (top-level GET), NOT an api() fetch and NOT the GIS id_token button: Rails' oauth_start
+// 302s to Google and relies on the session cookie it sets to carry the CSRF `state`, neither of which
+// survives an XHR. As a link it keeps native semantics too — keyboard activation, Cmd/Ctrl-click to
+// open in a new tab, and it works without JS.
+//
+// The editor's redirect_uri + code_challenge are a PKCE PAIR: forwarded only when BOTH are present, so a
+// partial (unbound) handoff never reaches the backend. Absent — a plain web login — oauth_start just
+// opens a web session. The backend already accepts `google` here; GitHub would come "free" the same way.
+export default function ProviderSignIn({
+  redirectUri,
+  codeChallenge,
+}: {
+  redirectUri?: string;
+  codeChallenge?: string;
+}) {
+  return (
+    <a
+      href={oauthStartUrl("google", redirectUri, codeChallenge)}
+      className="flex w-full items-center justify-center gap-2.5 rounded-full border border-rule bg-card px-6 py-3 text-[15px] font-medium text-ink transition-colors hover:border-ink"
+    >
+      <GoogleG />
+      Continue with Google
+    </a>
+  );
+}
+
+function oauthStartUrl(provider: string, redirectUri?: string, codeChallenge?: string): string {
+  const qs = new URLSearchParams();
+  // Both or neither — a lone redirect_uri has no PKCE binding and must not be forwarded (defensive; the
+  // login page already pairs them, but this component shouldn't trust its caller to).
+  if (redirectUri && codeChallenge) {
+    qs.set("redirect_uri", redirectUri);
+    qs.set("code_challenge", codeChallenge);
+  }
+  const q = qs.toString();
+  return `${API_BASE}/ai/auth/oauth/${provider}${q ? `?${q}` : ""}`;
+}
+
+function GoogleG() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9086c1.7018-1.5668 2.6837-3.874 2.6837-6.615z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.4673-.806 5.9564-2.1805l-2.9086-2.2581c-.8059.54-1.8368.859-3.0478.859-2.344 0-4.3282-1.5832-5.036-3.7105H.9573v2.3318C2.4382 15.9832 5.4818 18 9 18z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.964 10.71c-.18-.54-.2822-1.1168-.2822-1.71s.1023-1.17.2823-1.71V4.9582H.9573C.3477 6.1732 0 7.5477 0 9s.3477 2.8268.9573 4.0418L3.964 10.71z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5813-2.5814C13.4636.8918 11.426 0 9 0 5.4818 0 2.4382 2.0168.9573 4.9582L3.964 7.29C4.6718 5.1627 6.656 3.5795 9 3.5795z"
+      />
+    </svg>
+  );
+}
