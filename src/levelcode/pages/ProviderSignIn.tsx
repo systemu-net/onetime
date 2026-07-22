@@ -1,16 +1,15 @@
-import { API_BASE, navigateTo } from "../api";
+import { API_BASE } from "../api";
 
 // "Continue with Google" for the LevelCode Cloud login.
 //
-// Unlike the email flow this is a TOP-LEVEL navigation (a GET), NOT an api() fetch: the Rails
-// `oauth_start` route 302s to Google and relies on the session cookie it sets to carry the CSRF
-// `state`, neither of which survives an XHR. It also must NOT use the GIS id_token button — that's a
-// different (thin.ly) flow that can't carry the editor's PKCE handoff.
+// A real <a> (top-level GET), NOT an api() fetch and NOT the GIS id_token button: Rails' oauth_start
+// 302s to Google and relies on the session cookie it sets to carry the CSRF `state`, neither of which
+// survives an XHR. As a link it keeps native semantics too — keyboard activation, Cmd/Ctrl-click to
+// open in a new tab, and it works without JS.
 //
-// The editor's redirect_uri + code_challenge are forwarded so the eventual one-time handoff code stays
-// bound to the editor's PKCE verifier (exactly as EmailSignIn threads them). Absent (a plain web login),
-// oauth_start just signs the user into the web session. The backend already accepts `google` here;
-// GitHub would come "free" the same way, but we only surface Google for now.
+// The editor's redirect_uri + code_challenge are a PKCE PAIR: forwarded only when BOTH are present, so a
+// partial (unbound) handoff never reaches the backend. Absent — a plain web login — oauth_start just
+// opens a web session. The backend already accepts `google` here; GitHub would come "free" the same way.
 export default function ProviderSignIn({
   redirectUri,
   codeChallenge,
@@ -18,24 +17,27 @@ export default function ProviderSignIn({
   redirectUri?: string;
   codeChallenge?: string;
 }) {
-  function start(provider: string) {
-    const qs = new URLSearchParams();
-    if (redirectUri) qs.set("redirect_uri", redirectUri);
-    if (codeChallenge) qs.set("code_challenge", codeChallenge);
-    const q = qs.toString();
-    navigateTo(`${API_BASE}/ai/auth/oauth/${provider}${q ? `?${q}` : ""}`);
-  }
-
   return (
-    <button
-      type="button"
-      onClick={() => start("google")}
+    <a
+      href={oauthStartUrl("google", redirectUri, codeChallenge)}
       className="flex w-full items-center justify-center gap-2.5 rounded-full border border-rule bg-card px-6 py-3 text-[15px] font-medium text-ink transition-colors hover:border-ink"
     >
       <GoogleG />
       Continue with Google
-    </button>
+    </a>
   );
+}
+
+function oauthStartUrl(provider: string, redirectUri?: string, codeChallenge?: string): string {
+  const qs = new URLSearchParams();
+  // Both or neither — a lone redirect_uri has no PKCE binding and must not be forwarded (defensive; the
+  // login page already pairs them, but this component shouldn't trust its caller to).
+  if (redirectUri && codeChallenge) {
+    qs.set("redirect_uri", redirectUri);
+    qs.set("code_challenge", codeChallenge);
+  }
+  const q = qs.toString();
+  return `${API_BASE}/ai/auth/oauth/${provider}${q ? `?${q}` : ""}`;
 }
 
 function GoogleG() {

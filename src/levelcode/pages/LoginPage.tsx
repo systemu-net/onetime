@@ -18,7 +18,11 @@ export default function LoginPage() {
   const redirectUri = params.get("redirect_uri");
   const codeChallenge = params.get("code_challenge");
   const errorCode = params.get("error");
-  const fromEditor = !!redirectUri;
+  // The editor's PKCE handoff is a PAIR — a redirect_uri is only meaningful with its code_challenge.
+  // Treat it as present only when BOTH arrive, and forward both-or-neither to the sign-in forms so a
+  // lone (unbound) redirect_uri never reaches the backend.
+  const editorHandoff = redirectUri && codeChallenge ? { redirectUri, codeChallenge } : null;
+  const fromEditor = !!editorHandoff;
 
   const { loading: sessionLoading, profile } = useSession();
   // idle: probing session / about to redirect · completing: minting an editor code · form: show sign-in.
@@ -108,7 +112,7 @@ export default function LoginPage() {
                 {SIGNIN_ERRORS[errorCode] ?? "Sign-in failed. Please try again."}
               </div>
             ) : null}
-            <ProviderSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
+            <ProviderSignIn redirectUri={editorHandoff?.redirectUri} codeChallenge={editorHandoff?.codeChallenge} />
 
             <div className="my-5 flex items-center gap-3 text-faint" aria-hidden="true">
               <span className="flex-1 border-t border-rule" />
@@ -116,7 +120,7 @@ export default function LoginPage() {
               <span className="flex-1 border-t border-rule" />
             </div>
 
-            <EmailSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
+            <EmailSignIn redirectUri={editorHandoff?.redirectUri} codeChallenge={editorHandoff?.codeChallenge} />
           </div>
 
           <p className="mt-5 font-mono text-[12px] text-faint">
