@@ -2,7 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { captureAttribution } from "./attribution";
 import "./globals.css";
+
+// First-touch campaign attribution — record the marketing channel (?linkedin=…/?youtube=…/utm_*) before
+// render, so it's known at sign-in even after the visitor navigates around. Best-effort; never throws.
+captureAttribution();
 
 // The LevelCode Cloud account app mounts under /ai on every host (owner decision:
 // the /ai prefix never collides with the 7-char shortcode lookup). Rails serves
