@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api, ApiError, navigateTo } from "../api";
+import { getAttribution } from "../attribution";
 
 // Passwordless email + one-time-code sign-in (OpenRouter/Cursor style):
 //   1. enter email → POST /ai/auth/email        (Rails emails a 6-digit code)
@@ -39,7 +40,9 @@ export default function EmailSignIn({
     setError(null);
     try {
       const d = await api<{ redirect?: string }>("/ai/auth/verify", {
-        body: { email, code, redirect_uri: redirectUri, code_challenge: codeChallenge },
+        // attribution: first-touch campaign channel (null for organic sign-ins) so the backend can record
+        // which channel acquired a new account. Harmless if the backend doesn't consume it yet.
+        body: { email, code, redirect_uri: redirectUri, code_challenge: codeChallenge, attribution: getAttribution() },
       });
       if (!d.redirect) throw new ApiError(422, "That code is invalid or has expired.");
 
