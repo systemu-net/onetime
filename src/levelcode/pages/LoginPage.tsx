@@ -108,7 +108,7 @@ export default function LoginPage() {
                 {SIGNIN_ERRORS[errorCode] ?? "Sign-in failed. Please try again."}
               </div>
             ) : null}
-            <EmailSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
+            <ProviderSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
 
             <div className="my-5 flex items-center gap-3 text-faint" aria-hidden="true">
               <span className="flex-1 border-t border-rule" />
@@ -116,7 +116,7 @@ export default function LoginPage() {
               <span className="flex-1 border-t border-rule" />
             </div>
 
-            <ProviderSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
+            <EmailSignIn redirectUri={redirectUri ?? undefined} codeChallenge={codeChallenge ?? undefined} />
           </div>
 
           <p className="mt-5 font-mono text-[12px] text-faint">
