@@ -126,6 +126,7 @@ export type RosterModel = {
   context: number;
   multiplier: number;
   live: boolean; // confirmed price → selectable/billable; false → staged ("coming soon")
+  per_turn_micros: number; // retail micro-$ for ONE turn — same unit as the balance fields below
   turns_budget: number;
   turns_left: number | null;
 };
