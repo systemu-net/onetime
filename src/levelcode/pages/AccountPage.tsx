@@ -183,12 +183,18 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const toCredits = (m: number) => (m || 0) / MICROS_PER_CREDIT;
   // Balances read as whole credits — the round, spendable-looking number is the entire point.
   const credits = (m: number) => Math.round(toCredits(m)).toLocaleString();
-  // A per-turn cost can sit well below 1 credit (a gpt-oss turn is ~0.4), and rounding that to "0"
-  // would read as free. Keep one decimal until the number is big enough not to need it.
+  // A per-turn cost can sit well below 1 credit (a gpt-oss turn is ~0.4), and showing "0" for a turn
+  // that does cost something would read as free. So: whole credits once big enough, one decimal below
+  // that, and an explicit floor rather than a rounded-down zero.
+  //
+  // Returns the FIXED STRING deliberately. An earlier version wrapped it in a unary + to drop trailing
+  // zeros, which silently defeated both halves of that rule — it rendered 7.0 as "7" and collapsed
+  // anything under 0.05 to "0".
   const rate = (m: number) => {
     const c = toCredits(m);
     if (!(c > 0)) return "—";
-    return c < 10 ? String(+c.toFixed(1)) : Math.round(c).toLocaleString();
+    if (c >= 10) return Math.round(c).toLocaleString();
+    return c < 0.05 ? "<0.1" : c.toFixed(1);
   };
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
 
@@ -237,6 +243,10 @@ function CreditsRoster({ models }: { models: AccountModels }) {
                   title={`${m.multiplier}× the baseline model`}
                 >
                   {rate(m.per_turn_micros)}
+                  {/* The multiplier used to be the visible value; credits/turn replaced it because it
+                      divides into your balance directly. Keeping it in `title` alone would hide it from
+                      screen readers and from touch, so it also rides here — announced, never displayed. */}
+                  <span className="sr-only"> credits per turn, {m.multiplier}× the baseline model</span>
                 </td>
                 <td className="py-1.5 px-3 text-right tabular-nums text-sub">
                   {m.live ? (m.turns_left ?? 0).toLocaleString() : "—"}
