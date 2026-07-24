@@ -5,6 +5,12 @@ import { useSession } from "../auth";
 import LevelNav from "../components/LevelNav";
 import ContributionsHeatmap from "./ContributionsHeatmap";
 
+// Group digits with a FIXED locale, never the viewer's ambient one. A bare toLocaleString() renders the
+// same balance as "1,279" here, "1.279" on a de-DE machine and "1 279" on fr-FR — so the number would
+// look different per user, and the editor's response bar (which pins en-US) would disagree with this
+// dashboard about the very same figure. Keep this in step with CREDIT_LOCALE in the extension's chat.html.
+const LOCALE = "en-US";
+
 // Usage dashboard (SPEC §8 / §3 GET /account/usage). Session-gated: redirects to
 // /ai/login when the Devise session probe comes back empty.
 export default function AccountPage() {
@@ -182,7 +188,7 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const MICROS_PER_CREDIT = 10_000;
   const toCredits = (m: number) => (m || 0) / MICROS_PER_CREDIT;
   // Balances read as whole credits — the round, spendable-looking number is the entire point.
-  const credits = (m: number) => Math.round(toCredits(m)).toLocaleString();
+  const credits = (m: number) => Math.round(toCredits(m)).toLocaleString(LOCALE);
   // A per-turn cost can sit well below 1 credit (a gpt-oss turn is ~0.4), and showing "0" for a turn
   // that does cost something would read as free. So: whole credits once big enough, one decimal below
   // that, and an explicit floor rather than a rounded-down zero.
@@ -193,7 +199,7 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const rate = (m: number) => {
     const c = toCredits(m);
     if (!(c > 0)) return "—";
-    if (c >= 10) return Math.round(c).toLocaleString();
+    if (c >= 10) return Math.round(c).toLocaleString(LOCALE);
     return c < 0.05 ? "<0.1" : c.toFixed(1);
   };
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
@@ -249,7 +255,7 @@ function CreditsRoster({ models }: { models: AccountModels }) {
                   <span className="sr-only"> credits per turn, {m.multiplier}× the baseline model</span>
                 </td>
                 <td className="py-1.5 px-3 text-right tabular-nums text-sub">
-                  {m.live ? (m.turns_left ?? 0).toLocaleString() : "—"}
+                  {m.live ? (m.turns_left ?? 0).toLocaleString(LOCALE) : "—"}
                 </td>
                 <td className="py-1.5 pl-3 text-right">
                   {m.live ? (
@@ -297,7 +303,7 @@ function pct(used: number, cap: number): number {
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${+(n / 1_000).toFixed(0)}K`;
-  return (n ?? 0).toLocaleString();
+  return (n ?? 0).toLocaleString(LOCALE);
 }
 
 function formatDate(iso: string): string {
