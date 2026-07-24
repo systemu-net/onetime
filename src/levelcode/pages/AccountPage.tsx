@@ -4,12 +4,7 @@ import { api, navigateTo, type AccountModels, type AccountUsage, type Activity }
 import { useSession } from "../auth";
 import LevelNav from "../components/LevelNav";
 import ContributionsHeatmap from "./ContributionsHeatmap";
-
-// Group digits with a FIXED locale, never the viewer's ambient one. A bare toLocaleString() renders the
-// same balance as "1,279" here, "1.279" on a de-DE machine and "1 279" on fr-FR — so the number would
-// look different per user, and the editor's response bar (which pins en-US) would disagree with this
-// dashboard about the very same figure. Keep this in step with CREDIT_LOCALE in the extension's chat.html.
-const LOCALE = "en-US";
+import { fmtCredits, fmtCreditAmount, toCredits, LOCALE } from "../credits";
 
 // Usage dashboard (SPEC §8 / §3 GET /account/usage). Session-gated: redirects to
 // /ai/login when the Devise session probe comes back empty.
@@ -182,26 +177,12 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const tranched = ceiling < full;
   const unlockAt = models.next_unlock_at ? new Date(models.next_unlock_at) : null;
   const pct = ceiling > 0 ? Math.min(Math.round((spent / ceiling) * 100), 100) : 0;
-  // Credits are the in-product spending unit: $1 = 100 credits, so 1 credit = 10_000 retail micro-$.
-  // The API sends retail micro-$ (Levelcode.retail_micros), and this is the ONE place that converts —
-  // the balance and the per-turn column must come from the same helper or they'd silently disagree.
-  const MICROS_PER_CREDIT = 10_000;
-  const toCredits = (m: number) => (m || 0) / MICROS_PER_CREDIT;
-  // Balances read as whole credits — the round, spendable-looking number is the entire point.
-  const credits = (m: number) => Math.round(toCredits(m)).toLocaleString(LOCALE);
-  // A per-turn cost can sit well below 1 credit (a gpt-oss turn is ~0.4), and showing "0" for a turn
-  // that does cost something would read as free. So: whole credits once big enough, one decimal below
-  // that, and an explicit floor rather than a rounded-down zero.
-  //
-  // Returns the FIXED STRING deliberately. An earlier version wrapped it in a unary + to drop trailing
-  // zeros, which silently defeated both halves of that rule — it rendered 7.0 as "7" and collapsed
-  // anything under 0.05 to "0".
-  const rate = (m: number) => {
-    const c = toCredits(m);
-    if (!(c > 0)) return "—";
-    if (c >= 10) return Math.round(c).toLocaleString(LOCALE);
-    return c < 0.05 ? "<0.1" : c.toFixed(1);
-  };
+  // Credit formatting lives in ../credits, shared with the activity panel below — the two must render
+  // the same figure identically, and a comment promising that is not enforcement.
+  const credits = fmtCredits;
+  // A per-turn price of zero means "no price", not "free", so it reads as an em dash here rather than
+  // the "0" fmtCreditAmount returns for a genuinely zero SPEND.
+  const rate = (m: number) => (toCredits(m) > 0 ? fmtCreditAmount(m) : "—");
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
 
   return (

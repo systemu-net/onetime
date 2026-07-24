@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Activity, ActivityDay } from "../api";
+import { fmtCreditAmount, fmtInt } from "../credits";
 
 // GitHub-style contribution calendar for editor usage. Columns are weeks (Sunday-start),
 // rows are weekdays; cell intensity scales with the day's request count. Clicking a day
@@ -21,16 +22,10 @@ function level(count: number): number {
   return 4;
 }
 
-function fmtInt(n: number): string {
-  return (n ?? 0).toLocaleString();
-}
 function fmtTokens(n: number): string {
   if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${+(n / 1_000).toFixed(0)}K`;
-  return (n ?? 0).toLocaleString();
-}
-function fmtCost(micros: number): string {
-  return `$${(micros / 1_000_000).toFixed(2)}`;
+  return fmtInt(n);
 }
 function prettyDate(key: string): string {
   const [y, m, d] = key.split("-").map(Number);
@@ -198,7 +193,7 @@ export default function ContributionsHeatmap({
             <div className="font-mono text-[12px] text-sub">{prettyDate(selected)}</div>
             <div className="font-mono text-[12px] text-faint">
               {selectedDay.count} req · {fmtTokens(selectedDay.input)} in · {fmtTokens(selectedDay.output)} out ·{" "}
-              {fmtCost(selectedDay.cost_micros)}
+              {fmtCreditAmount(selectedDay.cost_micros)} credits
             </div>
           </div>
           <ul className="mt-3 space-y-1.5">
@@ -228,7 +223,7 @@ export default function ContributionsHeatmap({
                   <th className="py-1.5 px-3 text-right font-normal">requests</th>
                   <th className="py-1.5 px-3 text-right font-normal">input</th>
                   <th className="py-1.5 px-3 text-right font-normal">output</th>
-                  <th className="py-1.5 px-3 text-right font-normal">cost</th>
+                  <th className="py-1.5 px-3 text-right font-normal">credits</th>
                   <th className="py-1.5 pl-3 text-right font-normal">reactions</th>
                 </tr>
               </thead>
@@ -239,7 +234,7 @@ export default function ContributionsHeatmap({
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtInt(m.count)}</td>
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.input)}</td>
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.output)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtCost(m.cost_micros)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtCreditAmount(m.cost_micros)}</td>
                     <td className="py-1.5 pl-3 text-right tabular-nums text-faint">
                       <span className="inline-flex items-center justify-end gap-3">
                         <span className="inline-flex items-center gap-1">
