@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Activity, ActivityDay } from "../api";
+import { fmtCreditAmount, fmtInt } from "../credits";
 
 // GitHub-style contribution calendar for editor usage. Columns are weeks (Sunday-start),
 // rows are weekdays; cell intensity scales with the day's request count. Clicking a day
@@ -21,30 +22,10 @@ function level(count: number): number {
   return 4;
 }
 
-// Pinned locale + credit conversion, kept identical to AccountPage (and to CREDIT_LOCALE in the
-// extension's chat.html) so one number never renders three ways across the product.
-const LOCALE = "en-US";
-const MICROS_PER_CREDIT = 10_000;
-
-function fmtInt(n: number): string {
-  return (n ?? 0).toLocaleString(LOCALE);
-}
 function fmtTokens(n: number): string {
   if (n >= 1_000_000) return `${+(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${+(n / 1_000).toFixed(0)}K`;
-  return (n ?? 0).toLocaleString(LOCALE);
-}
-// Spend, in credits — the unit the balance above this panel is shown in. The API now sends RETAIL
-// micro-$ for activity (it previously sent raw wire COST, which understated what the user actually
-// spent), so these figures reconcile against the credits the dashboard reports as spent.
-//
-// Same shape as AccountPage's rate(): a day or a model can total well under one credit, and rounding
-// that to "0" would read as free, so small amounts floor rather than disappear.
-function fmtCost(micros: number): string {
-  const c = (micros || 0) / MICROS_PER_CREDIT;
-  if (!(c > 0)) return "0";
-  if (c >= 10) return Math.round(c).toLocaleString(LOCALE);
-  return c < 0.05 ? "<0.1" : c.toFixed(1);
+  return fmtInt(n);
 }
 function prettyDate(key: string): string {
   const [y, m, d] = key.split("-").map(Number);
@@ -212,7 +193,7 @@ export default function ContributionsHeatmap({
             <div className="font-mono text-[12px] text-sub">{prettyDate(selected)}</div>
             <div className="font-mono text-[12px] text-faint">
               {selectedDay.count} req · {fmtTokens(selectedDay.input)} in · {fmtTokens(selectedDay.output)} out ·{" "}
-              {fmtCost(selectedDay.cost_micros)} credits
+              {fmtCreditAmount(selectedDay.cost_micros)} credits
             </div>
           </div>
           <ul className="mt-3 space-y-1.5">
@@ -253,7 +234,7 @@ export default function ContributionsHeatmap({
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtInt(m.count)}</td>
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.input)}</td>
                     <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.output)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtCost(m.cost_micros)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtCreditAmount(m.cost_micros)}</td>
                     <td className="py-1.5 pl-3 text-right tabular-nums text-faint">
                       <span className="inline-flex items-center justify-end gap-3">
                         <span className="inline-flex items-center gap-1">
