@@ -176,7 +176,20 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const tranched = ceiling < full;
   const unlockAt = models.next_unlock_at ? new Date(models.next_unlock_at) : null;
   const pct = ceiling > 0 ? Math.min(Math.round((spent / ceiling) * 100), 100) : 0;
-  const usd = (m: number) => `$${(m / 1_000_000).toFixed(2)}`;
+  // Credits are the in-product spending unit: $1 = 100 credits, so 1 credit = 10_000 retail micro-$.
+  // The API sends retail micro-$ (Levelcode.retail_micros), and this is the ONE place that converts —
+  // the balance and the per-turn column must come from the same helper or they'd silently disagree.
+  const MICROS_PER_CREDIT = 10_000;
+  const toCredits = (m: number) => (m || 0) / MICROS_PER_CREDIT;
+  // Balances read as whole credits — the round, spendable-looking number is the entire point.
+  const credits = (m: number) => Math.round(toCredits(m)).toLocaleString();
+  // A per-turn cost can sit well below 1 credit (a gpt-oss turn is ~0.4), and rounding that to "0"
+  // would read as free. Keep one decimal until the number is big enough not to need it.
+  const rate = (m: number) => {
+    const c = toCredits(m);
+    if (!(c > 0)) return "—";
+    return c < 10 ? String(+c.toFixed(1)) : Math.round(c).toLocaleString();
+  };
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
 
   return (
@@ -184,19 +197,23 @@ function CreditsRoster({ models }: { models: AccountModels }) {
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="lineno">{tranched ? "usage available now" : "compute credits"}</div>
         <div className="font-mono text-[12px] tabular-nums text-sub">
-          {usd(spent)} / {usd(ceiling)} · {pct}%
+          {credits(spent)} / {credits(ceiling)} · {pct}%
         </div>
       </div>
       <div className="mt-1 font-display text-2xl font-semibold tracking-tightest tabular-nums">
-        {usd(remaining)}
-        <span className="text-sm font-normal text-faint"> {tranched ? "available now" : "left this period"}</span>
+        {credits(remaining)}
+        <span className="text-sm font-normal text-faint">
+          {" "}
+          credits {tranched ? "available now" : "left this period"}
+        </span>
       </div>
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-rule">
         <div className={`h-full rounded-full ${pct >= 100 ? "bg-flamedeep" : "bg-flame"}`} style={{ width: `${pct}%` }} />
       </div>
       {tranched && unlockAt ? (
         <div className="mt-2 font-mono text-[11px] text-faint">
-          More unlocks {unlockAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {usd(full)} total this cycle
+          More unlocks {unlockAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {credits(full)}{" "}
+          credits total this cycle
         </div>
       ) : null}
 
@@ -206,7 +223,7 @@ function CreditsRoster({ models }: { models: AccountModels }) {
           <thead className="text-faint">
             <tr className="border-b border-rule">
               <th className="py-1.5 pr-3 font-normal">model</th>
-              <th className="py-1.5 px-3 text-right font-normal">credits</th>
+              <th className="py-1.5 px-3 text-right font-normal">credits/turn</th>
               <th className="py-1.5 px-3 text-right font-normal">≈ turns left</th>
               <th className="py-1.5 pl-3 text-right font-normal">status</th>
             </tr>
@@ -215,7 +232,12 @@ function CreditsRoster({ models }: { models: AccountModels }) {
             {models.models.map((m) => (
               <tr key={m.id} className={`border-b border-rule/60 ${m.live ? "" : "opacity-55"}`}>
                 <td className="py-1.5 pr-3 text-ink">{short(m.id)}</td>
-                <td className="py-1.5 px-3 text-right tabular-nums text-sub">{m.multiplier}×</td>
+                <td
+                  className="py-1.5 px-3 text-right tabular-nums text-sub"
+                  title={`${m.multiplier}× the baseline model`}
+                >
+                  {rate(m.per_turn_micros)}
+                </td>
                 <td className="py-1.5 px-3 text-right tabular-nums text-sub">
                   {m.live ? (m.turns_left ?? 0).toLocaleString() : "—"}
                 </td>
