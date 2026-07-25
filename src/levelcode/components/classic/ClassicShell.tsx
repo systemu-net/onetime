@@ -111,7 +111,7 @@ function ClassicNav({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () 
           <ul className="hidden items-center gap-5 sm:flex">
             <li>
               <a
-                href={`${GITHUB}/tree/main/docs`}
+                href={`${GITHUB}/tree/HEAD/docs`}
                 className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]"
               >
                 Documentation
