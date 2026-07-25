@@ -74,7 +74,7 @@ export default function EmailSignIn({
     return (
       <form onSubmit={sendCode} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="font-mono text-[11px] uppercase tracking-widest text-faint">Email</span>
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--c-text3)]">Email</span>
           <input
             type="email"
             required
@@ -83,11 +83,11 @@ export default function EmailSignIn({
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
             placeholder="you@studio.dev"
-            className="rounded-lg border border-rule bg-card px-3 py-2.5 text-[15px] text-ink outline-none transition-colors focus:border-flame"
+            className="rounded-[4px] border border-[var(--c-line)] bg-[var(--c-bg)] px-3 py-2.5 text-[15px] text-[var(--c-text)] outline-none transition-colors focus:border-[var(--c-accent)]"
           />
         </label>
-        {error ? <p className="text-[13px] text-red-600">{error}</p> : null}
-        <button type="submit" disabled={busy} className="btn-primary w-full justify-center">
+        {error ? <p className="text-[13px] text-red-500">{error}</p> : null}
+        <button type="submit" disabled={busy} className="classic-button w-full">
           {busy ? "Sending…" : "Email me a sign-in code"}
         </button>
       </form>
@@ -96,11 +96,11 @@ export default function EmailSignIn({
 
   return (
     <form onSubmit={verify} className="flex flex-col gap-3">
-      <p className="text-[13px] text-sub">
-        We sent a 6-digit code to <span className="font-medium text-ink">{email}</span>. Enter it below.
+      <p className="text-[13px]">
+        We sent a 6-digit code to <span className="font-medium text-[var(--c-text)]">{email}</span>. Enter it below.
       </p>
       <label className="flex flex-col gap-1">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-faint">Verification code</span>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-[var(--c-text3)]">Verification code</span>
         <input
           inputMode="numeric"
           autoComplete="one-time-code"
@@ -111,15 +111,15 @@ export default function EmailSignIn({
           value={code}
           onChange={(ev) => setCode(ev.target.value.replace(/\D/g, "").slice(0, 6))}
           placeholder="000000"
-          className="rounded-lg border border-rule bg-card px-3 py-2.5 text-center text-[22px] font-semibold tracking-[0.4em] text-ink outline-none transition-colors focus:border-flame"
+          className="rounded-[4px] border border-[var(--c-line)] bg-[var(--c-bg)] px-3 py-2.5 text-center font-mono text-[22px] font-semibold tracking-[0.4em] text-[var(--c-text)] outline-none transition-colors focus:border-[var(--c-accent)]"
         />
       </label>
-      {error ? <p className="text-[13px] text-red-600">{error}</p> : null}
-      <button type="submit" disabled={busy || code.length < 6} className="btn-primary w-full justify-center">
+      {error ? <p className="text-[13px] text-red-500">{error}</p> : null}
+      <button type="submit" disabled={busy || code.length < 6} className="classic-button w-full">
         {busy ? "Verifying…" : "Verify & continue"}
       </button>
-      <div className="flex items-center justify-between font-mono text-[12px] text-faint">
-        <button type="button" onClick={sendCode} disabled={busy} className="underline decoration-rule underline-offset-4 hover:text-ink">
+      <div className="flex items-center justify-between text-[13px]">
+        <button type="button" onClick={sendCode} disabled={busy} className="text-[var(--c-accent)] hover:underline">
           Resend code
         </button>
         <button
@@ -129,7 +129,7 @@ export default function EmailSignIn({
             setCode("");
             setError(null);
           }}
-          className="underline decoration-rule underline-offset-4 hover:text-ink"
+          className="text-[var(--c-accent)] hover:underline"
         >
           Use a different email
         </button>

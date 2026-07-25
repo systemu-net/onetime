@@ -5,7 +5,6 @@ import LegalLayout, { LegalSection } from "../components/LegalLayout";
 export default function PrivacyPage() {
   return (
     <LegalLayout
-      eyebrow="09 · legal"
       title="Privacy Policy"
       updated="July 9, 2026"
       intro={
@@ -19,20 +18,20 @@ export default function PrivacyPage() {
       <LegalSection id="collect" heading="1. What we collect">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            <strong className="text-ink">Account</strong> — your email and basic profile, and the
+            <strong className="text-[var(--c-text)]">Account</strong> — your email and basic profile, and the
             authentication tokens the editor uses to talk to the service.
           </li>
           <li>
-            <strong className="text-ink">Prompts &amp; code</strong> — the prompts and code you submit to the
+            <strong className="text-[var(--c-text)]">Prompts &amp; code</strong> — the prompts and code you submit to the
             AI gateway, so we can generate responses and meter usage.
           </li>
           <li>
-            <strong className="text-ink">Usage &amp; billing</strong> — model used, token counts, timestamps,
+            <strong className="text-[var(--c-text)]">Usage &amp; billing</strong> — model used, token counts, timestamps,
             plan, and spend, used to meter your allowance and support billing. Payments are handled by Stripe;
             we do not receive or store your full card number.
           </li>
           <li>
-            <strong className="text-ink">Technical</strong> — IP address, device/browser info, and server
+            <strong className="text-[var(--c-text)]">Technical</strong> — IP address, device/browser info, and server
             logs, used for security and to operate the Service.
           </li>
         </ul>
@@ -55,15 +54,15 @@ export default function PrivacyPage() {
         <p>We share information only with service providers that help us run LevelCode:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            <strong className="text-ink">AI model providers &amp; routing</strong> — your prompts and selected
+            <strong className="text-[var(--c-text)]">AI model providers &amp; routing</strong> — your prompts and selected
             code are sent to the AI provider(s) that generate your response, via our routing partner. They
             process this content to return a result and under their own terms and privacy policies.
           </li>
           <li>
-            <strong className="text-ink">Payments</strong> — Stripe, to process subscriptions and payments.
+            <strong className="text-[var(--c-text)]">Payments</strong> — Stripe, to process subscriptions and payments.
           </li>
           <li>
-            <strong className="text-ink">Hosting &amp; infrastructure</strong> — our cloud hosting provider,
+            <strong className="text-[var(--c-text)]">Hosting &amp; infrastructure</strong> — our cloud hosting provider,
             which stores and serves the Service on our behalf.
           </li>
         </ul>
@@ -133,7 +132,7 @@ export default function PrivacyPage() {
       <LegalSection id="contact" heading="11. Contact">
         <p>
           Privacy questions or requests? Email{" "}
-          <a href="mailto:privacy@levelcode.ai" className="underline decoration-rule underline-offset-4 hover:text-ink">
+          <a href="mailto:privacy@levelcode.ai" className="text-[var(--c-accent)] hover:underline">
             privacy@levelcode.ai
           </a>
           .

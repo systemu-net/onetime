@@ -5,7 +5,6 @@ import LegalLayout, { LegalSection } from "../components/LegalLayout";
 export default function TermsPage() {
   return (
     <LegalLayout
-      eyebrow="09 · legal"
       title="Terms of Service"
       updated="July 9, 2026"
       intro={
@@ -13,7 +12,7 @@ export default function TermsPage() {
           These Terms govern your use of LevelCode — the LevelCode editor and the LevelCode Cloud service
           at levelcode.ai (together, the “Service”). By creating an account or using the Service, you agree
           to these Terms and to our{" "}
-          <a href="/privacy" className="underline decoration-rule underline-offset-4 hover:text-ink">
+          <a href="/privacy" className="text-[var(--c-accent)] hover:underline">
             Privacy Policy
           </a>
           .
@@ -139,7 +138,7 @@ export default function TermsPage() {
       <LegalSection heading="13. Contact">
         <p>
           Questions about these Terms? Email{" "}
-          <a href="mailto:legal@levelcode.ai" className="underline decoration-rule underline-offset-4 hover:text-ink">
+          <a href="mailto:legal@levelcode.ai" className="text-[var(--c-accent)] hover:underline">
             legal@levelcode.ai
           </a>
           .

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, type Pricing, type PricingTier } from "../api";
 import { useSession } from "../auth";
-import LevelNav from "../components/LevelNav";
+import ClassicShell from "../components/classic/ClassicShell";
 import PricingCards from "./PricingCards";
 
-// Server-truth pricing (SPEC §6 plan_catalog via GET /pricing, public).
+// Server-truth pricing (SPEC §6 plan_catalog via GET /pricing, public) — LevelCode Classic
+// (atom.io-heritage) framing: flat, centered, hairline rules. Same scoping as the landing.
 export default function PricingPage() {
   const { profile } = useSession();
   const [tiers, setTiers] = useState<PricingTier[]>([]);
@@ -25,24 +26,35 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <>
-      <LevelNav />
-      <main className="mx-auto max-w-6xl px-5 py-28">
-        <div className="lineno mb-4">04 · pricing</div>
-        <h1 className="max-w-3xl font-display text-[clamp(2rem,4.5vw,3.2rem)] font-semibold leading-[1.04] tracking-tightest text-balance">
-          Plans that scale with your orbit
-        </h1>
-        <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-sub pretty">
-          Every plan is bring-your-own-key by default. Switch on the gateway and your monthly token cap is all
-          you pay — we never mark up the provider.
-        </p>
+    <ClassicShell>
+      <section className="border-b border-[var(--c-line)] bg-[var(--c-surface)]">
+        <div className="mx-auto max-w-5xl px-5 py-12 text-center">
+          <h1 className="text-[30px] font-bold tracking-tight text-[var(--c-text)] sm:text-[36px]">
+            Plans that scale as you ship
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl pretty">
+            Every plan is bring-your-own-key by default — free, forever. Switch on the gateway and
+            your monthly credit is all you pay; we never mark up the provider.
+          </p>
+        </div>
+      </section>
 
-        {error ? (
-          <div className="surface mt-12 p-8 text-[15px] text-sub">{error}</div>
-        ) : (
-          <PricingCards tiers={tiers} authed={!!profile} currentPlan={profile?.plan ?? null} />
-        )}
-      </main>
-    </>
+      <section>
+        <div className="mx-auto max-w-5xl px-5 py-12">
+          {error ? (
+            <div className="rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-8 text-center text-[15px]">
+              {error}
+            </div>
+          ) : (
+            <PricingCards tiers={tiers} authed={!!profile} currentPlan={profile?.plan ?? null} />
+          )}
+
+          <p className="mt-10 text-center text-[13px] text-[var(--c-text3)]">
+            All plans include the full editor — it&rsquo;s free and open source. Plans meter the
+            managed AI gateway only.
+          </p>
+        </div>
+      </section>
+    </ClassicShell>
   );
 }

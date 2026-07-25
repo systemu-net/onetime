@@ -287,3 +287,118 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ───────── LevelCode Classic — the atom.io-heritage LOGGED-OUT landing ─────────
+   Scoped to `.classic` so the signed-in dashboard (cream paper-and-ink) is
+   untouched. Colors are literal inside the page markup; only fonts + the
+   portal animation + the two buttons live here. */
+.classic {
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
+  /* scoped theme vars — light (the atom.io classic) */
+  --c-bg: #ffffff;
+  --c-surface: #fafaf9;
+  --c-text: #333333;
+  --c-text2: #555555;
+  --c-text3: #777777;
+  --c-line: #e0e0e0;
+  --c-accent: #5b3fd6;
+  --c-accent-deep: #4527b8;
+  --c-strip: #efeafd;
+  color-scheme: light;
+}
+
+/* Dark = ONE DARK — Atom's own palette, matching levelcode.dev's dark mode. */
+.classic.classic--dark {
+  --c-bg: #282c34;
+  --c-surface: #21252b;
+  --c-text: #dcdfe4;
+  --c-text2: #abb2bf;
+  --c-text3: #828997;
+  --c-line: #3e4451;
+  --c-accent: #7d6bff;
+  --c-accent-deep: #5b3fd6;
+  --c-strip: #2e2b45;
+  color-scheme: dark;
+}
+
+.classic .classic-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 4px;
+  background: var(--c-accent);
+  padding: 0.625rem 1.5rem;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.15s ease;
+}
+.classic .classic-button:hover {
+  background: var(--c-accent-deep);
+}
+.classic .classic-button--quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--c-line);
+  background: var(--c-bg);
+  padding: 0.625rem 1.5rem;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--c-text);
+  transition: border-color 0.15s ease;
+}
+.classic .classic-button--quiet:hover {
+  border-color: var(--c-accent);
+}
+
+.classic .portal-layer {
+  transform-origin: 50% 60%;
+  animation: portal-drift 7s ease-in-out infinite;
+}
+.classic .portal-layer:nth-child(2) { animation-delay: -1.4s; }
+.classic .portal-layer:nth-child(3) { animation-delay: -2.8s; }
+.classic .portal-layer:nth-child(4) { animation-delay: -4.2s; }
+.classic .portal-layer:nth-child(5) { animation-delay: -5.6s; }
+@keyframes portal-drift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.02); }
+}
+
+/* Dark-mode legibility for the embedded cream-token demos, re-inked from the
+   outside (no shared-component edits — light mode + dashboard untouched):
+   the AgentShowcase caption/tab bar, and the SketchBuilder demo framed as a
+   light "screenshot card" (the board is a product artifact — it stays light). */
+.classic--dark [aria-live="polite"] { color: var(--c-text2); }
+.classic--dark [aria-live="polite"] strong { color: var(--c-text); }
+.classic--dark [role="tablist"] { background: var(--c-surface); border-color: var(--c-line); }
+.classic--dark [role="tab"] { color: var(--c-text2); }
+.classic--dark [role="tab"][aria-selected="true"] { color: #ffffff; }
+.classic--dark .classic-demo-sketch {
+  background: #fafaf9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* The dashboard's solid cards + small-caps labels (AccountPage / AdminPage /
+   ContributionsHeatmap). Surface-tinted, hairline-bordered, a whisper of
+   depth — the cream dashboard's separation, in classic materials. */
+.classic .classic-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.classic .classic-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text3);
+}
