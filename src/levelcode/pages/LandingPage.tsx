@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AgentShowcase from "../components/AgentShowcase";
 import ClassicShell from "../components/classic/ClassicShell";
@@ -13,9 +14,52 @@ const GITHUB = "https://github.com/levelcodeai/levelcode";
 const RELEASES = `${GITHUB}/releases/latest`;
 const DMG_ARM = `${RELEASES}/download/LevelCode-arm64.dmg`;
 const DMG_X64 = `${RELEASES}/download/LevelCode-x64.dmg`;
-const VERSION = "0.6.0";
+// Shown until the live lookup lands (and if it fails) — the hero normally renders the REAL
+// latest release, fetched from GitHub client-side and cached per session, so it can't go stale.
+const FALLBACK_VERSION = "0.9.2";
+
+function useLatestVersion(): string {
+  const [version, setVersion] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem("lc-latest-version") || FALLBACK_VERSION;
+    } catch {
+      return FALLBACK_VERSION;
+    }
+  });
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("lc-latest-version")) return;
+    } catch {
+      /* fall through to fetch */
+    }
+    let alive = true;
+    fetch("https://api.github.com/repos/levelcodeai/levelcode/releases/latest", {
+      headers: { Accept: "application/vnd.github+json" },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { tag_name?: string } | null) => {
+        const v = String(d?.tag_name ?? "").replace(/^v/, "");
+        if (alive && v) {
+          setVersion(v);
+          try {
+            sessionStorage.setItem("lc-latest-version", v);
+          } catch {
+            /* private mode */
+          }
+        }
+      })
+      .catch(() => {
+        /* keep the fallback */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return version;
+}
 
 export default function LandingPage() {
+  const version = useLatestVersion();
   return (
     <ClassicShell strip>
 
@@ -53,9 +97,9 @@ export default function LandingPage() {
                 Level<span className="text-[var(--c-accent)]">Code</span>
               </li>
               <li className="text-[14px]">
-                <span className="mr-2 font-mono font-semibold text-[var(--c-text)]">{VERSION}</span>
+                <span className="mr-2 font-mono font-semibold text-[var(--c-text)]">{version}</span>
                 <a
-                  href={`${GITHUB}/releases/tag/v${VERSION}`}
+                  href={`${GITHUB}/releases/tag/v${version}`}
                   className="text-[var(--c-accent)] hover:underline"
                 >
                   Release notes
@@ -120,7 +164,7 @@ export default function LandingPage() {
           </p>
 
           <p className="mt-6">
-            <a href={DMG_ARM} className="classic-button" download>
+            <a href="#download" className="classic-button">
               Download for macOS
             </a>
           </p>
@@ -181,6 +225,41 @@ export default function LandingPage() {
                 <p className="mt-1.5 text-[15px] pretty">{f.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────────────────── DOWNLOAD ───────────────────────────── */}
+      <section id="download" className="scroll-mt-14 border-b border-[var(--c-line)]">
+        <div className="mx-auto max-w-5xl px-5 py-14 text-center">
+          <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Download LevelCode</h3>
+          <p className="mx-auto mt-3 max-w-xl pretty">
+            Free and open. Drag the .dmg to Applications, add a key — or run fully offline on
+            local Ollama — and the editor starts editing with you.
+          </p>
+          <div className="mx-auto mt-8 max-w-2xl rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-8 text-left">
+            <h4 className="text-[17px] font-semibold text-[var(--c-text)]">Install in one drag</h4>
+            <p className="mt-2 text-[15px] pretty">
+              Download the <span className="font-mono text-[13px]">.dmg</span>, open it, drag
+              LevelCode to Applications. Add your API key — or point it at local Ollama — and the
+              editor starts editing with you.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href={DMG_ARM} className="classic-button" download>
+                <AppleMark />
+                Download for Apple Silicon
+              </a>
+              <a href={DMG_X64} className="classic-button--quiet" download>
+                <AppleMark />
+                Intel Mac
+              </a>
+            </div>
+            <p className="mt-4 text-[13px] text-[var(--c-text3)]">
+              free · MIT · no account required ·{" "}
+              <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
+                all releases →
+              </a>
+            </p>
           </div>
         </div>
       </section>
@@ -314,6 +393,14 @@ function Icon({ d, filled = false }: { d: string; filled?: boolean }) {
       className="inline-block"
     >
       <path d={d} />
+    </svg>
+  );
+}
+
+function AppleMark() {
+  return (
+    <svg viewBox="0 0 814 1000" width="14" height="14" fill="currentColor" aria-hidden>
+      <path d="M788 341c-6 4-107 61-107 187 0 146 128 198 132 199-1 3-20 70-67 138-42 60-86 120-153 120s-84-39-161-39c-75 0-102 40-163 40s-104-56-153-124C60 782 13 660 13 544c0-186 121-285 240-285 63 0 116 42 156 42 38 0 97-44 169-44 27 0 125 2 210 84zM554 172c31-37 53-88 53-139 0-7-1-14-2-20-50 2-110 34-146 76-29 32-55 83-55 135 0 8 1 16 2 18 3 1 8 2 13 2 45 0 102-30 135-72z" />
     </svg>
   );
 }
