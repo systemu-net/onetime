@@ -129,7 +129,7 @@ export default function LandingPage() {
               </li>
               <li className="text-[13px] text-[var(--c-text3)]">
                 Free and open source under the{" "}
-                <a href={`${GITHUB}/blob/main/LICENSE`} className="text-[var(--c-accent)] hover:underline">
+                <a href={`${GITHUB}/blob/HEAD/LICENSE`} className="text-[var(--c-accent)] hover:underline">
                   MIT license
                 </a>
                 . No account required.
@@ -186,7 +186,7 @@ export default function LandingPage() {
           </div>
 
           <p className="mt-8">
-            <a href={`${GITHUB}/tree/main/docs`} className="classic-button--quiet">
+            <a href={`${GITHUB}/tree/HEAD/docs`} className="classic-button--quiet">
               Learn more
             </a>
           </p>
