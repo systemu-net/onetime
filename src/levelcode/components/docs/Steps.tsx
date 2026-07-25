@@ -25,7 +25,9 @@ export function Steps({ children }: { children: ReactNode }) {
   return (
     <ol className="my-6 list-none space-y-0 pl-0">
       {steps.map((step, i) => (
-        <li key={step.props.title} className="relative pb-6 pl-10 last:pb-0">
+        // Title alone would collide if two steps share one; the index makes it
+        // unique within the list.
+        <li key={`${step.props.title}-${i}`} className="relative pb-6 pl-10 last:pb-0">
           {/* the rail, stopping at the last marker */}
           {i < steps.length - 1 ? (
             <span aria-hidden className="absolute bottom-0 left-[13px] top-7 w-px bg-[var(--c-line)]" />

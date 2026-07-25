@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Agent from "./agent.mdx";
 import Autocomplete from "./autocomplete.mdx";
 import Chat from "./chat.mdx";
@@ -39,12 +40,38 @@ const PAGES: Record<string, React.ComponentType> = {
   troubleshooting: Troubleshooting,
 };
 
-/** True for a slug this bundle can render — lets the route 404 instead of guessing. */
-export function isDocSlug(slug: string): boolean {
-  return slug in PAGES;
+export default function DocsBundle({ slug = "" }: { slug?: string }) {
+  const Doc = PAGES[slug];
+  // An unknown slug says so rather than quietly rendering the Overview. Falling
+  // back would make a typo or a stale link look like a working page, which hides
+  // broken links from whoever published them.
+  if (!Doc) return <DocNotFound slug={slug} />;
+  return <Doc />;
 }
 
-export default function DocsBundle({ slug = "" }: { slug?: string }) {
-  const Doc = PAGES[slug] ?? Overview;
-  return <Doc />;
+function DocNotFound({ slug }: { slug: string }) {
+  return (
+    <div>
+      <h1 className="mb-4 text-[34px] font-bold leading-tight tracking-tight text-[var(--c-text)]">
+        Page not found
+      </h1>
+      <p className="my-4 text-[16px] leading-[1.7]">
+        There is no documentation page at{" "}
+        <code className="rounded-[3px] border border-[var(--c-line)] bg-[var(--c-surface)] px-[5px] py-[1.5px] font-mono text-[0.875em] text-[var(--c-text)]">
+          /docs/{slug}
+        </code>
+        . It may have been renamed or removed.
+      </p>
+      <p className="my-4 text-[16px] leading-[1.7]">
+        Use the navigation to find what you need, or start from the{" "}
+        <Link
+          to="/docs"
+          className="font-medium text-[var(--c-accent)] underline decoration-[var(--c-accent)]/30 underline-offset-2 hover:decoration-[var(--c-accent)]"
+        >
+          documentation overview
+        </Link>
+        .
+      </p>
+    </div>
+  );
 }

@@ -80,7 +80,10 @@ export const mdxComponents = {
       <a
         href={href}
         className={LINK}
-        {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+        // Both parts on purpose: `noreferrer` implies `noopener` in current
+        // browsers, but stating it explicitly is what keeps the new tab from ever
+        // getting a `window.opener` handle back to this page.
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         {...props}
       >
         {children}

@@ -41,7 +41,9 @@ export function Tabs({ children }: { children: ReactNode }) {
           const selected = i === active;
           return (
             <button
-              key={tab.props.title}
+              // Title alone would collide if two tabs share one; the index makes
+              // it unique within the list.
+              key={`${tab.props.title}-${i}`}
               type="button"
               role="tab"
               id={`${id}-tab-${i}`}

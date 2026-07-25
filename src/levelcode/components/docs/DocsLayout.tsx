@@ -46,12 +46,18 @@ function useDocumentTitle(pathname: string) {
     document.title = entry ? `${entry.title} — LevelCode Docs` : "LevelCode Docs";
 
     const meta = document.querySelector('meta[name="description"]');
+    const hadDesc = meta?.hasAttribute("content") ?? false;
     const previousDesc = meta?.getAttribute("content") ?? null;
     if (meta && entry) meta.setAttribute("content", entry.blurb);
 
     return () => {
       document.title = previousTitle;
-      if (meta && previousDesc !== null) meta.setAttribute("content", previousDesc);
+      if (!meta) return;
+      // Restore the exact prior state. Checking `previousDesc !== null` would not
+      // be enough: if the tag had no content attribute at all, leaving ours behind
+      // would strand a doc page's blurb on every other route.
+      if (hadDesc && previousDesc !== null) meta.setAttribute("content", previousDesc);
+      else meta.removeAttribute("content");
     };
   }, [pathname]);
 }
