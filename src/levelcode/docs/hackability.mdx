@@ -1,0 +1,117 @@
+# Hackability
+
+> A user init script that runs at startup, package authoring that hot-reloads on save, and keymap presets that bring your muscle memory with you.
+
+Most of this is reachable from one place: run **LevelCode: Customize…** from the palette for a panel covering AI, appearance, keys, updates, and hackability.
+
+## The init script
+
+`~/.levelcode/init.js` runs every time LevelCode starts. It's the fastest way to add a command or a status-bar item without building an extension.
+
+Run **LevelCode: Open Init Script** — it creates the file with a commented starter if it doesn't exist yet.
+
+```js
+// ~/.levelcode/init.js
+
+levelcode.registerCommand("my.reverseSelection", () => {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) return;
+  const sel = editor.selection;
+  const text = editor.document.getText(sel);
+  editor.edit((b) => b.replace(sel, [...text].reverse().join("")));
+});
+
+levelcode.addStatusBarItem("⇄", "Reverse the selection", "my.reverseSelection");
+
+levelcode.onDidSave((doc) => {
+  levelcode.log("saved", doc.fileName);
+});
+```
+
+### What's in scope
+
+| Name | What it is |
+| --- | --- |
+| `levelcode` | The convenience API below |
+| `vscode` | The full editor API |
+| `require` | Resolved relative to `~/.levelcode`, so you can require your own modules |
+| `__dirname` / `__filename` | `~/.levelcode` and the init script's path |
+
+The `levelcode` object provides `registerCommand`, `onDidSave`, `onDidOpen`, `onDidChangeEditor`, `addStatusBarItem`, `showMessage`, `showError`, `getConfig`, and `log`. Everything registered through it is disposed automatically on reload, so re-running never leaves duplicates behind.
+
+<Note>
+  The init script does **not** reload on save. Run **LevelCode: Reload Init Script** after editing it. (Packages *do* hot-reload — see below.)
+</Note>
+
+A broken init script can't stop the editor starting: errors are caught, logged to the **LevelCode Init** output channel, and shown with a **Show Log** button.
+
+Turn it off entirely with `levelcode.init.enabled`.
+
+## Write a package
+
+When an init script isn't enough, scaffold a real extension.
+
+<Steps>
+  <Step title="Generate it">
+    Run **LevelCode: Generate Package…** and give it a lowercase, hyphenated name.
+
+    You get `~/.levelcode/packages/<name>/` containing a manifest, an `extension.js` registering a sample command and status-bar item, a README, and a launch config.
+
+  </Step>
+
+  <Step title="Develop it with hot reload">
+    Run **LevelCode: Develop Package (Hot Reload)…** and pick your package.
+
+    Now save any `.js` file in it and the package reloads into the running window — no restart. A status-bar item shows `dev: <name>` and spins briefly on each reload.
+
+  </Step>
+
+  <Step title="Stop">
+    **LevelCode: Stop Developing Package**, or click the status-bar item.
+  </Step>
+</Steps>
+
+Two limits worth knowing:
+
+- **Manifest changes don't hot-reload.** Editing `contributes` needs a full Extension Development Host — press <Kbd keys="f5" /> using the generated launch config.
+- **Storage is stubbed** in hot-reload mode. `globalState` and `workspaceState` are no-ops, so persistence needs the F5 path to test.
+
+Load failures go to the **LevelCode Packages** output channel.
+
+## Keymap presets
+
+Run **LevelCode: Apply Keymap Preset…** to bring another editor's muscle memory over wholesale.
+
+| Preset | What it gives you |
+| --- | --- |
+| **Atom** | <Kbd keys="cmd+t" /> finder, <Kbd keys="cmd+\\" /> tree, <Kbd keys="ctrl+cmd+up" />/<Kbd keys="ctrl+cmd+down" /> move lines, <Kbd keys="cmd+r" /> symbols, <Kbd keys="cmd+shift+d" /> duplicate line |
+| **Notepad++** | Windows-style Ctrl bindings — <Kbd keys="ctrl+d" />, <Kbd keys="ctrl+g" />, <Kbd keys="ctrl+q" />, <Kbd keys="f3" /> |
+| **VS Code default** | Clears the preset back to an empty keybindings file |
+
+<Warning>
+  Applying a preset **overwrites** `keybindings.json`. A timestamped backup is written next to it first, and you get a confirmation dialog before anything is replaced — but your existing custom bindings will not survive into the new file.
+</Warning>
+
+The Notepad++ preset uses Ctrl bindings that apply inside the editor, so macOS Ctrl text-navigation still works everywhere else.
+
+<Note>
+  There is no Sublime preset, despite what some older material claims. The three above are what ship.
+</Note>
+
+## Themes
+
+Two themes ship, both adapted from Atom's palette:
+
+- **LevelCode One Dark** — the default
+- **LevelCode One Light**
+
+Switch with **Preferences: Color Theme**. Anything on [Open VSX](https://open-vsx.org) works too — see [Extensions](/docs/import-and-updates#extensions-come-from-open-vsx).
+
+<CardGroup>
+  <Card title="Power editing" href="/docs/power-editing">
+    Macros, column mode, and line operations.
+  </Card>
+  <Card title="Import and updates" href="/docs/import-and-updates">
+    Bring settings across and install extensions.
+  </Card>
+</CardGroup>

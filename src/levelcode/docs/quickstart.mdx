@@ -1,0 +1,157 @@
+# Quickstart
+
+> Install the editor, connect a model, and hand the agent a real task — about ten minutes, most of it downloading.
+
+## Before you start
+
+You need a Mac. LevelCode is macOS-only today, on both Apple Silicon and Intel.
+
+You also need a way to talk to a model. Pick one:
+
+- **A LevelCode Cloud account** — sign in and you're on a metered plan with no provider key to manage. There's a free tier.
+- **Your own API key** from any [supported provider](/docs/providers) — free to use, you pay the provider directly.
+- **Ollama** running locally — no key, no network, but no agent mode ([why](/docs/providers#local-models-with-ollama)).
+
+<Steps>
+  <Step title="Install LevelCode">
+    Download the build for your Mac, open the `.dmg`, and drag **LevelCode** to Applications.
+
+    <Tabs>
+      <Tab title="Apple Silicon">
+        For M1 and later.
+
+        [Download for Apple Silicon →](https://levelcode.ai/download/arm64)
+
+        Not sure which you have? Open **About This Mac** from the Apple menu. Anything listing an M-series chip is Apple Silicon.
+      </Tab>
+
+      <Tab title="Intel">
+        For pre-2020 Intel Macs.
+
+        [Download for Intel →](https://levelcode.ai/download/x64)
+      </Tab>
+    </Tabs>
+
+    Releases are signed and notarized, so the app opens on a double-click. On first launch you get a short **Welcome to LevelCode** walkthrough — follow it, or close it and continue here.
+
+  </Step>
+
+  <Step title="Open a project">
+    Use **File → Open Folder…** and pick a real project you know well. The agent works against your open workspace, so its answers are only as good as what it can see.
+
+    <Tip>
+      Install the `level` command from the palette (<Kbd keys="shift+cmd+p" /> → **Shell Command: Install 'level' command in PATH**) and you can open projects with `level .` from any terminal.
+    </Tip>
+
+  </Step>
+
+  <Step title="Connect a model">
+    Open the AI panel with <Kbd keys="shift+cmd+i" />. It lives in the secondary side bar, on the right.
+
+    <Tabs>
+      <Tab title="LevelCode Cloud">
+        Click the account button in the chat footer, or run **LevelCode: Account: Sign in to LevelCode…** from the palette. Your browser opens to finish sign-in and hands you back to the editor.
+
+        Once you're signed in, requests run through your plan — no key to set. The footer will read **LevelCode Cloud · Gateway**.
+      </Tab>
+
+      <Tab title="Your own key">
+        Run **LevelCode: AI: Select Model…** from the palette (<Kbd keys="shift+cmd+p" />) and pick a model. This sets the provider and the model together.
+
+        Then run **LevelCode: AI: Set API Key…** and paste your key. It goes into your OS keychain, never into `settings.json`, and is never synced.
+
+        The footer will read **Direct · BYO key**.
+      </Tab>
+
+      <Tab title="Local (Ollama)">
+        Install [Ollama](https://ollama.com), then pull a model:
+
+        ```bash
+        ollama pull llama3.1
+        ```
+
+        In LevelCode, run **LevelCode: AI: Select Model…** and choose from the **Ollama (local)** section — it lists whatever you've pulled. No API key is needed.
+
+        <Warning>
+          Ollama covers chat, inline completion, and edits, but **not** agent mode — the agent needs reliable tool-calling. Use a hosted provider for the next step.
+        </Warning>
+      </Tab>
+    </Tabs>
+
+  </Step>
+
+  <Step title="Ask something first">
+    Before handing over write access, check it can see your code. Switch the mode pill above the composer from **Agent** to **Chat**, and ask something only your codebase could answer:
+
+    ```text
+    Where is authentication handled, and what happens when a token expires?
+    ```
+
+    Chat cannot edit files or run commands — it's the safe way to confirm the model is connected and that context is being pulled in. You'll see a `🔎 Auto-context` line naming the files it found.
+
+  </Step>
+
+  <Step title="Hand the agent a real task">
+    Switch the mode pill back to **Agent** and give it a goal rather than an instruction. Something small and verifiable is the right first task:
+
+    ```text
+    The README's install section is out of date — read package.json
+    and the scripts folder, then rewrite it to match what's actually there.
+    ```
+
+    Watch what happens:
+
+    - It reads files before it writes any, and shows you each step.
+    - Edits are applied to your files **immediately** and wait for your verdict.
+    - If it wants to run a command, it stops at an approval card. Nothing runs until you press **Run**.
+
+  </Step>
+
+  <Step title="Review, then keep or undo">
+    Every file the agent changed is now pending your review. You have three places to act:
+
+    - **In the file** — a `Keep` / `Undo` row appears above the changed lines, with added and removed counts.
+    - **In the chat** — a sticky bar reads *"N files changed"* with **Keep all** and **Undo all**.
+    - **In the status bar** — `Keep edit` and `Undo edit` act on the file you're looking at.
+
+    Undo restores the file exactly as it was before the agent touched it, read from disk. Nothing is lost by trying.
+
+    <Tip>
+      Went further wrong than one file? Hover any message you sent and click **Restore checkpoint** to roll back that turn and everything after it. See [Keep, Undo, and checkpoints](/docs/agent#keep-undo-and-checkpoints).
+    </Tip>
+
+  </Step>
+
+  <Step title="Make it check its own work">
+    Point the agent at the command your project already uses to know it's healthy, and it will run it after editing and fix what it broke:
+
+    ```json
+    { "levelcode.ai.verify.command": "npm run typecheck" }
+    ```
+
+    Use a command that exits on its own — a test or typecheck run, never a dev server or a watch task. Type and lint errors from the editor are checked for you whether or not you set this.
+
+  </Step>
+</Steps>
+
+## What to do next
+
+Two things change the feel of the tool more than any others, and both are covered in depth on the [Agent](/docs/agent) page:
+
+- **Autopilot** (`levelcode.ai.agent.autopilot`) drops the approval card on routine commands, while still stopping for anything hard to undo.
+- **Project rules** — drop an `AGENTS.md` or `CLAUDE.md` in your repo and the agent folds it into every run. It's how you teach it your conventions once instead of repeating them every task.
+
+<CardGroup>
+  <Card title="Agent" href="/docs/agent">
+    Approvals, self-verification, checkpoints, and the limits that bound a run.
+  </Card>
+  <Card title="Providers and models" href="/docs/providers">
+    Switch providers, compare context windows, keep your keys straight.
+  </Card>
+  <Card title="Power editing" href="/docs/power-editing">
+    Macros, column mode, line operations — the Notepad++ toolkit.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    When sign-in, a key, or a command doesn't behave.
+  </Card>
+</CardGroup>

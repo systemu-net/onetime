@@ -1,0 +1,132 @@
+# Power editing
+
+> The Notepad++ toolkit, rebuilt on Code-OSS: macros, column mode, line operations, encoding control, and a read-optimized mode for enormous files.
+
+Every command here is in the Command Palette (<Kbd keys="shift+cmd+p" />) under the **LevelCode:** prefix. Most also sit on the editor's right-click menu, grouped into submenus.
+
+## Macros
+
+Record a sequence of keystrokes once and replay it as many times as you need. This is the tool for repetitive edits that are too irregular for find-and-replace.
+
+| Action | Command | Shortcut |
+| --- | --- | --- |
+| Start / stop recording | **Macro: Start/Stop Recording** | <Kbd keys="cmd+shift+r" /> |
+| Play the last macro | **Macro: Play Last** | <Kbd keys="cmd+alt+p" /> |
+| Play it N times | **Macro: Play Last N Times…** | — |
+| Save it under a name | **Macro: Save Last Macro…** | — |
+| Run a saved macro | **Macro: Run Saved Macro…** | — |
+| Delete a saved macro | **Macro: Delete Saved Macro…** | — |
+
+While recording, the status bar shows `⏺ Recording macro (N)` with the step count.
+
+What gets captured: typed text, arrow and word-wise motions, Home and End, backspace and delete, Enter and Tab. A whole replay collapses into a **single undo**, so an unwanted replay is one <Kbd keys="cmd+z" /> away.
+
+<Tip>
+  The pattern that pays off: record the edit for one line including the motion to the next line, then **Play Last N Times** with the number of remaining lines.
+</Tip>
+
+Saved macros persist across restarts. Two caps guard against runaways — `levelcode.macros.maxSteps` (default `5000`) and `levelcode.macros.maxReplayCount` (default `100000`).
+
+<Warning>
+  Applying the Atom keymap preset rebinds <Kbd keys="cmd+shift+r" /> to *Go to Symbol in Workspace*, taking over the macro-record shortcut. Rebind one of them if you use both. See [Keymap presets](/docs/hackability#keymap-presets).
+</Warning>
+
+## Column editor
+
+Works from a box selection (<Kbd keys="shift+alt" />-drag) or from multiple cursors.
+
+### Insert incrementing numbers
+
+**Column: Insert Incrementing Numbers…** numbers your cursors top to bottom in visual order, not selection order.
+
+The format string carries the whole specification:
+
+| You type | You get |
+| --- | --- |
+| `1` | 1, 2, 3, 4… |
+| `001` | 001, 002, 003 — padded to the digits you typed |
+| `10 -2` | 10, 8, 6, 4 — a second token sets the step, and it may be negative |
+| `0x0a` | 0x0a, 0x0b, 0x0c — hex, padded, lowercase |
+| `0xFF` | 0xFF, 0x100 — uppercase, because you typed uppercase |
+
+### Fill with text
+
+**Column: Fill With Text…** inserts the same text at every cursor.
+
+## Line operations
+
+Right-click → **Line Operations**, or the palette. These act on the selected lines, or on **the entire file when nothing is selected**.
+
+| Command | What it does |
+| --- | --- |
+| **Lines: Sort Ascending** / **Descending** | Locale-aware sort |
+| **Lines: Sort (Case-Insensitive)** | Ignores case |
+| **Lines: Sort Numerically** | Sorts on each line's leading number; lines without one sort last |
+| **Lines: Remove Duplicate Lines** | Removes every repeat, anywhere in the range |
+| **Lines: Remove Consecutive Duplicate Lines** | Removes only adjacent repeats |
+| **Lines: Remove Empty Lines** | Drops blank lines |
+| **Lines: Reverse** | Reverses the order |
+| **Lines: Join** | Joins onto one line |
+| **Lines: Trim Trailing Whitespace** | Strips trailing spaces |
+
+Case conversion works per selection or multi-cursor, falling back to the word under the cursor:
+
+**Convert to UPPERCASE** · **Convert to lowercase** · **Convert to Title Case** · **Toggle Case**
+
+Every operation reports what it did — `(120→98 lines)` — or tells you it changed nothing.
+
+## Encoding and line endings
+
+The status bar permanently shows the current line ending: `⇄ LF · macOS/Unix` or `⇄ CRLF · Windows`. **Click it to toggle.** No menu digging, and no wondering what a file is.
+
+| Command | What it does |
+| --- | --- |
+| **Convert Line Endings to macOS/Unix (LF)** | Convert to LF |
+| **Convert Line Endings to Windows (CRLF)** | Convert to CRLF |
+| **Toggle Line Endings** | Flip between them |
+| **Change File Encoding…** | Reopen or save with a different encoding |
+
+## Big-file mode
+
+Open a file past `levelcode.bigFile.thresholdMB` (default `256`) and the status bar shows `⚡ Big-file mode`. Heavy features like syntax highlighting are reduced; editing, scrolling, and find keep working.
+
+Detection is by file size alone — the file is never read to decide — so opening a 4 GB log doesn't cost anything before you see it.
+
+LevelCode also raises the "this file is large" confirmation threshold to 2 GB, so big files simply open instead of prompting.
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.bigFile.thresholdMB` | `256` | When the indicator appears |
+| `levelcode.bigFile.notify` | `true` | One-time notification per file |
+
+## Duplicate a file
+
+Select a file or folder in the Explorer and press <Kbd keys="cmd+d" />, or right-click → **Duplicate**.
+
+Names avoid collisions automatically — `report copy.md`, then `report copy 2.md`. It works on folders recursively and on multi-selections, and reveals the new item so you can rename it immediately.
+
+## JSON beautify on paste
+
+Paste text that is entirely a valid JSON object or array and LevelCode pretty-prints it in place. Works in any buffer, including untitled scratch tabs. Non-JSON pastes are untouched.
+
+```json
+{
+  "levelcode.jsonPaste.enabled": true,
+  "levelcode.jsonPaste.indent": "editor"
+}
+```
+
+`indent` accepts `"editor"` (follow the buffer's own settings), a number of spaces, or `"tab"`.
+
+## Hot exit
+
+LevelCode defaults `files.hotExit` to `onExitAndWindowClose`, the Sublime behavior: unsaved edits and untitled tabs survive quitting the app **and** closing a window. Set it back to `onExit` or `off` if you'd rather be prompted.
+
+<CardGroup>
+  <Card title="Hackability" href="/docs/hackability">
+    Keymap presets, the init script, and writing your own packages.
+  </Card>
+  <Card title="Import and updates" href="/docs/import-and-updates">
+    Bring your VS Code settings and keybindings across.
+  </Card>
+</CardGroup>

@@ -1,5 +1,9 @@
+import mdx from "@mdx-js/rollup";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import rehypePrettyCode from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
+import remarkGfm from "remark-gfm";
 import { defineConfig, Plugin } from "vite";
 
 function injectRuntimeEnv(): Plugin {
@@ -74,9 +78,38 @@ const devProxy = Object.fromEntries(
   ]),
 );
 
+// The LevelCode docs (/ai/docs → levelcode.ai/docs) are authored as MDX under
+// src/levelcode/docs. remark-gfm buys tables; rehype-slug puts an id on every
+// heading for the on-this-page rail; rehype-pretty-code highlights fences with
+// Shiki AT BUILD TIME, so no highlighting runtime ships to the browser.
+// `providerImportSource` wires MDXProvider, which is how a page can use <Tabs>,
+// <Steps> or <Kbd> with no import (see DocsLayout).
+const mdxPlugin: Plugin = {
+  enforce: "pre", // .mdx must compile to JSX before plugin-react sees it
+  ...mdx({
+    providerImportSource: "@mdx-js/react",
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [
+      rehypeSlug,
+      [
+        rehypePrettyCode,
+        // One Dark is the editor's own palette; the pane color belongs to the
+        // CodeBlock component, not the highlighter theme.
+        { theme: "one-dark-pro", keepBackground: false, defaultLang: "text" },
+      ],
+    ],
+  }),
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), injectRuntimeEnv(), serveLevelcodeUnderAi()],
+  plugins: [
+    mdxPlugin,
+    // .mdx joins the react plugin's include so Fast Refresh covers doc pages too
+    react({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }),
+    injectRuntimeEnv(),
+    serveLevelcodeUnderAi(),
+  ],
   // Multi-page build: the thin.ly shortener SPA (index.html) and the LevelCode Cloud
   // account app (levelcode.html). Vite auto-extracts the shared chunks; Rails serves
   // the right shell per Host (see thin.ly StaticController#ui).

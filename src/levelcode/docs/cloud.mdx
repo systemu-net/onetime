@@ -1,0 +1,77 @@
+# Cloud and billing
+
+> Sign in and AI requests run through your plan — no provider key to manage. Sign out and it falls back to your own key automatically.
+
+LevelCode Cloud is optional. The editor is fully functional with your own API key, or with a local model, and never phones home for AI in either case.
+
+## What signing in changes
+
+| | Signed out | Signed in |
+| --- | --- | --- |
+| **Routing** | Your machine → provider | Your machine → LevelCode Cloud → provider |
+| **Key** | Yours, required | None needed |
+| **Cost** | You pay the provider | Credits on your plan |
+| **Models** | Every provider you have a key for | Your plan's roster |
+| **Cost shown per run** | No | Yes |
+
+The `gateway` mode is the default and adapts to your state: it only routes through the gateway while you're signed in, and falls back to your own key when you're not.
+
+## Sign in
+
+Click the account button in the chat footer, or run **LevelCode: Account: Sign in to LevelCode…**.
+
+Your browser opens to complete sign-in — with email, GitHub, or Google — and hands you back to the editor. The exchange uses PKCE, so no long-lived secret sits in a URL.
+
+Once signed in, the chat footer reads **LevelCode Cloud · Gateway** and the account panel shows your plan and remaining credits.
+
+## Credits
+
+Usage is metered in **credits**, where **100 credits = $1**.
+
+After each agent run, the response bar shows what that run cost and how many credits you have left. Different models draw at different rates — the model picker shows each one's multiplier alongside its context window and a rough estimate of how many turns you have left.
+
+The free plan runs on a fixed model. Paid plans unlock the roster, including an **Auto** option that picks a model per task.
+
+<Note>
+  Cost figures appear on the gateway only. On your own key, LevelCode has no visibility into your provider bill and shows nothing — check your provider's dashboard.
+</Note>
+
+Plans and current pricing are on the [pricing page](/pricing). Manage your subscription from the account panel's **Manage account** button, or on [your account page](/account).
+
+### Hitting a limit
+
+If you exhaust your plan's allowance, the chat shows an upgrade card rather than failing silently, with buttons to upgrade or manage your plan. Work already applied to your files is unaffected.
+
+Separately, a run that hits the step limit pauses with a **Continue** button — that's `levelcode.ai.agent.maxSteps` protecting you from a runaway loop, not a billing limit. See [Agent limits](/docs/agent#limits-that-bound-a-run).
+
+## Choosing between a plan and your own key
+
+**A plan makes sense if** you'd rather not manage provider accounts, you want one bill, or you want per-run costs visible in the editor.
+
+**Your own key makes sense if** you already have provider credit, you want a model or provider outside the roster, or you need requests to go straight from your machine to the provider with nothing in between.
+
+You can have both. Stay signed in for the account, but force your own key for AI:
+
+```json
+{ "levelcode.ai.providerMode": "byok" }
+```
+
+## Privacy
+
+- **On your own key**, requests go directly from your machine to the provider. No LevelCode server is involved, and your key never leaves your keychain.
+- **On the gateway**, requests pass through LevelCode Cloud to reach the provider — that is what metering requires.
+- **Telemetry is off** and there is no setting to enable it.
+- **The 👍/👎 buttons** on a response send feedback only when you're signed in and on the gateway. On your own key they stay local.
+
+## Signing out
+
+Use the account panel. Sign-out clears your stored tokens and cached profile, and AI falls straight back to your own key. Your provider keys are untouched — they were never part of the session.
+
+<CardGroup>
+  <Card title="Providers and models" href="/docs/providers">
+    Use your own key with any supported provider.
+  </Card>
+  <Card title="Agent" href="/docs/agent">
+    The limits that bound what a single run can spend.
+  </Card>
+</CardGroup>

@@ -2,7 +2,10 @@
 const plugin = require("tailwindcss/plugin")
 
 export default {
-  content: ['./index.html', './atompp.html', './src/**/*.{js,ts,jsx,tsx}'],
+  // levelcode.html is the LevelCode Cloud entry (it replaced atompp.html, which no
+  // longer exists — the stale glob silently matched nothing). .mdx is here for the
+  // docs pages under src/levelcode/docs.
+  content: ['./index.html', './levelcode.html', './src/**/*.{js,ts,jsx,tsx,mdx}'],
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {

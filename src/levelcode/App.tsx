@@ -1,6 +1,7 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import AccountPage from "./pages/AccountPage";
 import AdminPage from "./pages/AdminPage";
+import DocsPage from "./pages/DocsPage";
 import DownloadPage from "./pages/DownloadPage";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -14,6 +15,8 @@ import TermsPage from "./pages/TermsPage";
 //   /ai/admin  → admin dashboard (admin role only; enforced client + server side)
 //   /ai/terms, /ai/privacy → legal (served publicly as levelcode.ai/terms, /privacy)
 //   /ai/download → macOS downloads (served publicly as levelcode.ai/download)
+//   /ai/docs, /ai/docs/:slug → documentation (served publicly as levelcode.ai/docs).
+//     This is the CANONICAL home of the LevelCode docs; levelcode.dev/docs redirects here.
 export default function App() {
   return (
     <Routes>
@@ -25,7 +28,15 @@ export default function App() {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/download" element={<DownloadPage />} />
+      <Route path="/docs" element={<DocsPage />} />
+      <Route path="/docs/:slug" element={<DocsRoute />} />
       <Route path="*" element={<LandingPage />} />
     </Routes>
   );
+}
+
+/** Pulls the slug out of the URL so DocsPage stays a plain presentational component. */
+function DocsRoute() {
+  const { slug } = useParams<{ slug: string }>();
+  return <DocsPage slug={slug} />;
 }

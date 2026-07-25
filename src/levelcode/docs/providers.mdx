@@ -1,0 +1,182 @@
+# Providers and models
+
+> One provider registry and one OpenAI-compatible adapter. Set a key once and it works across chat, the agent, edit, and autocomplete.
+
+## Two ways to reach a model
+
+LevelCode routes every AI request one of two ways, and the chat footer always shows which is active.
+
+| | Bring your own key | Metered gateway |
+| --- | --- | --- |
+| **Path** | Your machine → the provider | Your machine → LevelCode Cloud → the provider |
+| **Key needed** | Yours | None |
+| **Cost** | You pay the provider | Credits on your plan |
+| **Footer reads** | `Direct · BYO key` | `LevelCode Cloud · Gateway` |
+| **Model choice** | Any provider and model below | Your plan's roster |
+
+The default is `gateway`, which is adaptive rather than absolute: signed in, you're on your plan; signed out, it falls back to your own key automatically. Nothing to toggle.
+
+To always use your own key even while signed in, set:
+
+```json
+{ "levelcode.ai.providerMode": "byok" }
+```
+
+See [Cloud and billing](/docs/cloud) for credits and plans.
+
+## Switching model
+
+Run **LevelCode: AI: Select Model…** from the palette (<Kbd keys="shift+cmd+p" />), or click the model pill in the chat composer. This sets the provider and the model together, so you never have to keep two settings consistent by hand.
+
+The picker also offers three escape hatches:
+
+- **Browse all models (live)** — fetches the provider's current catalogue
+- **Enter a model ID** — type any id your provider serves
+- **OpenAI-compatible endpoint** — point at your own server
+
+## Supported providers
+
+| Provider | `levelcode.ai.provider` | Key needed | Agent |
+| --- | --- | --- | --- |
+| Anthropic (Claude) | `claude` | Yes | Yes |
+| OpenAI | `openai` | Yes | Yes |
+| OpenRouter | `openrouter` | Yes | Yes |
+| Groq | `groq` | Yes | Yes |
+| Together | `together` | Yes | Yes |
+| Fireworks | `fireworks` | Yes | Yes |
+| DeepSeek | `deepseek` | Yes | Yes, except R1 |
+| xAI (Grok) | `xai` | Yes | Yes |
+| Mistral | `mistral` | Yes | Yes |
+| Ollama (local) | `ollama` | No | **No** |
+| OpenAI-compatible | `custom` | Yes | Yes |
+
+Anthropic uses its native API. Everything else speaks the OpenAI `/chat/completions` protocol through one shared adapter — which is why "any OpenAI-compatible endpoint" genuinely works.
+
+Google Gemini has no dedicated provider; reach it through OpenRouter.
+
+### Context windows
+
+The window matters more than the name — it's what limits how much of your codebase can be in play at once.
+
+| Model | Context |
+| --- | --- |
+| `anthropic/claude-opus-5` (via OpenRouter) | 1,000,000 |
+| `moonshotai/kimi-k2.7-code` | 262,144 |
+| `codestral-latest` | 256,000 |
+| `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` | 200,000 |
+| `grok-2-latest` | 131,072 |
+| `gpt-4o`, `gpt-4o-mini`, Llama 3.3 70B | 128,000 |
+| `deepseek-chat`, `deepseek-reasoner` | 64,000 |
+
+<Note>
+  `claude-opus-4-8` reached directly through Anthropic is treated as 200K, while the same model **via OpenRouter** is treated as 1M. That is deliberate: the long-context beta header isn't sent on the native route, so the larger window isn't assumed there.
+</Note>
+
+Unlisted models get a sensible estimate from the model id. If it's wrong for yours, override it:
+
+```json
+{ "levelcode.ai.contextWindow": 1000000 }
+```
+
+## Bring your own key
+
+<Steps>
+  <Step title="Pick the provider and model">
+    Run **LevelCode: AI: Select Model…** and choose one. This sets `levelcode.ai.provider` for you.
+  </Step>
+
+  <Step title="Set the key">
+    Run **LevelCode: AI: Set API Key…** and paste it. The prompt names the provider so you can be sure which key you're setting.
+
+    You can also just send a message — if the key is missing, you'll be asked for it then.
+
+  </Step>
+</Steps>
+
+Keys are **per provider**. Switching provider needs its own key, and each is remembered separately, so you can move between providers without re-entering anything.
+
+### Where your keys live
+
+In your **OS keychain**, via the editor's encrypted secret storage.
+
+- Never written to `settings.json` — there is no setting that holds a key
+- Never synced anywhere
+- Never sent to LevelCode when you're using your own key
+
+To remove one, run **LevelCode: AI: Clear API Key**. It clears the key for the *current* provider only; there's no clear-all, so switch provider and repeat if you need to remove several.
+
+## Local models with Ollama
+
+<Steps>
+  <Step title="Install and pull a model">
+    Install [Ollama](https://ollama.com), then:
+
+    ```bash
+    ollama pull llama3.1
+    ```
+
+  </Step>
+
+  <Step title="Point LevelCode at it">
+    Run **LevelCode: AI: Select Model…** and pick from the **Ollama (local)** section — it lists what you've actually pulled. No API key is involved.
+
+    If your server isn't on the default port:
+
+    ```json
+    { "levelcode.ai.ollama.url": "http://localhost:11434" }
+    ```
+
+  </Step>
+</Steps>
+
+<Warning>
+  **Agent mode does not run on Ollama.** Tool-calling support across local models is too inconsistent to depend on, so it's disabled rather than left to fail unpredictably. Chat, autocomplete, and edit all work.
+</Warning>
+
+If the picker shows nothing under Ollama, the server isn't running — start it and reopen the picker.
+
+## Custom OpenAI-compatible endpoints
+
+For vLLM, LM Studio, LiteLLM, or anything else speaking the OpenAI protocol:
+
+```json
+{
+  "levelcode.ai.provider": "custom",
+  "levelcode.ai.baseURL": "http://localhost:8000/v1",
+  "levelcode.ai.model": "your-model-id"
+}
+```
+
+The base URL should end in `/v1` — the adapter appends `/chat/completions`.
+
+Two things to know:
+
+- **A key is still required**, even for a local server that ignores it. Enter any non-empty placeholder.
+- **Plain `http` is refused for remote hosts.** Local addresses (`localhost`, `127.0.0.1`, `[::1]`) are fine over http; anything else must be `https`, so a key can't be sent in the clear.
+
+## Settings reference
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.ai.provider` | `claude` | Active provider |
+| `levelcode.ai.model` | `""` | Model id for every provider except Claude and Ollama |
+| `levelcode.ai.claude.model` | `claude-sonnet-4-6` | Anthropic model |
+| `levelcode.ai.ollama.model` | `llama3.1` | Ollama model |
+| `levelcode.ai.ollama.url` | `http://localhost:11434` | Ollama server |
+| `levelcode.ai.baseURL` | `""` | Base URL for the `custom` provider |
+| `levelcode.ai.providerMode` | `gateway` | `gateway` or `byok` |
+| `levelcode.ai.cloudModel` | `moonshotai/kimi-k2.7-code` | Gateway model on a paid plan |
+| `levelcode.ai.contextWindow` | `200000` | Override the detected window. Only used if you set it |
+| `levelcode.ai.claude.maxTokens` | `4096` | Max output tokens for chat and edit, all providers |
+
+<CardGroup>
+  <Card title="Cloud and billing" href="/docs/cloud">
+    Credits, plans, and what a run actually costs.
+  </Card>
+  <Card title="Agent" href="/docs/agent">
+    Which models can drive the agent loop.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    Key errors, connection failures, and empty model lists.
+  </Card>
+</CardGroup>
