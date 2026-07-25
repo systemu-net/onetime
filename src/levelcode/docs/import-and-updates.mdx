@@ -1,0 +1,97 @@
+# Import and updates
+
+> Move your existing setup across in one command, install extensions from Open VSX, and decide how you get new builds.
+
+## Import from VS Code, VSCodium, or Cursor
+
+Run **LevelCode: Import from VS Code…** from the palette (<Kbd keys="shift+cmd+p" />), or use **Customize → Appearance & keys → Import from VS Code**.
+
+LevelCode looks for these installations and, if it finds more than one, asks which to import from:
+
+- Visual Studio Code
+- VS Code Insiders
+- VSCodium
+- Cursor
+
+Then you pick what to bring across:
+
+| What | How it merges |
+| --- | --- |
+| **Settings** | Merged at the top level — **your incoming values win**, LevelCode-specific defaults are kept |
+| **Keybindings** | Appended after LevelCode's, so yours take priority |
+| **Snippets** | Copied into your snippets folder |
+
+<Warning>
+  **Extensions are not imported.** Reinstall them from Open VSX — see below. Some extensions on the Microsoft marketplace aren't published there at all.
+</Warning>
+
+The import is careful with what's already yours:
+
+- Every destination file is **backed up first**, as `<file>.bak-<timestamp>`. If a backup can't be written, that file is skipped rather than overwritten.
+- Writes are atomic.
+- A file that can't be parsed is skipped and left untouched, not half-merged. Comments and trailing commas in JSON are handled.
+
+You'll be offered **Reload Window** at the end, which is needed for everything to take effect.
+
+<Note>
+  Import is macOS-only, like the rest of LevelCode today.
+</Note>
+
+## Extensions come from Open VSX
+
+LevelCode's extension gallery points at [Open VSX](https://open-vsx.org), the Eclipse Foundation's open marketplace — not Microsoft's.
+
+This isn't a preference. Microsoft's marketplace is licensed for use with Microsoft products only, so every Code-OSS fork that plays by the rules uses an alternative.
+
+What that means in practice:
+
+- Install extensions the usual way, from the Extensions view. They land in `~/.levelcode/extensions`.
+- Most popular open-source extensions are on Open VSX.
+- Microsoft's proprietary extensions — the C# debugger, the Remote Development pack, Copilot — are not, and can't be.
+- If something you need is missing, publishers can add it to Open VSX; you can also install from a `.vsix` file directly.
+
+## Updates
+
+Two mechanisms are at work, and they do different things.
+
+**Built-in updates** install new versions automatically, the same way VS Code does. A released build is downloaded and applied at the next check.
+
+**The notify-only checker** watches for new releases and tells you, without installing anything. It never applies an update itself, so it works on any build.
+
+When a new version is found you get a notification with **Download**, **Release Notes**, and **Later**. Download opens the [download page](https://levelcode.ai/download); Release Notes opens the [GitHub release](https://github.com/levelcodeai/levelcode/releases/latest).
+
+Run a check yourself any time with **LevelCode: Check for Updates**.
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.update.enabled` | `true` | Periodic background checks |
+| `levelcode.update.intervalHours` | `4` | How often to check |
+| `levelcode.update.url` | `""` | Point at your own update feed; blank uses the default |
+
+To see what version you're on, use **About** — it shows the LevelCode version alongside the Code-OSS base it's built from.
+
+## Settings Sync
+
+<Warning>
+  **Settings Sync is not available in LevelCode today.** The extension that provided it was removed before release because the managed sync host isn't built yet. Some older README and walkthrough text still mentions it — that text is out of date.
+</Warning>
+
+Until it ships, to move a configuration between machines:
+
+- Copy `~/Library/Application Support/LevelCode/User/settings.json` and `keybindings.json` across by hand, or
+- Keep them in a dotfiles repo and symlink them, or
+- Use **Import from VS Code** if the other machine has a VS Code install you keep current
+
+Your API keys are deliberately *not* part of any of this — they live in the OS keychain and are never synced. Set them per machine with **LevelCode: AI: Set API Key…**.
+
+<CardGroup>
+  <Card title="Install and setup" href="/docs/setup">
+    Where LevelCode keeps its files, and how to build from source.
+  </Card>
+  <Card title="Hackability" href="/docs/hackability">
+    Keymap presets to rebuild your muscle memory.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    When an update or import doesn't behave.
+  </Card>
+</CardGroup>

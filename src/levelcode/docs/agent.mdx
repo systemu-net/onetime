@@ -1,0 +1,184 @@
+# Agent
+
+> State a goal. The agent plans it, edits across files, runs commands behind approval gates, checks its own work, and reports back.
+
+Agent is the default mode of the AI panel (<Kbd keys="shift+cmd+i" />). Give it a goal rather than a step-by-step instruction — it is designed to work out the steps.
+
+```text
+Add rate limiting to the public API routes, then run the tests and fix what breaks.
+```
+
+## How a run works
+
+The agent works in a loop: it reads, decides, acts, observes the result, and repeats until the goal is met or a limit stops it.
+
+It has tools to list and read files, search with ripgrep, write and edit and delete files, run shell commands, read the output of background commands, keep a visible plan, ask you a question, and load a skill. Anything you've configured via [MCP](#mcp-servers) shows up alongside those.
+
+Two rules govern the whole loop, and they are different from each other on purpose:
+
+- **File edits apply immediately** and wait for your verdict afterwards.
+- **Shell commands never run** until you approve them (unless you turn on [Autopilot](#autopilot)).
+
+Edits apply straight away because the agent needs to run commands against real files to check itself. Nothing is lost by that — every edit is reversible, in two independent ways.
+
+## Keep, Undo, and checkpoints
+
+### Per file: Keep and Undo
+
+Before the first write to any file, LevelCode snapshots that file **from disk**. That snapshot is what Undo restores, which is why undoing is exact rather than approximate.
+
+Every changed file then offers:
+
+- **In the editor** — changed lines are tinted, with a `Keep` / `Undo` row above them showing added and removed counts
+- **In the chat** — a card per file with an inline diff, plus a sticky bar reading *"N files changed"* with **Keep all** and **Undo all**
+- **In the status bar** — `Keep edit` and `Undo edit`, acting on the file you're looking at
+
+Undo handles the awkward cases properly: if the agent deleted a file, Undo brings it back; if it created one, Undo removes it.
+
+Pending reviews survive a window reload. And if you start editing a pending file yourself, LevelCode takes that as acceptance and keeps it automatically rather than letting your work sit on top of an undoable change.
+
+### Per turn: checkpoints
+
+Keep and Undo work file by file. Checkpoints work turn by turn.
+
+Every message you send opens a checkpoint. Hover a message you sent and a **Restore checkpoint · N files** control appears; confirm it and LevelCode reverts that turn **and every turn after it**, then truncates the conversation back to that point.
+
+Use Undo when one file went wrong. Use a checkpoint when the whole approach went wrong.
+
+<Warning>
+  Restoring a checkpoint has no redo, and checkpoints are cleared by **New Chat**. It also refuses to run mid-turn — stop the agent first.
+</Warning>
+
+## Running commands
+
+By default, every shell command stops at an approval card showing the exact command. Press **Run** to allow it or **Skip** to refuse. Nothing runs until you decide.
+
+Approved commands stream real stdout and stderr into the chat. **Stop** kills the entire process group, so a dev server doesn't survive as an orphan.
+
+### Long-running commands
+
+The agent can start a command in the background — a dev server, a watcher — and keep working while it runs. Background commands are never timed out, appear in a **Background tasks** tray with their own Stop buttons, and the agent reads their output as it accumulates.
+
+If a background command prints a local URL, LevelCode opens it in the built-in browser beside the chat. Only genuinely local addresses are ever opened, each at most once per session; a remote URL printed by a script is ignored. Turn this off with `levelcode.ai.preview.autoOpen`.
+
+### Autopilot
+
+Turn on Autopilot (`levelcode.ai.agent.autopilot`, or the approvals menu in the chat footer) and routine commands run without asking.
+
+Autopilot is not a blank cheque. These always stop and ask, whatever the setting:
+
+| Category | Example |
+| --- | --- |
+| Deleting files | `rm -rf build` |
+| Discarding uncommitted work | `git checkout .` |
+| Running as root | `sudo …` |
+| Force-pushing or rewriting remote history | `git push --force` |
+| Rewriting git history | `git rebase`, `git filter-branch` |
+| Piping a remote script into a shell | `curl … \| sh` |
+| Publishing a package | `npm publish` |
+| Writing outside the project | paths beyond your workspace |
+
+The card explains why it paused. File edits stay reviewable with Keep and Undo either way.
+
+<Warning>
+  The classifier reads command text, so it can be evaded. Deletion smuggled through an interpreter (`node -e "fs.rmSync(...)"`), a bare truncating redirect (`> file`), or deliberate obfuscation will not be caught. Autopilot suits a repo under version control with a clean working tree — not a directory of irreplaceable files.
+</Warning>
+
+## Self-verification
+
+When the agent believes it's done, it checks rather than asserts. If `levelcode.ai.verify.enabled` is on (the default) and it actually edited something, it:
+
+1. Runs `levelcode.ai.verify.command`, if you set one.
+2. Pulls type and lint diagnostics for the files it touched.
+3. Compares those against a **baseline captured before the run**, so only problems it introduced count. Pre-existing errors don't send it chasing your backlog.
+4. Feeds any new failures back to itself and fixes them.
+
+```json
+{
+  "levelcode.ai.verify.command": "npm run typecheck",
+  "levelcode.ai.verify.maxRounds": 2
+}
+```
+
+<Warning>
+  The verify command must **exit on its own**. A dev server or a watch command blocks until the timeout kills it, which wastes a round and reports nothing useful. Use `npm test`, `npm run typecheck`, `npm run lint` — not `npm run dev`.
+</Warning>
+
+The loop is bounded by `levelcode.ai.verify.maxRounds` (default `2`). When it runs out, the agent stops and hands you what's still failing rather than grinding on. Set it to `0` to report failures without auto-retrying.
+
+If the verify command can't run at all — wrong name, missing script — that's treated as a configuration problem and reported to you, never looped back to the agent.
+
+By default only errors block. Set `levelcode.ai.verify.includeWarnings` to `true` to make warnings count too.
+
+## Project rules
+
+Drop one of these in your repo and the agent folds it into every run, and shows a `📋 project rules` chip so you know it loaded:
+
+- `AGENTS.md`
+- `CLAUDE.md`
+- `.cursorrules`
+
+The first one present wins. This is where your conventions belong — the test command, the directory layout, the patterns you want followed — so you stop repeating them in every prompt.
+
+## Skills
+
+With `levelcode.ai.skills.enabled` on (the default), the agent picks up bundled playbooks for tasks that match them: code review, focused bug fixes, and test writing. Only the names and descriptions sit in the prompt; the full playbook loads on demand, and the chat shows a `🧩 using skill` chip when one is used.
+
+## MCP servers
+
+The agent can use [Model Context Protocol](https://modelcontextprotocol.io) servers for tools beyond the editor.
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"]
+    }
+  },
+  "levelcode.ai.mcp.toolPolicy": { "filesystem__read_file": "allow" }
+}
+```
+
+Two deliberate safety properties:
+
+- Both settings are **user-scoped only**. A repo's committed `.vscode/settings.json` cannot add a server or allow a tool, so opening an untrusted repo can never make LevelCode spawn a process.
+- Anything not explicitly allow-listed in `toolPolicy` is **refused** — including under Autopilot. An MCP tool is third-party code, so Autopilot does not relax it.
+
+Use `"*": "allow"` to permit every tool from every configured server.
+
+## Limits that bound a run
+
+| Setting | Default | What it bounds |
+| --- | --- | --- |
+| `levelcode.ai.agent.maxSteps` | `25` | Tool-use steps per goal |
+| `levelcode.ai.agent.maxTokens` | `8192` | Output tokens per turn (1024–32768) |
+| `levelcode.ai.commandTimeout` | `120000` | Milliseconds before a foreground command is killed. `0` disables |
+| `levelcode.ai.verify.maxRounds` | `2` | Self-correction rounds after failed verification |
+
+When the step limit stops a run, the chat says so and offers **Continue** — the pause is a safety limit, not a failure.
+
+## Which models can run the agent
+
+Agent mode needs reliable tool-calling. It runs on Anthropic, OpenAI, OpenRouter, Groq, Together, Fireworks, DeepSeek, xAI, Mistral, and any OpenAI-compatible endpoint.
+
+It does **not** run on Ollama, and a few specific models opt out (reasoning-only models like DeepSeek R1 among them). If you pick one, LevelCode says so and chat, completion, and edits keep working.
+
+<Note>
+  The description under `levelcode.ai.provider` in the Settings UI still claims agent mode is Anthropic-only. That text is out of date — the agent is multi-provider.
+</Note>
+
+<CardGroup>
+  <Card title="Providers and models" href="/docs/providers">
+    Which model to point the agent at, and what each one can do.
+  </Card>
+  <Card title="Cloud and billing" href="/docs/cloud">
+    What a run costs when you're on the metered gateway.
+  </Card>
+  <Card title="Chat" href="/docs/chat">
+    Asking questions without granting write access.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    When the agent stalls, loops, or refuses a tool.
+  </Card>
+</CardGroup>

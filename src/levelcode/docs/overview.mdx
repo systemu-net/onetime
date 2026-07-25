@@ -1,0 +1,139 @@
+# Overview
+
+> LevelCode is an AI-native, hackable code editor for macOS. It reads your codebase, edits across files, runs commands behind approval gates, and verifies its own work — on your own API key or on a metered plan.
+
+LevelCode is a fork of [Code-OSS](https://github.com/microsoft/vscode), the MIT-licensed core behind VS Code. It keeps the editor you already know — the same Monaco engine, the same extension model, the same keybindings — and adds three things that fork doesn't have: a first-class AI layer that talks straight to whichever model provider you pick, the Notepad++ power-editing toolkit, and the old Atom "everything is hackable" layer.
+
+It is macOS-only today, and it ships under the MIT license. It is not produced by, endorsed by, or affiliated with Microsoft.
+
+## Get started
+
+<Tabs>
+  <Tab title="Download (recommended)">
+    Grab the `.dmg` for your Mac, open it, and drag **LevelCode** to Applications.
+
+    - [Apple Silicon](https://levelcode.ai/download/arm64) — M1 and later
+    - [Intel](https://levelcode.ai/download/x64)
+    - [All releases](https://github.com/levelcodeai/levelcode/releases/latest)
+
+    Builds are signed and notarized, so they open with a plain double-click. Then head to the [Quickstart](/docs/quickstart) to connect a model.
+
+    <Note>
+      Running an older unsigned build that macOS blocks on first launch? Right-click the app and choose **Open** once. See [Troubleshooting](/docs/troubleshooting#macos-blocks-the-app-on-first-launch).
+    </Note>
+
+  </Tab>
+
+  <Tab title="Build from source">
+    LevelCode is a thin overlay on Code-OSS rather than a vendored copy of it, so the bootstrap script fetches upstream at a pinned tag and brands it.
+
+    ```bash
+    git clone https://github.com/levelcodeai/levelcode.git
+    cd levelcode
+    ./scripts/bootstrap.sh     # clone Code-OSS, brand it, install extensions
+    ./scripts/run-dev.sh       # launch from source
+    ```
+
+    You'll need macOS, Xcode Command Line Tools, Node matching `vscode/.nvmrc`, and Python 3.8+. Full prerequisites and the build/package scripts are in [Install and setup](/docs/setup#build-from-source).
+
+  </Tab>
+</Tabs>
+
+## How the AI layer is wired
+
+Four AI systems share one provider configuration, so a key you set once works across all of them.
+
+| System | What it does | How you reach it |
+| --- | --- | --- |
+| [Chat](/docs/chat) | Answers questions about your codebase; never edits files | <Kbd keys="shift+cmd+i" />, then switch the mode pill to **Chat** |
+| [Agent](/docs/agent) | Plans, edits across files, runs commands, verifies its work | <Kbd keys="shift+cmd+i" /> — this is the default mode |
+| [Edit](/docs/edit) | Rewrites a selection, shown as a diff you approve | <Kbd keys="cmd+alt+e" /> with code selected |
+| [Autocomplete](/docs/autocomplete) | Inline ghost text as you type | Always on; accept with <Kbd keys="tab" /> |
+
+Requests are routed one of two ways, and the chat footer always tells you which is active:
+
+- **Your own key (BYOK).** Requests go straight from your machine to the provider. Keys are stored in your OS keychain and are never synced or sent to LevelCode. Free.
+- **The metered gateway.** When you're signed in to LevelCode Cloud, requests run through your plan and no provider key is needed. Sign out and it falls back to BYOK automatically.
+
+See [Providers and models](/docs/providers) to pick a provider, and [Cloud and billing](/docs/cloud) for how credits work.
+
+## What you can do
+
+<AccordionGroup>
+  <Accordion title="Hand off a whole task, not a snippet">
+    State a goal and the agent plans it, edits across as many files as it takes, runs commands to check itself, and reports back. Edits land immediately and wait for your verdict — every changed file gets **Keep** and **Undo** controls, and every turn is a checkpoint you can rewind to.
+
+    Try: *"add pagination to the users endpoint, then run the tests and fix what breaks."*
+
+  </Accordion>
+
+  <Accordion title="Make it prove its work before it reports">
+    After the agent finishes editing, it pulls type and lint diagnostics for the files it touched, diffs them against a baseline taken before the run, and runs your verify command if you set one. New failures are fed back so it self-corrects — bounded, so it can never loop indefinitely.
+
+    ```json
+    { "levelcode.ai.verify.command": "npm run typecheck" }
+    ```
+
+    Details in [Agent → Self-verification](/docs/agent#self-verification).
+
+  </Accordion>
+
+  <Accordion title="Keep commands on a leash">
+    By default every shell command the agent wants to run stops at an approval card showing exactly what will execute. Turn on Autopilot and routine commands run unattended — but anything hard to undo still stops and asks: deleting files, `sudo`, force-pushing, rewriting history, piping a remote script into a shell, publishing a package, or writing outside the project.
+
+    Commands stream real output, and **Stop** kills the whole process tree rather than orphaning a dev server.
+
+  </Accordion>
+
+  <Accordion title="Run any model, including local ones">
+    One provider registry plus one OpenAI-compatible adapter covers Anthropic, OpenAI, OpenRouter, Groq, Together, Fireworks, DeepSeek, xAI, Mistral, any OpenAI-compatible endpoint, and local models via Ollama. Switch with **LevelCode: AI: Select Model…** — it sets the provider and the model together.
+
+    See [Providers and models](/docs/providers).
+
+  </Accordion>
+
+  <Accordion title="Edit text like it's Notepad++">
+    Record and replay keystroke macros, insert incrementing numbers down a column, sort and dedupe lines, flip encoding and line endings from the status bar, and open multi-gigabyte files in a read-optimized mode.
+
+    See [Power editing](/docs/power-editing).
+
+  </Accordion>
+
+  <Accordion title="Bend the editor at runtime">
+    A user init script at `~/.levelcode/init.js` runs at startup with an API for commands, status-bar items, and editor events. Scaffold a package and develop it with hot reload — save a file and it reloads into the running window, no restart. Keymap presets bring Atom or Notepad++ muscle memory over wholesale.
+
+    See [Hackability](/docs/hackability).
+
+  </Accordion>
+</AccordionGroup>
+
+## Where things live
+
+| I want to... | Go here |
+| --- | --- |
+| Install it and run my first task | [Quickstart](/docs/quickstart) |
+| Use my own API key | [Providers and models](/docs/providers#bring-your-own-key) |
+| Run a model on my own machine | [Providers → Ollama](/docs/providers#local-models-with-ollama) |
+| Stop the agent asking before every command | [Agent → Autopilot](/docs/agent#autopilot) |
+| Undo something the agent did | [Agent → Keep, Undo, and checkpoints](/docs/agent#keep-undo-and-checkpoints) |
+| Give the agent project-specific rules | [Agent → Project rules](/docs/agent#project-rules) |
+| Bring my VS Code setup over | [Import and updates](/docs/import-and-updates) |
+| Install extensions | [Import and updates → Extensions](/docs/import-and-updates#extensions-come-from-open-vsx) |
+| Understand what a run cost | [Cloud and billing](/docs/cloud#credits) |
+
+## Next steps
+
+<CardGroup>
+  <Card title="Quickstart" href="/docs/quickstart">
+    Install, connect a model, and run a real agent task end to end.
+  </Card>
+  <Card title="Providers and models" href="/docs/providers">
+    Every supported provider, what each model can do, and where your keys live.
+  </Card>
+  <Card title="Agent" href="/docs/agent">
+    The loop in full: approvals, verification, checkpoints, and limits.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    First-launch blocks, key errors, agent problems, update failures.
+  </Card>
+</CardGroup>

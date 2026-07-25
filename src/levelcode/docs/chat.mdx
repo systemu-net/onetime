@@ -1,0 +1,106 @@
+# Chat
+
+> Ask questions about your codebase. Chat answers and explains — it never edits a file or runs a command.
+
+Open the AI panel with <Kbd keys="shift+cmd+i" />. It lives in the secondary side bar, on the right.
+
+The panel has two modes, selected by the pill above the composer:
+
+- **Agent** — plans, edits files, runs commands. This is the default. See [Agent](/docs/agent).
+- **Chat** — answers questions, with no tools at all. It is structurally incapable of changing your files.
+
+<Note>
+  Every window opens in **Agent** mode. The choice isn't remembered between windows, so if you want to ask rather than act, switch the pill each time.
+</Note>
+
+## What Chat can see
+
+Chat assembles context per message. Understanding the order helps you predict what it knows:
+
+1. **The active file**, in full, if `levelcode.ai.includeActiveFile` is on.
+2. **Files you pinned**, via the **+** button or **LevelCode: AI: Add Files to Chat…**.
+3. **Files it found itself** — see [auto-context](#auto-context) below.
+4. **Your selection**, if you sent one with <Kbd keys="cmd+alt+a" />.
+5. **A map of every path in the workspace**, only if you turn on `levelcode.ai.chat.workspaceMap`.
+
+Large files are truncated rather than dropped, so a huge file still contributes its beginning.
+
+### Auto-context
+
+With `levelcode.ai.chat.autoContext` on (the default), LevelCode searches your workspace for files relevant to the question and includes the best matches. It combines three signals:
+
+- **Content search** with ripgrep, across the meaningful words in your question
+- **Filename matches**
+- **Workspace symbols** — the same index that powers Go to Symbol
+
+Matches are scored, and the top few are attached. The chat prints a `🔎 Auto-context` line naming exactly which files it chose, so this is never a black box.
+
+Two settings shape it:
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.ai.chat.autoContextMaxFiles` | `4` | How many files it may attach per message |
+| `levelcode.ai.chat.scopeToActiveProject` | `true` | Confines the search to the active file's top-level sub-folder |
+
+That second one matters in a monorepo: without it, a question about `apps/web` can drag in same-named files from `apps/admin`. Turn it off when a question genuinely spans projects.
+
+<Tip>
+  When an answer is subtly wrong, look at the `🔎 Auto-context` line first. Nine times out of ten it pulled the wrong file, and pinning the right one with **+** fixes it outright.
+</Tip>
+
+## Pinning files
+
+Auto-context is a good guess. Pinning is certainty.
+
+Click **+** in the composer (or run **LevelCode: AI: Add Files to Chat…**) and pick files. They appear as chips above the composer and stay attached to every message until you remove them with **✕**.
+
+Pin when:
+
+- The question is about a file that doesn't mention the words you're using
+- You want to compare two specific implementations
+- You're iterating on one area and want it in context every turn
+
+## Sending a selection
+
+Select code and press <Kbd keys="cmd+alt+a" /> — or right-click and choose **LevelCode: AI: Add Selection to Chat**. The selection is attached to your next message, which is the fastest way to ask "what is this doing?" about a specific block.
+
+To *change* the selected code instead of asking about it, use [Edit](/docs/edit) (<Kbd keys="cmd+alt+e" />).
+
+## Managing the conversation
+
+### The context meter
+
+The footer shows a donut with how much of the model's context window the conversation is using. Click it for a breakdown — messages, system prompt, tools, free space, and how many tokens were served from the prefix cache.
+
+Above roughly three-quarters full you get a warning bar with a **New chat** button, and the popover offers **Compact**.
+
+### Compact
+
+**Compact** summarizes the earlier part of the conversation into a single briefing and keeps the most recent messages verbatim. Use it when a long, productive session is running out of room but you don't want to lose the thread. It reports how much it freed.
+
+### New chat
+
+**LevelCode: AI: New Chat** clears the conversation, the pinned files, and the checkpoints. It also stops any background commands the agent left running.
+
+It does **not** revert file changes — anything already applied stays applied. Undo those first if you want them gone.
+
+## Settings
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.ai.includeActiveFile` | `true` | Send the open file with each message |
+| `levelcode.ai.chat.autoContext` | `true` | Find and attach relevant files automatically |
+| `levelcode.ai.chat.autoContextMaxFiles` | `4` | Cap on auto-attached files |
+| `levelcode.ai.chat.scopeToActiveProject` | `true` | Keep the search inside the active sub-project |
+| `levelcode.ai.chat.workspaceMap` | `false` | Include every workspace path. Costs a lot of tokens |
+| `levelcode.ai.chat.groupActivity` | `true` | Fold consecutive agent actions into one collapsible card |
+| `levelcode.ai.claude.maxTokens` | `4096` | Max output tokens per chat reply, for every provider despite the name |
+
+<CardGroup>
+  <Card title="Agent" href="/docs/agent">
+    When you want it to do the work, not describe it.
+  </Card>
+  <Card title="Providers and models" href="/docs/providers">
+    Pick the model behind chat, and mind the context window.
+  </Card>
+</CardGroup>

@@ -1,0 +1,63 @@
+# Autocomplete
+
+> Inline suggestions appear as grey ghost text ahead of your cursor. Press <Kbd keys="tab" /> to accept.
+
+Autocomplete is on by default and works in every file. It sends the code around your cursor — roughly the preceding page and the following few lines — and suggests what comes next.
+
+## Using it
+
+- **Accept** with <Kbd keys="tab" />
+- **Ignore** it by continuing to type; the suggestion is cancelled the moment you do
+- **Toggle** it from the status bar — the `AI` indicator on the right shows `✦ AI` when on and a slashed circle when off. Click it, or run **LevelCode: AI: Toggle Inline Completions**
+
+## How it picks a model
+
+Autocomplete routes to a **fast** model, separately from your chat model, because latency matters more than depth for a single line.
+
+| Provider | Model used |
+| --- | --- |
+| Anthropic | `levelcode.ai.completions.model` — Haiku 4.5 by default |
+| OpenAI | `gpt-4o-mini` |
+| OpenRouter | `openai/gpt-4o-mini` |
+| Groq | `llama-3.1-8b-instant` |
+| Mistral | `codestral-latest` |
+| Everything else | Your active chat model |
+
+On Anthropic you can override this with `levelcode.ai.completions.model` — Sonnet and Opus are both selectable, at the cost of noticeably slower suggestions.
+
+<Note>
+  When you're signed in and running on the metered gateway, completions route through the gateway's fast model rather than `levelcode.ai.completions.model`. That setting applies to direct Anthropic connections.
+</Note>
+
+## Tuning it
+
+```json
+{
+  "levelcode.ai.completions.enabled": true,
+  "levelcode.ai.completions.debounce": 150
+}
+```
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `levelcode.ai.completions.enabled` | `true` | Ghost text on or off |
+| `levelcode.ai.completions.model` | `claude-haiku-4-5-20251001` | Anthropic-only model choice |
+| `levelcode.ai.completions.debounce` | `150` | Idle milliseconds before a request is made |
+
+**Debounce** is the dial worth touching. It's how long you must pause before a suggestion is requested. Lower feels snappier and makes far more requests; higher is calmer and cheaper. If suggestions feel like they're interrupting you, raise it to `300`.
+
+## Behavior worth knowing
+
+- **It never interrupts you with dialogs.** If no API key is set, autocomplete stays silent rather than prompting — it will never pop a key dialog mid-keystroke. Set your key from the palette instead.
+- **Errors are silent.** Network failures produce no suggestion and no notification.
+- **It won't repeat what's already there.** A suggestion that merely duplicates the text after your cursor is discarded.
+- **Cost.** On BYOK you pay per request, and typing generates a lot of them. On a metered plan, completions draw on the same credits as everything else. If cost is a concern, raise the debounce or turn autocomplete off and rely on [Edit](/docs/edit).
+
+<CardGroup>
+  <Card title="Edit" href="/docs/edit">
+    Rewrite a whole selection instead of finishing a line.
+  </Card>
+  <Card title="Providers and models" href="/docs/providers">
+    Which providers have a fast tier, and what it costs.
+  </Card>
+</CardGroup>

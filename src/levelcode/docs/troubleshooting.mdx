@@ -1,0 +1,254 @@
+# Troubleshooting
+
+> Symptoms, causes, and fixes for the things that actually go wrong.
+
+## Installing and launching
+
+<AccordionGroup>
+  <Accordion title="macOS blocks the app on first launch">
+    Released builds are signed and notarized and should open on a double-click. If you're running an early or self-built version, macOS will refuse it.
+
+    **Right-click the app and choose Open**, then confirm. You only need to do this once — the consent is recorded.
+
+    If that doesn't work, clear the quarantine attribute:
+
+    ```bash
+    xattr -dr com.apple.quarantine "/Applications/LevelCode.app"
+    ```
+
+    A build you compiled yourself without a Developer ID is ad-hoc signed. It will run on your machine but warn on any other.
+
+  </Accordion>
+
+  <Accordion title="The level command isn't found">
+    Install it from inside the editor: <Kbd keys="shift+cmd+p" /> → **Shell Command: Install 'level' command in PATH**.
+
+    If the command exists but your shell can't see it, `/usr/local/bin` probably isn't on your `PATH`:
+
+    ```bash
+    echo $PATH | tr ':' '\n' | grep -c /usr/local/bin
+    ```
+
+    A `0` means you need to add it to your shell profile.
+
+  </Accordion>
+
+  <Accordion title="Build from source fails">
+    Three causes account for nearly all of them:
+
+    **Running under Rosetta.** The build refuses to continue when Node's architecture doesn't match the host, because the bundler crashes mid-build otherwise. Check they agree:
+
+    ```bash
+    node -p process.arch && uname -m
+    ```
+
+    `arm64` should pair with `arm64`, `x64` with `x86_64`. If they don't, you're in a Rosetta shell — open a native terminal.
+
+    **Wrong Node major.** After bootstrap clones upstream, the required version is in `vscode/.nvmrc`. Match its major version exactly.
+
+    **Missing Python or Xcode tools.** node-gyp needs Python 3.8+ and the Command Line Tools:
+
+    ```bash
+    xcode-select --install
+    ```
+
+    If a patch fails to apply after an upstream bump, that's a genuine break rather than a local problem — the bootstrap halts deliberately rather than producing a half-patched build.
+
+  </Accordion>
+</AccordionGroup>
+
+## Models and keys
+
+<AccordionGroup>
+  <Accordion title="Nothing happens when I send a message">
+    Check the chat footer first — it tells you how requests are being routed:
+
+    - **`Direct · BYO key`** — using your own key. If nothing happens, the key is probably missing or wrong. Run **LevelCode: AI: Set API Key…** and re-enter it.
+    - **`LevelCode Cloud · Gateway`** — on your plan. Check the account panel for remaining credits.
+    - **`Local`** — Ollama. Confirm the server is actually running.
+
+    Then turn on `levelcode.ai.debug` and send again. It prints every step inline, prefixed `🐛 DEBUG`, which usually names the failure immediately.
+
+    <Warning>
+      Debug output can include file contents, tool arguments, and full model responses. Turn it back off before screen-sharing or recording.
+    </Warning>
+
+  </Accordion>
+
+  <Accordion title="Authentication or 401 errors">
+    Keys are stored **per provider**. Switching providers needs that provider's own key — a working Anthropic key does nothing for OpenAI.
+
+    Re-enter the key for the provider you're actually on:
+
+    1. **LevelCode: AI: Clear API Key** — clears the current provider's key
+    2. **LevelCode: AI: Set API Key…** — set it again
+
+    Check the prompt's title names the provider you expect. If it doesn't, run **LevelCode: AI: Select Model…** first.
+
+  </Accordion>
+
+  <Accordion title="The Ollama model list is empty">
+    The picker asks your Ollama server what's installed, so an empty list means it couldn't reach it.
+
+    ```bash
+    ollama list                       # is anything pulled?
+    curl http://localhost:11434/api/tags   # is the server up?
+    ```
+
+    If your server isn't on the default port, set `levelcode.ai.ollama.url`. Note it takes the base URL with **no** `/v1` suffix.
+
+  </Accordion>
+
+  <Accordion title="A custom OpenAI-compatible endpoint is refused">
+    Two rules catch most cases:
+
+    - **A key is required** even when your server ignores it. Enter any non-empty placeholder.
+    - **Plain http is refused for remote hosts.** `localhost`, `127.0.0.1`, and `[::1]` may use http; anything else must be `https`, so your key is never sent in the clear.
+
+    The base URL should end in `/v1` — `/chat/completions` is appended for you.
+
+  </Accordion>
+
+  <Accordion title="Refusing to send your token over plain http">
+    Gateway mode won't send your Cloud token to a non-https host. Set `levelcode.cloud.endpoint` to an `https` URL — for normal use that's `https://levelcode.ai`.
+
+    Only relevant if you changed it for local development.
+
+  </Accordion>
+</AccordionGroup>
+
+## The agent
+
+<AccordionGroup>
+  <Accordion title="Agent mode is unavailable for this model">
+    The agent needs reliable tool-calling. It doesn't run on **Ollama** at all, and a few specific models opt out — reasoning-only models such as DeepSeek R1 among them.
+
+    Switch to a tool-capable model with **LevelCode: AI: Select Model…**. Chat, autocomplete, and edit keep working on the model you had.
+
+  </Accordion>
+
+  <Accordion title="It stopped partway through">
+    Most likely the step limit. The chat says so and offers **Continue**, which resumes without losing context.
+
+    For habitually larger tasks, raise it:
+
+    ```json
+    { "levelcode.ai.agent.maxSteps": 40 }
+    ```
+
+    If it stopped citing a length budget instead, a single turn produced an enormous amount of output. Raising `levelcode.ai.agent.maxTokens` helps, but a task that hits this usually wants breaking into smaller goals.
+
+  </Accordion>
+
+  <Accordion title="Verification keeps failing, or never runs">
+    **Never runs?** It only runs when the agent actually edited a file, and needs `levelcode.ai.verify.enabled` on.
+
+    **Reports that the command couldn't run?** That's a configuration problem, and it's deliberately never fed back to the agent. Check `levelcode.ai.verify.command` matches a script that exists:
+
+    ```bash
+    npm run typecheck   # does this work in your terminal?
+    ```
+
+    **Hangs until it's killed?** Your verify command doesn't exit. A dev server or watch task blocks forever — use a test, typecheck, or lint command instead.
+
+    **Fails on problems you already had?** It compares against a baseline taken before the run, so pre-existing errors shouldn't count. If warnings are being treated as failures, check `levelcode.ai.verify.includeWarnings`.
+
+  </Accordion>
+
+  <Accordion title="An MCP tool was refused">
+    Every MCP tool is refused unless explicitly allow-listed — including under Autopilot, because an MCP tool is third-party code.
+
+    Allow the specific tool, or all of them:
+
+    ```json
+    { "levelcode.ai.mcp.toolPolicy": { "filesystem__read_file": "allow" } }
+    ```
+
+    ```json
+    { "levelcode.ai.mcp.toolPolicy": { "*": "allow" } }
+    ```
+
+    Both `levelcode.ai.mcp.servers` and `toolPolicy` are **user-scoped**: a repo's own `.vscode/settings.json` cannot set them, so opening an untrusted repo can't make LevelCode spawn a process. If you configured a server in a repo file, move it to your user settings.
+
+  </Accordion>
+
+  <Accordion title="A command is still running after I stopped it">
+    **Stop** kills the whole process group, so this should be rare. If a server does survive, find and kill it by port:
+
+    ```bash
+    lsof -ti:3000 | xargs kill
+    ```
+
+    Background commands live in the **Background tasks** tray in the chat, each with its own Stop button. **New Chat** stops all of them.
+
+  </Accordion>
+
+  <Accordion title="I want to undo what it did">
+    Three levels, smallest first:
+
+    1. **One file** — `Undo` in the file, the chat card, or the status bar. Restores exactly what was on disk beforehand.
+    2. **Everything this turn** — **Undo all** in the chat's sticky review bar.
+    3. **This turn and everything after** — hover the message you sent and click **Restore checkpoint**.
+
+    Checkpoints have no redo and are cleared by **New Chat**. Note that **New Chat** on its own does *not* revert files — undo first, then clear.
+
+  </Accordion>
+</AccordionGroup>
+
+## Editor and extensions
+
+<AccordionGroup>
+  <Accordion title="An extension I need isn't in the marketplace">
+    LevelCode installs from [Open VSX](https://open-vsx.org), not Microsoft's marketplace — which is licensed for Microsoft products only.
+
+    Most open-source extensions are there. Microsoft's proprietary ones (the C# debugger, Remote Development, Copilot) are not, and cannot be.
+
+    If a publisher hasn't published to Open VSX, you can install a `.vsix` directly from the Extensions view menu, or ask them to publish there.
+
+  </Accordion>
+
+  <Accordion title="My macro shortcut stopped working">
+    The **Atom keymap preset** rebinds <Kbd keys="cmd+shift+r" /> to *Go to Symbol in Workspace*, which takes over macro recording — user keybindings outrank extension defaults.
+
+    Rebind one of them in `keybindings.json`, or use the palette entry **LevelCode: Macro: Start/Stop Recording**.
+
+  </Accordion>
+
+  <Accordion title="Applying a keymap preset wiped my keybindings">
+    Presets replace `keybindings.json` wholesale. A **timestamped backup** is written next to it first:
+
+    ```bash
+    ls ~/Library/Application\ Support/LevelCode/User/keybindings.backup-*.json
+    ```
+
+    Copy your bindings back out of the most recent one.
+
+  </Accordion>
+
+  <Accordion title="My init script isn't running">
+    Three things to check:
+
+    1. It's at exactly `~/.levelcode/init.js`
+    2. `levelcode.init.enabled` is `true`
+    3. It hasn't thrown — open the **LevelCode Init** output channel
+
+    Remember it does **not** reload on save. Run **LevelCode: Reload Init Script** after editing. (Packages hot-reload; the init script doesn't.)
+
+  </Accordion>
+
+  <Accordion title="Updates aren't arriving">
+    Run **LevelCode: Check for Updates** for an immediate answer — it reports whether you're current and which build it checked.
+
+    If it can't reach the server, check `levelcode.update.url` is empty (it should be, unless you're testing against a local feed) and that `levelcode.update.enabled` is on.
+
+    Background checks are skipped entirely on development builds with no stamped commit, which is expected.
+
+  </Accordion>
+</AccordionGroup>
+
+## Still stuck
+
+- [Open an issue](https://github.com/levelcodeai/levelcode/issues/new) — include your LevelCode version from **About**, your provider, and whether you're on your own key or the gateway
+- [Discussions](https://github.com/levelcodeai/levelcode/discussions) for questions and workflow help
+
+Turning on `levelcode.ai.debug` and pasting the relevant output makes an AI-related report far easier to act on — with the caveat above about what it can contain.

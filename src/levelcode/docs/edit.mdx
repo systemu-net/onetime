@@ -1,0 +1,66 @@
+# Edit
+
+> Select code, say what you want changed, and review the result as a diff. Nothing is written until you accept it.
+
+Edit is the smallest of the AI systems and the most predictable: one selection in, one rewrite out, always shown as a diff first.
+
+## Use it
+
+<Steps>
+  <Step title="Select the code">
+    Select the lines you want changed. The selection is expanded to whole lines, so you don't need to be precise about where it starts and ends.
+  </Step>
+
+  <Step title="Describe the change">
+    Press <Kbd keys="cmd+alt+e" />, or right-click and choose **LevelCode: AI: Edit Selection…**.
+
+    Type what you want. Be concrete about the outcome rather than the method:
+
+    ```text
+    add error handling and a JSDoc comment
+    ```
+
+    ```text
+    convert this to async/await and propagate errors to the caller
+    ```
+
+  </Step>
+
+  <Step title="Review the diff">
+    A side-by-side diff opens comparing your original against the proposal. Your file is untouched at this point — the diff is a scratch view.
+
+    Two buttons sit in the diff editor's title bar:
+
+    - **✓ Keep AI Edit** — applies the rewrite over the original range and closes the diff
+    - **✗ Discard AI Edit** — closes it, changing nothing
+
+    Closing the tab discards it too.
+
+  </Step>
+</Steps>
+
+## When to use Edit instead of Agent
+
+| Use | When |
+| --- | --- |
+| **Edit** | You know exactly which lines are wrong, and you want one bounded rewrite you can eyeball |
+| **[Agent](/docs/agent)** | The change spans files, needs commands run, or you don't yet know everything it touches |
+| **[Chat](/docs/chat)** | You want to understand the code before changing anything |
+
+Edit's appeal is its narrowness. It cannot touch another file, run a command, or surprise you — the worst case is a diff you discard.
+
+## Notes
+
+- **Works on every provider**, including Ollama. Unlike the agent, it needs no tool-calling support.
+- **The model returns only code.** Explanatory prose and stray code fences are stripped, so what lands is a drop-in replacement for your selection.
+- **Output length** is governed by `levelcode.ai.claude.maxTokens` (default `4096`) for every provider, despite the Claude-specific name. Raise it if a long selection comes back truncated.
+- **The request is cancellable** — a progress notification appears while it works.
+
+<CardGroup>
+  <Card title="Agent" href="/docs/agent">
+    For changes that span files or need commands run.
+  </Card>
+  <Card title="Autocomplete" href="/docs/autocomplete">
+    Inline suggestions while you type.
+  </Card>
+</CardGroup>

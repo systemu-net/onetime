@@ -1,0 +1,140 @@
+# Install and setup
+
+> Get a build running, whether you want the signed `.dmg` or a checkout you compile yourself.
+
+LevelCode is macOS-only today. Every build script, the import tool, and the update feed target macOS; there are no Windows or Linux builds.
+
+## Install the app
+
+<Tabs>
+  <Tab title="Apple Silicon">
+    For M1 and later.
+
+    [Download LevelCode for Apple Silicon →](https://levelcode.ai/download/arm64)
+
+    Open the `.dmg` and drag **LevelCode** to Applications.
+
+  </Tab>
+
+  <Tab title="Intel">
+    For pre-2020 Intel Macs.
+
+    [Download LevelCode for Intel →](https://levelcode.ai/download/x64)
+
+    Open the `.dmg` and drag **LevelCode** to Applications.
+
+  </Tab>
+</Tabs>
+
+Every published release is also on the [GitHub releases page](https://github.com/levelcodeai/levelcode/releases/latest) if you want a specific version or the checksums.
+
+### First launch
+
+Releases are signed and notarized, so a double-click is all it takes. If you're on an older unsigned build, macOS may refuse it — right-click the app and choose **Open** once, which records your consent. The stubborn case is covered in [Troubleshooting](/docs/troubleshooting#macos-blocks-the-app-on-first-launch).
+
+You'll get a **Welcome to LevelCode** walkthrough on first run, covering connecting a model, making the editor yours, and update settings.
+
+### The `level` command
+
+Open the palette with <Kbd keys="shift+cmd+p" /> and run **Shell Command: Install 'level' command in PATH**. Then:
+
+```bash
+level .                 # open the current folder
+level -n .              # open it in a new window
+level --diff a.js b.js  # diff two files
+```
+
+## Where LevelCode keeps things
+
+Worth knowing before you customize or debug anything:
+
+| Path | What lives there |
+| --- | --- |
+| `~/.levelcode/init.js` | Your [init script](/docs/hackability#the-init-script) |
+| `~/.levelcode/packages/` | Packages you're [authoring](/docs/hackability#write-a-package) |
+| `~/.levelcode/extensions/` | Extensions installed from Open VSX |
+| `~/Library/Application Support/LevelCode/User/settings.json` | Your settings |
+| `~/Library/Application Support/LevelCode/User/keybindings.json` | Your keybindings |
+
+API keys are **not** in any of these — they go to your OS keychain. See [Providers → Where keys live](/docs/providers#where-your-keys-live).
+
+## Defaults that differ from VS Code
+
+LevelCode ships a few deliberate default changes. All are ordinary settings you can override.
+
+| Setting | LevelCode default | Why |
+| --- | --- | --- |
+| `workbench.colorTheme` | `LevelCode One Dark` | Atom's signature palette |
+| `files.hotExit` | `onExitAndWindowClose` | Sublime-style persistence — unsaved edits and untitled tabs survive quitting |
+| `workbench.editorLargeFileConfirmation` | `2048` (MB) | Large files open without nagging; see [big-file mode](/docs/power-editing#big-file-mode) |
+| Telemetry | Off | Not collected, and there's no switch to turn it on |
+
+## Build from source
+
+LevelCode is a **thin overlay on Code-OSS**, not a vendored copy of the editor. `bootstrap.sh` fetches upstream at a pinned tag and brands it, which is why the repo stays small and rebases cleanly onto new upstream releases.
+
+### Prerequisites
+
+- **macOS**, running natively. The build refuses to run under Rosetta — a mismatch between Node's architecture and the host makes the bundler crash mid-build.
+- **Xcode Command Line Tools** — `xcode-select --install`
+- **Node** matching `vscode/.nvmrc` after bootstrap clones it. Bootstrap requires major 22+ up front, then checks the exact major.
+- **Python 3.8+** for node-gyp. Override the interpreter with `PYTHON=` if you need to.
+- **git**
+
+<Steps>
+  <Step title="Bootstrap">
+    ```bash
+    git clone https://github.com/levelcodeai/levelcode.git
+    cd levelcode
+    ./scripts/bootstrap.sh
+    ```
+
+    This clones Code-OSS at the pinned tag into `vscode/`, deep-merges LevelCode's branding onto `product.json`, copies the first-party extensions in, applies the core patches, and runs `npm ci`. The install is the slow part — several minutes.
+
+    It's idempotent, so re-running it after an upstream bump is safe.
+
+  </Step>
+
+  <Step title="Run from source">
+    ```bash
+    ./scripts/run-dev.sh
+    ```
+
+    Launches LevelCode from source with the extensions re-synced first.
+
+    <Note>
+      Edit extensions in the repo's own `extensions/` directory, never in `vscode/extensions/`. Every run re-copies the former over the latter, so changes made in `vscode/` are silently overwritten.
+    </Note>
+
+  </Step>
+
+  <Step title="Build an app bundle">
+    ```bash
+    ./scripts/build-macos.sh          # defaults to your architecture
+    ./scripts/build-macos.sh x64      # or name one explicitly
+    ```
+
+    Produces `VSCode-darwin-arm64/LevelCode.app` (or `-x64`). The build stamps the LevelCode repo's HEAD commit so each release reports a distinct version to the update feed.
+
+  </Step>
+
+  <Step title="Package a .dmg">
+    ```bash
+    ./scripts/make-dmg.sh
+    ```
+
+    Wraps the app into `LevelCode-<arch>.dmg`. Without signing credentials it ad-hoc signs the app — required, since Apple Silicon refuses to launch unsigned binaries — which produces a working but unnotarized build that other machines will warn about.
+
+    With a Developer ID identity in the environment, the same script signs, notarizes, staples, and also emits the `.app.zip` that the auto-updater consumes.
+
+  </Step>
+</Steps>
+
+<CardGroup>
+  <Card title="Quickstart" href="/docs/quickstart">
+    Connect a model and run your first task.
+  </Card>
+  <Card title="Import and updates" href="/docs/import-and-updates">
+    Bring your VS Code settings across and stay on the latest build.
+  </Card>
+</CardGroup>

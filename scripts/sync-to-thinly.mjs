@@ -50,7 +50,21 @@ let levelcode = readFileSync(join(dist, "levelcode.html"), "utf8");
 levelcode = levelcode.replace("</head>", "  <%= csrf_meta_tags %>\n</head>");
 writeFileSync(join(views, "ui_levelcode.html.erb"), withBrand(levelcode, "levelcode"));
 
-console.log(`Synced onetime → ${thinly} (ui.html, ui_levelcode.html.erb, ${assetsRel}/).`);
+// 4. llms.txt — the docs index for agents, generated from src/levelcode/docs/nav.ts
+// by the prebuild step. Copied into thin.ly's public/ so Rails serves it at
+// levelcode.ai/llms.txt (public/ is static-served ahead of the SPA catch-all).
+const llms = join(dist, "llms.txt");
+let llmsNote = "";
+if (existsSync(llms)) {
+  const publicDir = join(thinly, "public");
+  mkdirSync(publicDir, { recursive: true });
+  cpSync(llms, join(publicDir, "llms.txt"));
+  llmsNote = ", public/llms.txt";
+} else {
+  console.warn("llms.txt not in dist — run `npm run gen:llms` (the prebuild step) before building.");
+}
+
+console.log(`Synced onetime → ${thinly} (ui.html, ui_levelcode.html.erb, ${assetsRel}/${llmsNote}).`);
 
 // Replace the Vite-baked window.__ENV__ with one that also carries BRAND (and,
 // for levelcode, an empty API_BASE so the client uses same-origin relative URLs).

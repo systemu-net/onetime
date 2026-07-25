@@ -110,12 +110,9 @@ function ClassicNav({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () 
           </Link>
           <ul className="hidden items-center gap-5 sm:flex">
             <li>
-              <a
-                href={`${GITHUB}/tree/HEAD/docs`}
-                className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]"
-              >
+              <Link to="/docs" className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
                 Documentation
-              </a>
+              </Link>
             </li>
             <li>
               <a href="https://open-vsx.org/" className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
