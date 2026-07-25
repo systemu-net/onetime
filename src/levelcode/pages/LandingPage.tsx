@@ -230,37 +230,44 @@ export default function LandingPage() {
       </section>
 
       {/* ───────────────────────────── DOWNLOAD ───────────────────────────── */}
-      <section id="download" className="scroll-mt-14 border-b border-[var(--c-line)]">
-        <div className="mx-auto max-w-5xl px-5 py-14 text-center">
-          <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Download LevelCode</h3>
-          <p className="mx-auto mt-3 max-w-xl pretty">
+      <section id="download" className="scroll-mt-14 border-b border-[var(--c-line)] bg-[var(--c-surface)]">
+        <div className="mx-auto max-w-5xl px-5 py-20 text-center">
+          <svg viewBox="0 0 120 120" width="64" height="64" className="mx-auto" aria-hidden>
+            <g fill="none" stroke="var(--c-accent)" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M28 92 L60 69 L92 92" opacity="0.4" />
+              <path d="M28 68 L60 45 L92 68" opacity="0.7" />
+              <path d="M28 44 L60 21 L92 44" />
+            </g>
+          </svg>
+          <h2 className="mt-4 text-[34px] font-bold tracking-tight text-[var(--c-text)] text-balance sm:text-[42px]">
+            Download LevelCode
+          </h2>
+          <p className="mt-2 font-mono text-[14px] text-[var(--c-text3)]">
+            v{version} ·{" "}
+            <a href={`${GITHUB}/releases/tag/v${version}`} className="text-[var(--c-accent)] hover:underline">
+              Release notes
+            </a>
+          </p>
+          <p className="mx-auto mt-4 max-w-xl text-[17px] pretty">
             Free and open. Drag the .dmg to Applications, add a key — or run fully offline on
             local Ollama — and the editor starts editing with you.
           </p>
-          <div className="mx-auto mt-8 max-w-2xl rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-8 text-left">
-            <h4 className="text-[17px] font-semibold text-[var(--c-text)]">Install in one drag</h4>
-            <p className="mt-2 text-[15px] pretty">
-              Download the <span className="font-mono text-[13px]">.dmg</span>, open it, drag
-              LevelCode to Applications. Add your API key — or point it at local Ollama — and the
-              editor starts editing with you.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a href={DMG_ARM} className="classic-button" download>
-                <AppleMark />
-                Download for Apple Silicon
-              </a>
-              <a href={DMG_X64} className="classic-button--quiet" download>
-                <AppleMark />
-                Intel Mac
-              </a>
-            </div>
-            <p className="mt-4 text-[13px] text-[var(--c-text3)]">
-              free · MIT · no account required ·{" "}
-              <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
-                all releases →
-              </a>
-            </p>
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+            <a href={DMG_ARM} className="classic-button px-10 py-4 text-[17px]" download>
+              <AppleMark />
+              Download for Apple Silicon
+            </a>
+            <a href={DMG_X64} className="classic-button--quiet px-10 py-4 text-[17px]" download>
+              <AppleMark />
+              Intel Mac
+            </a>
           </div>
+          <p className="mt-6 text-[14px] text-[var(--c-text3)]">
+            free · MIT · no account required ·{" "}
+            <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
+              all releases →
+            </a>
+          </p>
         </div>
       </section>
 
