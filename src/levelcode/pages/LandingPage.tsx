@@ -138,7 +138,7 @@ export default function LandingPage() {
           </header>
 
           <h1 className="mx-auto mt-12 max-w-3xl text-center text-[34px] font-bold leading-tight tracking-tight text-[var(--c-text)] text-balance sm:text-[42px]">
-            A hackable <span className="text-[var(--c-accent)]">AI editor</span> for the 21st&nbsp;Century
+            A hackable editor for the <span className="text-[var(--c-accent)]">AI&nbsp;era</span>
           </h1>
         </div>
       </section>
