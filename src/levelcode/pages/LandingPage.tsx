@@ -4,11 +4,11 @@ import AgentShowcase from "../components/AgentShowcase";
 import ClassicShell from "../components/classic/ClassicShell";
 import SketchBuilder from "../components/level/SketchBuilder";
 
-// The /ai landing for LOGGED-OUT visitors — LevelCode Classic: the 2014-2022 atom.io page
-// structure and temperament, matching levelcode.dev. Flat, light, system fonts, octicon-style
-// glyphs. Everything is scoped under `.classic` (see globals.css) with literal colors, so the
-// signed-in dashboard's cream paper-and-ink palette is untouched. CTAs wire to the /ai flows
-// (Sign in → /login, Pricing → /pricing, legal pages are the real /terms + /privacy routes).
+// The /ai landing — LevelCode Classic: the 2014-2022 atom.io page structure and
+// temperament, matching levelcode.dev. Flat, light, system fonts, octicon-style glyphs,
+// all scoped under `.classic` (see globals.css). CTAs wire to the /ai flows (Sign in →
+// /login, Pricing → /pricing, legal pages are the real /terms + /privacy routes). The
+// classic design now covers the whole app, signed-in dashboard included (ClassicShell).
 
 const GITHUB = "https://github.com/levelcodeai/levelcode";
 const RELEASES = `${GITHUB}/releases/latest`;

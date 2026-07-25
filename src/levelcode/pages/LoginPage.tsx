@@ -138,7 +138,7 @@ export default function LoginPage() {
           <p className="mt-5 text-center text-[13px] text-[var(--c-text3)]">
             By continuing you agree to the{" "}
             <Link to="/terms" className="text-[var(--c-accent)] hover:underline">
-              Terms of Use
+              Terms of Service
             </Link>{" "}
             and{" "}
             <Link to="/privacy" className="text-[var(--c-accent)] hover:underline">

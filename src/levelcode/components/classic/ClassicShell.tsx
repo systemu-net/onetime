@@ -4,8 +4,9 @@ import { initials, useSession } from "../../auth";
 
 // The shared LevelCode Classic scaffolding (atom.io-heritage): theme state, the flat
 // top-bar, the optional heritage strip, and the octicon footer. Everything scoped
-// under `.classic` / `.classic--dark` (globals.css) so the signed-in dashboard's
-// cream palette is untouched. Used by the logged-out surfaces: landing, pricing, login.
+// under `.classic` / `.classic--dark` (globals.css). Originally logged-out-only; per
+// owner direction the WHOLE app now uses it — landing, pricing, login, legal, and the
+// signed-in Account/Admin dashboard.
 
 export const GITHUB = "https://github.com/levelcodeai/levelcode";
 
@@ -64,7 +65,7 @@ export default function ClassicShell({
           <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <li>
               <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/terms">
-                Terms of Use
+                Terms of Service
               </Link>
             </li>
             <li>
