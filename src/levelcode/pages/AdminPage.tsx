@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, type AdminSummary, type AdminUsers } from "../api";
 import { useSession } from "../auth";
-import LevelNav from "../components/LevelNav";
+import ClassicShell from "../components/classic/ClassicShell";
 
 type SortKey = "input" | "output" | "requests" | "cost" | "auth_attempts" | "auth_failures" | "last_seen" | "email" | "plan";
 
@@ -66,24 +66,21 @@ export default function AdminPage() {
 
   if (sessionLoading || !isAdmin) {
     return (
-      <>
-        <LevelNav />
-        <main className="mx-auto max-w-6xl px-5 py-28" />
-      </>
+      <ClassicShell>
+        <main className="mx-auto max-w-6xl px-5 py-12" />
+      </ClassicShell>
     );
   }
 
   return (
-    <>
-      <LevelNav />
-      <main className="mx-auto max-w-6xl px-5 py-28">
-        <div className="lineno mb-4">06 · admin</div>
-        <h1 className="font-display text-[clamp(1.9rem,4vw,2.8rem)] font-semibold leading-[1.05] tracking-tightest">
+    <ClassicShell>
+      <main className="mx-auto max-w-6xl px-5 py-12">
+        <h1 className="text-[28px] font-bold tracking-tight text-[var(--c-text)] sm:text-[32px]">
           System dashboard
         </h1>
-        <p className="mt-2 font-mono text-[13px] text-faint">tokens burned · plans · geography · login health</p>
+        <p className="mt-2 text-[14px] text-[var(--c-text3)]">tokens burned · plans · geography · login health</p>
 
-        {error ? <div className="surface mt-8 p-6 text-[14px] text-flame">{error}</div> : null}
+        {error ? <div className="classic-card mt-8 p-6 text-[14px] text-red-500">{error}</div> : null}
 
         {/* Summary cards */}
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -108,12 +105,12 @@ export default function AdminPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search email…"
-            className="w-full max-w-xs rounded-lg border border-rule bg-card px-3 py-2 font-mono text-[13px] text-ink outline-none focus:border-ink sm:w-auto"
+            className="w-full max-w-xs rounded-md border border-[var(--c-line)] bg-[var(--c-bg)] px-3 py-2 font-mono text-[13px] text-[var(--c-text)] outline-none focus:border-[var(--c-accent)] sm:w-auto"
           />
           <select
             value={plan}
             onChange={(e) => setPlan(e.target.value)}
-            className="rounded-lg border border-rule bg-card px-3 py-2 font-mono text-[13px] text-sub outline-none focus:border-ink"
+            className="rounded-md border border-[var(--c-line)] bg-[var(--c-bg)] px-3 py-2 font-mono text-[13px] text-[var(--c-text2)] outline-none focus:border-[var(--c-accent)]"
           >
             <option value="">all plans</option>
             {planOptions.map((p) => (
@@ -122,14 +119,14 @@ export default function AdminPage() {
               </option>
             ))}
           </select>
-          <span className="font-mono text-[12px] text-faint">{fmtInt(data?.total)} users</span>
+          <span className="font-mono text-[12px] text-[var(--c-text3)]">{fmtInt(data?.total)} users</span>
         </div>
 
         {/* Users table */}
-        <div className="surface mt-4 overflow-x-auto p-0">
+        <div className="classic-card mt-4 overflow-x-auto p-0">
           <table className="w-full min-w-[880px] border-collapse text-left font-mono text-[12px]">
-            <thead className="text-faint">
-              <tr className="border-b border-rule">
+            <thead className="text-[var(--c-text3)]">
+              <tr className="border-b border-[var(--c-line)]">
                 <Th label="email" col="email" sort={sort} dir={dir} onClick={toggleSort} align="left" />
                 <Th label="plan" col="plan" sort={sort} dir={dir} onClick={toggleSort} align="left" />
                 <Th label="input" col="input" sort={sort} dir={dir} onClick={toggleSort} />
@@ -144,26 +141,26 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {(data?.users ?? []).map((u) => (
-                <tr key={u.id} className="border-b border-rule/60 hover:bg-rule/20">
-                  <td className="px-3 py-2 text-ink">
+                <tr key={u.id} className="border-b border-[var(--c-line)] hover:bg-[var(--c-surface)]">
+                  <td className="px-3 py-2 text-[var(--c-text)]">
                     {u.email}
-                    {u.role === "admin" ? <span className="ml-2 rounded bg-flame/15 px-1.5 py-0.5 text-[10px] text-flame">admin</span> : null}
+                    {u.role === "admin" ? <span className="ml-2 rounded border border-[var(--c-accent)] px-1.5 py-0.5 text-[10px] text-[var(--c-accent)]">admin</span> : null}
                   </td>
-                  <td className="px-3 py-2 text-sub">{u.plan}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-sub">{fmtTokens(u.input)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-sub">{fmtTokens(u.output)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-sub">{fmtInt(u.requests)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-sub">{fmtCost(u.cost_micros)}</td>
-                  <td className="px-3 py-2 text-sub">{u.country ?? "—"}</td>
+                  <td className="px-3 py-2 text-[var(--c-text2)]">{u.plan}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-[var(--c-text2)]">{fmtTokens(u.input)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-[var(--c-text2)]">{fmtTokens(u.output)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-[var(--c-text2)]">{fmtInt(u.requests)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-[var(--c-text2)]">{fmtCost(u.cost_micros)}</td>
+                  <td className="px-3 py-2 text-[var(--c-text2)]">{u.country ?? "—"}</td>
                   <td className="px-3 py-2 text-right tabular-nums">
-                    <span className={u.auth_failures > 0 ? "text-flame" : "text-faint"}>
+                    <span className={u.auth_failures > 0 ? "text-red-500" : "text-[var(--c-text3)]"}>
                       {u.auth_attempts}
                       {u.auth_failures > 0 ? ` · ${u.auth_failures}✗` : ""}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-faint">{fmtWhen(u.last_seen_at)}</td>
+                  <td className="px-3 py-2 text-[var(--c-text3)]">{fmtWhen(u.last_seen_at)}</td>
                   <td className="px-3 py-2 text-right">
-                    <a className="text-flame underline decoration-rule underline-offset-2 hover:decoration-flame" href={`mailto:${u.email}`}>
+                    <a className="text-[var(--c-accent)] underline decoration-[var(--c-line)] underline-offset-2 hover:decoration-[var(--c-accent)]" href={`mailto:${u.email}`}>
                       email
                     </a>
                   </td>
@@ -171,7 +168,7 @@ export default function AdminPage() {
               ))}
               {data && data.users.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-3 py-6 text-center text-faint">
+                  <td colSpan={10} className="px-3 py-6 text-center text-[var(--c-text3)]">
                     No users match.
                   </td>
                 </tr>
@@ -180,7 +177,7 @@ export default function AdminPage() {
           </table>
         </div>
       </main>
-    </>
+    </ClassicShell>
   );
 }
 
@@ -202,7 +199,7 @@ function Th({
   const active = sort === col;
   return (
     <th className={`px-3 py-2 font-normal ${align === "right" ? "text-right" : "text-left"}`}>
-      <button type="button" onClick={() => onClick(col)} className={`inline-flex items-center gap-1 ${active ? "text-ink" : "hover:text-ink"}`}>
+      <button type="button" onClick={() => onClick(col)} className={`inline-flex items-center gap-1 ${active ? "text-[var(--c-text)]" : "hover:text-[var(--c-text)]"}`}>
         {label}
         <span className="text-[9px]">{active ? (dir === "desc" ? "▼" : "▲") : "↕"}</span>
       </button>
@@ -212,10 +209,10 @@ function Th({
 
 function Stat({ label, value, sub, alert }: { label: string; value: string; sub?: string; alert?: boolean }) {
   return (
-    <div className="surface p-5">
-      <div className="lineno">{label}</div>
-      <div className="mt-1 font-display text-2xl font-semibold tracking-tightest tabular-nums">{value}</div>
-      {sub ? <div className={`mt-1 font-mono text-[11px] ${alert ? "text-flame" : "text-faint"}`}>{sub}</div> : null}
+    <div className="classic-card p-5">
+      <div className="classic-label">{label}</div>
+      <div className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-[var(--c-text)]">{value}</div>
+      {sub ? <div className={`mt-1 font-mono text-[11px] ${alert ? "text-red-500" : "text-[var(--c-text3)]"}`}>{sub}</div> : null}
     </div>
   );
 }
@@ -223,19 +220,19 @@ function Stat({ label, value, sub, alert }: { label: string; value: string; sub?
 function Breakdown({ label, map, alert }: { label: string; map?: Record<string, number>; alert?: boolean }) {
   const entries = Object.entries(map ?? {}).sort((a, b) => b[1] - a[1]);
   return (
-    <div className="surface p-5">
-      <div className="lineno">{label}</div>
+    <div className="classic-card p-5">
+      <div className="classic-label">{label}</div>
       {entries.length ? (
         <ul className="mt-2 space-y-1 font-mono text-[12px]">
           {entries.slice(0, 5).map(([k, n]) => (
             <li key={k} className="flex justify-between">
-              <span className="text-sub">{k}</span>
-              <span className={`tabular-nums ${alert ? "text-flame" : "text-faint"}`}>{n}</span>
+              <span className="text-[var(--c-text2)]">{k}</span>
+              <span className={`tabular-nums ${alert ? "text-red-500" : "text-[var(--c-text3)]"}`}>{n}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="mt-2 font-mono text-[12px] text-faint">—</div>
+        <div className="mt-2 font-mono text-[12px] text-[var(--c-text3)]">—</div>
       )}
     </div>
   );

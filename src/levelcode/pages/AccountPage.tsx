@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, navigateTo, type AccountModels, type AccountUsage, type Activity } from "../api";
 import { useSession } from "../auth";
-import LevelNav from "../components/LevelNav";
+import ClassicShell from "../components/classic/ClassicShell";
 import ContributionsHeatmap from "./ContributionsHeatmap";
 import { fmtCredits, fmtCreditAmount, toCredits, LOCALE } from "../credits";
 
@@ -89,10 +89,9 @@ export default function AccountPage() {
   // While the session resolves (or is absent, pre-redirect), keep the frame.
   if (sessionLoading || !profile) {
     return (
-      <>
-        <LevelNav />
-        <main className="mx-auto max-w-4xl px-5 py-28" />
-      </>
+      <ClassicShell>
+        <main className="mx-auto max-w-4xl px-5 py-12" />
+      </ClassicShell>
     );
   }
 
@@ -100,41 +99,39 @@ export default function AccountPage() {
   const outPct = usage ? pct(usage.output_used, usage.output_cap) : 0;
 
   return (
-    <>
-      <LevelNav />
-      <main className="mx-auto max-w-4xl px-5 py-28">
-        <div className="lineno mb-4">05 · account</div>
+    <ClassicShell>
+      <main className="mx-auto max-w-4xl px-5 py-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-[clamp(1.9rem,4vw,2.8rem)] font-semibold leading-[1.05] tracking-tightest">
+            <h1 className="text-[28px] font-bold tracking-tight text-[var(--c-text)] sm:text-[32px]">
               {profile.name ? `Hi, ${profile.name}` : "Your account"}
             </h1>
-            {profile.email ? <p className="mt-2 font-mono text-[13px] text-faint">{profile.email}</p> : null}
+            {profile.email ? <p className="mt-2 font-mono text-[13px] text-[var(--c-text3)]">{profile.email}</p> : null}
           </div>
-          <span className="rounded-full border border-rule bg-card px-3 py-1 font-mono text-[12px] text-sub">
+          <span className="rounded-[3px] border border-[var(--c-line)] bg-[var(--c-surface)] px-2.5 py-1 font-mono text-[12px] text-[var(--c-text2)]">
             plan · {usage?.plan ?? profile.plan ?? "free"}
           </span>
         </div>
 
         {error ? (
-          <div className="surface mt-10 p-8 text-[15px] text-sub">{error}</div>
+          <div className="classic-card mt-10 p-8 text-[15px] text-[var(--c-text2)]">{error}</div>
         ) : usage ? (
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
             <UsageMeter label="Input tokens" used={usage.input_used} cap={usage.input_cap} pct={inPct} />
             <UsageMeter label="Output tokens" used={usage.output_used} cap={usage.output_cap} pct={outPct} />
 
-            <div className="surface p-6 sm:col-span-2">
+            <div className="classic-card p-6 sm:col-span-2">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <div className="lineno">billing period resets</div>
-                  <div className="mt-1 font-display text-lg font-semibold">{formatDate(usage.period_end)}</div>
-                  <div className="mt-1 font-mono text-[12px] text-faint">overage policy · {usage.overage_policy}</div>
+                  <div className="classic-label">billing period resets</div>
+                  <div className="mt-1 text-lg font-semibold text-[var(--c-text)]">{formatDate(usage.period_end)}</div>
+                  <div className="mt-1 font-mono text-[12px] text-[var(--c-text3)]">overage policy · {usage.overage_policy}</div>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <button type="button" onClick={manageBilling} className="btn-ghost">
+                  <button type="button" onClick={manageBilling} className="classic-button--quiet">
                     Manage billing
                   </button>
-                  <Link to="/pricing" className="btn-primary">
+                  <Link to="/pricing" className="classic-button">
                     Upgrade
                   </Link>
                 </div>
@@ -157,12 +154,12 @@ export default function AccountPage() {
         <button
           type="button"
           onClick={signOut}
-          className="mt-10 font-mono text-[12px] text-faint underline decoration-rule underline-offset-4 transition-colors hover:text-ink"
+          className="mt-10 text-[13px] text-[var(--c-accent)] hover:underline"
         >
           Sign out
         </button>
       </main>
-    </>
+    </ClassicShell>
   );
 }
 
@@ -186,25 +183,25 @@ function CreditsRoster({ models }: { models: AccountModels }) {
   const short = (id: string) => (id.includes("/") ? id.slice(id.indexOf("/") + 1) : id);
 
   return (
-    <div className="surface mt-5 p-6">
+    <div className="classic-card mt-5 p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <div className="lineno">{tranched ? "usage available now" : "compute credits"}</div>
-        <div className="font-mono text-[12px] tabular-nums text-sub">
+        <div className="classic-label">{tranched ? "usage available now" : "compute credits"}</div>
+        <div className="font-mono text-[12px] tabular-nums text-[var(--c-text2)]">
           {credits(spent)} / {credits(ceiling)} · {pct}%
         </div>
       </div>
-      <div className="mt-1 font-display text-2xl font-semibold tracking-tightest tabular-nums">
+      <div className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-[var(--c-text)]">
         {credits(remaining)}
-        <span className="text-sm font-normal text-faint">
+        <span className="text-sm font-normal text-[var(--c-text3)]">
           {" "}
           credits {tranched ? "available now" : "left this period"}
         </span>
       </div>
-      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-rule">
-        <div className={`h-full rounded-full ${pct >= 100 ? "bg-flamedeep" : "bg-flame"}`} style={{ width: `${pct}%` }} />
+      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--c-line)]">
+        <div className={`h-full rounded-full ${pct >= 100 ? "bg-red-500" : "bg-[var(--c-accent)]"}`} style={{ width: `${pct}%` }} />
       </div>
       {tranched && unlockAt ? (
-        <div className="mt-2 font-mono text-[11px] text-faint">
+        <div className="mt-2 font-mono text-[11px] text-[var(--c-text3)]">
           More unlocks {unlockAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })} · {credits(full)}{" "}
           credits total this cycle
         </div>
@@ -213,8 +210,8 @@ function CreditsRoster({ models }: { models: AccountModels }) {
       <div className="mt-6 lineno">models on your plan</div>
       <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[460px] border-collapse text-left font-mono text-[12px]">
-          <thead className="text-faint">
-            <tr className="border-b border-rule">
+          <thead className="text-[var(--c-text3)]">
+            <tr className="border-b border-[var(--c-line)]">
               <th className="py-1.5 pr-3 font-normal">model</th>
               <th className="py-1.5 px-3 text-right font-normal">credits/turn</th>
               <th className="py-1.5 px-3 text-right font-normal">≈ turns left</th>
@@ -223,10 +220,10 @@ function CreditsRoster({ models }: { models: AccountModels }) {
           </thead>
           <tbody>
             {models.models.map((m) => (
-              <tr key={m.id} className={`border-b border-rule/60 ${m.live ? "" : "opacity-55"}`}>
-                <td className="py-1.5 pr-3 text-ink">{short(m.id)}</td>
+              <tr key={m.id} className={`border-b border-[var(--c-line)] ${m.live ? "" : "opacity-55"}`}>
+                <td className="py-1.5 pr-3 text-[var(--c-text)]">{short(m.id)}</td>
                 <td
-                  className="py-1.5 px-3 text-right tabular-nums text-sub"
+                  className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]"
                   title={`${m.multiplier}× the baseline model`}
                 >
                   {rate(m.per_turn_micros)}
@@ -235,14 +232,14 @@ function CreditsRoster({ models }: { models: AccountModels }) {
                       screen readers and from touch, so it also rides here — announced, never displayed. */}
                   <span className="sr-only"> credits per turn, {m.multiplier}× the baseline model</span>
                 </td>
-                <td className="py-1.5 px-3 text-right tabular-nums text-sub">
+                <td className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]">
                   {m.live ? (m.turns_left ?? 0).toLocaleString(LOCALE) : "—"}
                 </td>
                 <td className="py-1.5 pl-3 text-right">
                   {m.live ? (
-                    <span className="text-[11px] text-flame">live</span>
+                    <span className="text-[11px] text-[var(--c-accent)]">live</span>
                   ) : (
-                    <span className="rounded bg-rule/60 px-1.5 py-0.5 text-[10px] text-faint">soon</span>
+                    <span className="rounded bg-[var(--c-line)] px-1.5 py-0.5 text-[10px] text-[var(--c-text3)]">soon</span>
                   )}
                 </td>
               </tr>
@@ -257,18 +254,18 @@ function CreditsRoster({ models }: { models: AccountModels }) {
 function UsageMeter({ label, used, cap, pct }: { label: string; used: number; cap: number; pct: number }) {
   const over = pct >= 100;
   return (
-    <div className="surface p-6">
+    <div className="classic-card p-6">
       <div className="flex items-baseline justify-between">
-        <div className="lineno">{label}</div>
-        <div className="font-mono text-[12px] tabular-nums text-sub">{pct}%</div>
+        <div className="classic-label">{label}</div>
+        <div className="font-mono text-[12px] tabular-nums text-[var(--c-text2)]">{pct}%</div>
       </div>
-      <div className="mt-3 font-display text-2xl font-semibold tracking-tightest tabular-nums">
+      <div className="mt-3 text-2xl font-semibold tracking-tight tabular-nums text-[var(--c-text)]">
         {formatTokens(used)}
-        <span className="text-sm font-normal text-faint"> / {formatTokens(cap)}</span>
+        <span className="text-sm font-normal text-[var(--c-text3)]"> / {formatTokens(cap)}</span>
       </div>
-      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-rule">
+      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--c-line)]">
         <div
-          className={`h-full rounded-full ${over ? "bg-flamedeep" : "bg-flame"}`}
+          className={`h-full rounded-full ${over ? "bg-red-500" : "bg-[var(--c-accent)]"}`}
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>

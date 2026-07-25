@@ -7,7 +7,7 @@ import { fmtCreditAmount, fmtInt } from "../credits";
 // reveals its per-model breakdown; a per-model year summary sits below. Dates are handled
 // in UTC so the grid keys line up with the backend's DATE(created_at) buckets.
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const LEVEL_BG = ["bg-rule/50", "bg-flame/25", "bg-flame/50", "bg-flame/75", "bg-flame"];
+const LEVEL_BG = ["bg-[var(--c-line)]", "bg-flame/25", "bg-flame/50", "bg-flame/75", "bg-[var(--c-accent)]"];
 
 function ymd(d: Date): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
@@ -97,11 +97,11 @@ export default function ContributionsHeatmap({
   const models = activity?.models ?? [];
 
   return (
-    <div className="surface p-6">
+    <div className="classic-card p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="lineno">activity</div>
-          <div className="mt-1 font-display text-lg font-semibold tracking-tightest">
+          <div className="classic-label">activity</div>
+          <div className="mt-1 text-lg font-semibold tracking-tight text-[var(--c-text)]">
             {fmtInt(activity?.total ?? 0)} request{(activity?.total ?? 0) === 1 ? "" : "s"} in {year}
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function ContributionsHeatmap({
                   onYear(y);
                 }}
                 className={`rounded-md px-2.5 py-1 font-mono text-[12px] transition-colors ${
-                  y === year ? "bg-flame text-white" : "text-sub hover:bg-rule/60"
+                  y === year ? "bg-[var(--c-accent)] text-white" : "text-[var(--c-text2)] hover:bg-[var(--c-line)]"
                 }`}
               >
                 {y}
@@ -132,7 +132,7 @@ export default function ContributionsHeatmap({
           {/* Month labels */}
           <div className="flex gap-[3px] pl-8">
             {monthCols.map((m, i) => (
-              <div key={i} className="w-[11px] font-mono text-[10px] text-faint">
+              <div key={i} className="w-[11px] font-mono text-[10px] text-[var(--c-text3)]">
                 {m ? <span className="relative -left-[1px] whitespace-nowrap">{m}</span> : null}
               </div>
             ))}
@@ -141,7 +141,7 @@ export default function ContributionsHeatmap({
             {/* Weekday labels (Mon/Wed/Fri) */}
             <div className="mr-1 flex w-7 flex-col gap-[3px]">
               {["", "Mon", "", "Wed", "", "Fri", ""].map((d, i) => (
-                <div key={i} className="h-[11px] font-mono text-[9px] leading-[11px] text-faint">
+                <div key={i} className="h-[11px] font-mono text-[9px] leading-[11px] text-[var(--c-text3)]">
                   {d}
                 </div>
               ))}
@@ -176,7 +176,7 @@ export default function ContributionsHeatmap({
             ))}
           </div>
           {/* Legend */}
-          <div className="mt-1 flex items-center gap-1 pl-8 font-mono text-[10px] text-faint">
+          <div className="mt-1 flex items-center gap-1 pl-8 font-mono text-[10px] text-[var(--c-text3)]">
             <span className="mr-1">Less</span>
             {LEVEL_BG.map((bg, i) => (
               <span key={i} className={`h-[11px] w-[11px] rounded-[2px] ${bg}`} />
@@ -188,10 +188,10 @@ export default function ContributionsHeatmap({
 
       {/* Selected-day per-model detail */}
       {selected && selectedDay ? (
-        <div className="mt-6 rounded-lg border border-rule bg-card p-4">
+        <div className="mt-6 rounded-md border border-[var(--c-line)] bg-[var(--c-bg)] p-4">
           <div className="flex items-baseline justify-between">
-            <div className="font-mono text-[12px] text-sub">{prettyDate(selected)}</div>
-            <div className="font-mono text-[12px] text-faint">
+            <div className="font-mono text-[12px] text-[var(--c-text2)]">{prettyDate(selected)}</div>
+            <div className="font-mono text-[12px] text-[var(--c-text3)]">
               {selectedDay.count} req · {fmtTokens(selectedDay.input)} in · {fmtTokens(selectedDay.output)} out ·{" "}
               {fmtCreditAmount(selectedDay.cost_micros)} credits
             </div>
@@ -199,8 +199,8 @@ export default function ContributionsHeatmap({
           <ul className="mt-3 space-y-1.5">
             {selectedDay.models.map((m) => (
               <li key={m.model} className="flex items-center justify-between gap-3 font-mono text-[12px]">
-                <span className="truncate text-ink">{modelShort(m.model)}</span>
-                <span className="whitespace-nowrap text-faint">
+                <span className="truncate text-[var(--c-text)]">{modelShort(m.model)}</span>
+                <span className="whitespace-nowrap text-[var(--c-text3)]">
                   {m.count} · {fmtTokens(m.input + m.output)} tok
                 </span>
               </li>
@@ -208,17 +208,17 @@ export default function ContributionsHeatmap({
           </ul>
         </div>
       ) : (
-        <p className="mt-4 font-mono text-[11px] text-faint">Click a day to see its per-model breakdown.</p>
+        <p className="mt-4 font-mono text-[11px] text-[var(--c-text3)]">Click a day to see its per-model breakdown.</p>
       )}
 
       {/* Per-model year summary */}
       {models.length ? (
         <div className="mt-6">
-          <div className="lineno mb-3">by model · {year}</div>
+          <div className="classic-label mb-3">by model · {year}</div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] border-collapse text-left font-mono text-[12px]">
-              <thead className="text-faint">
-                <tr className="border-b border-rule">
+              <thead className="text-[var(--c-text3)]">
+                <tr className="border-b border-[var(--c-line)]">
                   <th className="py-1.5 pr-3 font-normal">model</th>
                   <th className="py-1.5 px-3 text-right font-normal">requests</th>
                   <th className="py-1.5 px-3 text-right font-normal">input</th>
@@ -229,19 +229,19 @@ export default function ContributionsHeatmap({
               </thead>
               <tbody>
                 {models.map((m) => (
-                  <tr key={m.model} className="border-b border-rule/60">
-                    <td className="py-1.5 pr-3 text-ink">{modelShort(m.model)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtInt(m.count)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.input)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtTokens(m.output)}</td>
-                    <td className="py-1.5 px-3 text-right tabular-nums text-sub">{fmtCreditAmount(m.cost_micros)}</td>
-                    <td className="py-1.5 pl-3 text-right tabular-nums text-faint">
+                  <tr key={m.model} className="border-b border-[var(--c-line)]">
+                    <td className="py-1.5 pr-3 text-[var(--c-text)]">{modelShort(m.model)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]">{fmtInt(m.count)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]">{fmtTokens(m.input)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]">{fmtTokens(m.output)}</td>
+                    <td className="py-1.5 px-3 text-right tabular-nums text-[var(--c-text2)]">{fmtCreditAmount(m.cost_micros)}</td>
+                    <td className="py-1.5 pl-3 text-right tabular-nums text-[var(--c-text3)]">
                       <span className="inline-flex items-center justify-end gap-3">
                         <span className="inline-flex items-center gap-1">
-                          <ThumbUp className="text-sub" /> {m.up}
+                          <ThumbUp className="text-[var(--c-text2)]" /> {m.up}
                         </span>
                         <span className="inline-flex items-center gap-1">
-                          <ThumbDown className="text-sub" /> {m.down}
+                          <ThumbDown className="text-[var(--c-text2)]" /> {m.down}
                         </span>
                       </span>
                     </td>
