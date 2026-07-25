@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import AgentShowcase from "../components/AgentShowcase";
 import SketchBuilder from "../components/level/SketchBuilder";
@@ -15,28 +16,57 @@ const DMG_ARM = `${RELEASES}/download/LevelCode-arm64.dmg`;
 const DMG_X64 = `${RELEASES}/download/LevelCode-x64.dmg`;
 const VERSION = "0.6.0";
 
+type Theme = "light" | "dark";
+
+// Same behavior as levelcode.dev's switcher: stored choice wins, else the OS
+// preference, else light. Scoped entirely to the landing (`.classic--dark` =
+// One Dark) — the signed-in dashboard keeps its single cream theme.
+function initialTheme(): Theme {
+  try {
+    const t = localStorage.getItem("lc-theme");
+    if (t === "dark" || t === "light") return t;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  } catch {
+    return "light";
+  }
+}
+
 export default function LandingPage() {
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  const toggleTheme = () =>
+    setTheme((t) => {
+      const next: Theme = t === "light" ? "dark" : "light";
+      try {
+        localStorage.setItem("lc-theme", next);
+      } catch {
+        /* private mode — the flip still applies to this visit */
+      }
+      return next;
+    });
+
   return (
-    <div className="classic min-h-screen bg-white text-[16px] leading-relaxed text-[#555]">
-      <ClassicNav />
+    <div
+      className={`classic ${theme === "dark" ? "classic--dark" : ""} min-h-screen bg-[var(--c-bg)] text-[16px] leading-relaxed text-[var(--c-text2)]`}
+    >
+      <ClassicNav theme={theme} onToggleTheme={toggleTheme} />
 
       {/* heritage strip — the sunset banner slot, inverted */}
-      <p className="border-b border-[#e0e0e0] bg-[#efeafd] px-5 py-2 text-center text-[13px] text-[#333]">
+      <p className="border-b border-[var(--c-line)] bg-[var(--c-strip)] px-5 py-2 text-center text-[13px] text-[var(--c-text)]">
         Atom was sunset on December 15, 2022.{" "}
-        <a href={`${GITHUB}#readme`} className="font-medium text-[#5b3fd6] hover:underline">
+        <a href={`${GITHUB}#readme`} className="font-medium text-[var(--c-accent)] hover:underline">
           LevelCode carries the hackable spirit forward →
         </a>
       </p>
 
       {/* ───────────────────────── HERO ───────────────────────── */}
-      <section className="border-b border-[#e0e0e0] bg-[#fafaf9]">
+      <section className="border-b border-[var(--c-line)] bg-[var(--c-surface)]">
         <div className="mx-auto max-w-5xl px-5 pb-14 pt-10">
           <header className="flex flex-col items-center gap-10 md:flex-row md:items-center md:justify-between">
             {/* the portal: soft circles (the atom.io homage) + the chevron mark */}
             <div aria-hidden className="relative h-[280px] w-[300px] shrink-0">
               <svg viewBox="0 0 300 280" className="h-full w-full">
                 <g className="portal-layer">
-                  <circle cx="118" cy="128" r="104" fill="#5b3fd6" opacity="0.14" />
+                  <circle cx="118" cy="128" r="104" fill="var(--c-accent)" opacity="0.14" />
                 </g>
                 <g className="portal-layer">
                   <circle cx="186" cy="104" r="86" fill="#7d6bff" opacity="0.16" />
@@ -57,21 +87,21 @@ export default function LandingPage() {
 
             {/* the download box — atom.io's hero-download list */}
             <ul className="w-full max-w-sm space-y-3 text-center md:text-left">
-              <li className="text-[34px] font-bold leading-none tracking-tight text-[#333]">
-                Level<span className="text-[#5b3fd6]">Code</span>
+              <li className="text-[34px] font-bold leading-none tracking-tight text-[var(--c-text)]">
+                Level<span className="text-[var(--c-accent)]">Code</span>
               </li>
               <li className="text-[14px]">
-                <span className="mr-2 font-mono font-semibold text-[#333]">{VERSION}</span>
+                <span className="mr-2 font-mono font-semibold text-[var(--c-text)]">{VERSION}</span>
                 <a
                   href={`${GITHUB}/releases/tag/v${VERSION}`}
-                  className="text-[#5b3fd6] hover:underline"
+                  className="text-[var(--c-accent)] hover:underline"
                 >
                   Release notes
                 </a>
               </li>
               <li className="pt-1">
-                <span className="block font-semibold text-[#333]">macOS</span>
-                <span className="text-[13px] text-[#777]">For Apple Silicon and Intel Macs</span>
+                <span className="block font-semibold text-[var(--c-text)]">macOS</span>
+                <span className="text-[13px] text-[var(--c-text3)]">For Apple Silicon and Intel Macs</span>
               </li>
               <li>
                 <a href={DMG_ARM} className="classic-button w-full" download>
@@ -81,19 +111,19 @@ export default function LandingPage() {
                   Download
                 </a>
               </li>
-              <li className="text-[13px] text-[#777]">
+              <li className="text-[13px] text-[var(--c-text3)]">
                 Intel Mac?{" "}
-                <a href={DMG_X64} className="text-[#5b3fd6] hover:underline" download>
+                <a href={DMG_X64} className="text-[var(--c-accent)] hover:underline" download>
                   Download x64
                 </a>
                 {" · "}
-                <a href={`${GITHUB}/releases`} className="text-[#5b3fd6] hover:underline">
+                <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
                   Other builds
                 </a>
               </li>
-              <li className="text-[13px] text-[#777]">
+              <li className="text-[13px] text-[var(--c-text3)]">
                 Free and open source under the{" "}
-                <a href={`${GITHUB}/blob/main/LICENSE`} className="text-[#5b3fd6] hover:underline">
+                <a href={`${GITHUB}/blob/main/LICENSE`} className="text-[var(--c-accent)] hover:underline">
                   MIT license
                 </a>
                 . No account required.
@@ -101,16 +131,16 @@ export default function LandingPage() {
             </ul>
           </header>
 
-          <h1 className="mx-auto mt-12 max-w-3xl text-center text-[34px] font-bold leading-tight tracking-tight text-[#333] text-balance sm:text-[42px]">
-            A hackable <span className="text-[#5b3fd6]">AI editor</span> for the 21st&nbsp;Century
+          <h1 className="mx-auto mt-12 max-w-3xl text-center text-[34px] font-bold leading-tight tracking-tight text-[var(--c-text)] text-balance sm:text-[42px]">
+            A hackable <span className="text-[var(--c-accent)]">AI editor</span> for the 21st&nbsp;Century
           </h1>
         </div>
       </section>
 
       {/* ───────────────────── AGENT (the Teletype slot) ───────────────────── */}
-      <section id="agent" className="border-b border-[#e0e0e0]">
+      <section id="agent" className="border-b border-[var(--c-line)]">
         <div className="mx-auto max-w-5xl px-5 py-14">
-          <h3 className="text-[26px] font-semibold text-[#333]">Agent for LevelCode</h3>
+          <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Agent for LevelCode</h3>
           <p className="mt-3 max-w-3xl pretty">
             Great software happens when the editor works with you. The LevelCode agent plans, edits
             across files, runs commands, and verifies its own work — right in your editor, on your
@@ -136,16 +166,16 @@ export default function LandingPage() {
       </section>
 
       {/* ─────────────────── SKETCHES (the GitHub-package slot) ─────────────────── */}
-      <section id="sketches" className="border-b border-[#e0e0e0] bg-[#fafaf9]">
+      <section id="sketches" className="border-b border-[var(--c-line)] bg-[var(--c-surface)]">
         <div className="mx-auto max-w-5xl px-5 py-14">
-          <h3 className="text-[26px] font-semibold text-[#333]">Sketches for LevelCode</h3>
+          <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Sketches for LevelCode</h3>
           <p className="mt-3 max-w-3xl pretty">
             Some systems are too big for one prompt. Sketches let you drag a whole agent topology
             onto a canvas — eleven wired agents for a key-value store, a full leaderboard build —
             set the goal, hit Run, and watch them light up in order.
           </p>
 
-          <div className="mt-8">
+          <div className="classic-demo-sketch mt-8">
             <SketchBuilder />
           </div>
 
@@ -158,17 +188,17 @@ export default function LandingPage() {
       </section>
 
       {/* ─────────────────── EVERYTHING YOU WOULD EXPECT ─────────────────── */}
-      <section className="border-b border-[#e0e0e0]">
+      <section className="border-b border-[var(--c-line)]">
         <div className="mx-auto max-w-5xl px-5 py-14">
-          <h3 className="text-center text-[26px] font-semibold text-[#333]">
+          <h3 className="text-center text-[26px] font-semibold text-[var(--c-text)]">
             Everything you would expect
           </h3>
 
           <div className="mt-10 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {EXPECT.map((f) => (
               <div key={f.title} className="text-center sm:text-left">
-                <span className="text-[#5b3fd6]">{f.icon}</span>
-                <h4 className="mt-3 text-[17px] font-semibold text-[#333]">{f.title}</h4>
+                <span className="text-[var(--c-accent)]">{f.icon}</span>
+                <h4 className="mt-3 text-[17px] font-semibold text-[var(--c-text)]">{f.title}</h4>
                 <p className="mt-1.5 text-[15px] pretty">{f.body}</p>
               </div>
             ))}
@@ -177,15 +207,15 @@ export default function LandingPage() {
       </section>
 
       {/* ─────────────────────── MAKE IT YOUR EDITOR ─────────────────────── */}
-      <section className="border-b border-[#e0e0e0] bg-[#fafaf9]">
+      <section className="border-b border-[var(--c-line)] bg-[var(--c-surface)]">
         <div className="mx-auto max-w-5xl px-5 py-14">
-          <h3 className="text-center text-[26px] font-semibold text-[#333]">Make it your editor</h3>
+          <h3 className="text-center text-[26px] font-semibold text-[var(--c-text)]">Make it your editor</h3>
 
           <div className="mt-10 grid gap-x-10 gap-y-10 sm:grid-cols-2">
             {YOURS.map((f) => (
               <div key={f.title}>
-                <span className="text-[#5b3fd6]">{f.icon}</span>
-                <h4 className="mt-3 text-[17px] font-semibold text-[#333]">{f.title}</h4>
+                <span className="text-[var(--c-accent)]">{f.icon}</span>
+                <h4 className="mt-3 text-[17px] font-semibold text-[var(--c-text)]">{f.title}</h4>
                 <p className="mt-1.5 text-[15px] pretty">{f.body}</p>
               </div>
             ))}
@@ -194,10 +224,10 @@ export default function LandingPage() {
       </section>
 
       {/* ───────────────────────────── CONTACT ───────────────────────────── */}
-      <section className="border-b border-[#e0e0e0]">
+      <section className="border-b border-[var(--c-line)]">
         <div className="mx-auto grid max-w-5xl gap-12 px-5 py-14 md:grid-cols-2">
           <div>
-            <h3 className="text-[26px] font-semibold text-[#333]">Open source</h3>
+            <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Open source</h3>
             <p className="mt-3 pretty">
               LevelCode is open source, built on Code-OSS and released under MIT. Be part of the
               community — or help improve your favorite editor.
@@ -211,19 +241,19 @@ export default function LandingPage() {
           </div>
 
           <div>
-            <h3 className="text-[26px] font-semibold text-[#333]">Keep in touch</h3>
+            <h3 className="text-[26px] font-semibold text-[var(--c-text)]">Keep in touch</h3>
             <table className="mt-4 w-full text-[15px]">
               <tbody>
                 {TOUCH.map((r) => (
-                  <tr key={r.label} className="border-b border-[#e0e0e0] last:border-0">
-                    <td className="py-2 pr-6 text-[#777]">{r.label}</td>
+                  <tr key={r.label} className="border-b border-[var(--c-line)] last:border-0">
+                    <td className="py-2 pr-6 text-[var(--c-text3)]">{r.label}</td>
                     <td className="py-2">
                       {r.to ? (
-                        <Link to={r.to} className="text-[#5b3fd6] hover:underline">
+                        <Link to={r.to} className="text-[var(--c-accent)] hover:underline">
                           {r.text}
                         </Link>
                       ) : (
-                        <a href={r.href} className="text-[#5b3fd6] hover:underline">
+                        <a href={r.href} className="text-[var(--c-accent)] hover:underline">
                           {r.text}
                         </a>
                       )}
@@ -237,36 +267,36 @@ export default function LandingPage() {
       </section>
 
       {/* ───────────────────────────── FOOTER ───────────────────────────── */}
-      <footer className="bg-[#fafaf9]">
+      <footer className="bg-[var(--c-surface)]">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-5 py-8 text-[14px] sm:flex-row">
           <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <li>
-              <Link className="text-[#555] hover:text-[#333]" to="/terms">
+              <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/terms">
                 Terms of Use
               </Link>
             </li>
             <li>
-              <Link className="text-[#555] hover:text-[#333]" to="/privacy">
+              <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/privacy">
                 Privacy
               </Link>
             </li>
             <li>
-              <a className="text-[#555] hover:text-[#333]" href={`${GITHUB}/releases`}>
+              <a className="text-[var(--c-text2)] hover:text-[var(--c-text)]" href={`${GITHUB}/releases`}>
                 Releases
               </a>
             </li>
             <li>
-              <a className="text-[#555] hover:text-[#333]" href={`${GITHUB}/discussions`}>
+              <a className="text-[var(--c-text2)] hover:text-[var(--c-text)]" href={`${GITHUB}/discussions`}>
                 Discussions
               </a>
             </li>
             <li>
-              <Link className="text-[#555] hover:text-[#333]" to="/pricing">
+              <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/pricing">
                 Pricing
               </Link>
             </li>
           </ul>
-          <span className="flex items-center gap-1.5 text-[#777]">
+          <span className="flex items-center gap-1.5 text-[var(--c-text3)]">
             <CodeGlyph /> with <HeartGlyph /> by LevelCode
           </span>
         </div>
@@ -277,60 +307,80 @@ export default function LandingPage() {
 
 /* ─────────────────── the classic top-bar (session-aware) ─────────────────── */
 
-function ClassicNav() {
+function ClassicNav({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   const { profile } = useSession();
 
   return (
-    <nav aria-label="Primary" className="border-b border-[#e0e0e0] bg-[#fafaf9]">
+    <nav aria-label="Primary" className="border-b border-[var(--c-line)] bg-[var(--c-surface)]">
       <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-5">
         <div className="flex items-center gap-6">
-          <span className="text-[15px] font-bold text-[#333]">
-            Level<span className="text-[#5b3fd6]">Code</span>
+          <span className="text-[15px] font-bold text-[var(--c-text)]">
+            Level<span className="text-[var(--c-accent)]">Code</span>
           </span>
           <ul className="hidden items-center gap-5 sm:flex">
             <li>
-              <a href={`${GITHUB}/tree/main/docs`} className="text-[14px] text-[#555] hover:text-[#333]">
+              <a href={`${GITHUB}/tree/main/docs`} className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
                 Documentation
               </a>
             </li>
             <li>
-              <a href="https://open-vsx.org/" className="text-[14px] text-[#555] hover:text-[#333]">
+              <a href="https://open-vsx.org/" className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
                 Packages
               </a>
             </li>
             <li>
-              <a href={`${GITHUB}/releases`} className="text-[14px] text-[#555] hover:text-[#333]">
+              <a href={`${GITHUB}/releases`} className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
                 Releases
               </a>
             </li>
             <li>
-              <Link to="/pricing" className="text-[14px] text-[#555] hover:text-[#333]">
+              <Link to="/pricing" className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
                 Pricing
               </Link>
             </li>
           </ul>
         </div>
 
-        {profile ? (
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+            title={theme === "light" ? "Dark mode (One Dark)" : "Light mode"}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--c-line)] bg-[var(--c-bg)] text-[var(--c-text2)] transition-colors hover:border-[var(--c-accent)] hover:text-[var(--c-text)]"
+          >
+            {theme === "light" ? (
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden>
+                <path d="M13.3 9.9A5.6 5.6 0 0 1 6.1 2.7a.4.4 0 0 0-.5-.5 6.4 6.4 0 1 0 8.2 8.2.4.4 0 0 0-.5-.5z" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+                <circle cx="8" cy="8" r="3.2" />
+                <path d="M8 1.2v1.8M8 13v1.8M1.2 8H3M13 8h1.8M3.2 3.2l1.3 1.3M11.5 11.5l1.3 1.3M12.8 3.2l-1.3 1.3M4.5 11.5l-1.3 1.3" />
+              </svg>
+            )}
+          </button>
+          {profile ? (
           <Link
             to="/account"
             title="Account"
             aria-label="Account"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e0e0e0] bg-white text-[12px] font-semibold text-[#333] hover:border-[#5b3fd6]"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--c-line)] bg-[var(--c-bg)] text-[12px] font-semibold text-[var(--c-text)] hover:border-[var(--c-accent)]"
           >
             {initials(profile.name, profile.email)}
           </Link>
         ) : (
           <Link
             to="/login"
-            className="flex items-center gap-1.5 text-[14px] text-[#555] hover:text-[#333]"
+            className="flex items-center gap-1.5 text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]"
           >
             <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden>
               <path d="M10 3.75a.75.75 0 0 1 .75-.75h2.5A1.75 1.75 0 0 1 15 4.75v6.5A1.75 1.75 0 0 1 13.25 13h-2.5a.75.75 0 0 1 0-1.5h2.5a.25.25 0 0 0 .25-.25v-6.5a.25.25 0 0 0-.25-.25h-2.5a.75.75 0 0 1-.75-.75Zm-3.28.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H1.75a.75.75 0 0 1 0-1.5h6.69L6.72 5.53a.75.75 0 0 1 0-1.06Z" />
             </svg>
             Sign in
           </Link>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );
@@ -440,7 +490,7 @@ function CodeGlyph() {
 
 function HeartGlyph() {
   return (
-    <svg viewBox="0 0 16 16" width="14" height="14" fill="#5b3fd6" aria-hidden>
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="var(--c-accent)" aria-hidden>
       <path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002Z" />
     </svg>
   );
