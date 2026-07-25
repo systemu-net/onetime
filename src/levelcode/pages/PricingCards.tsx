@@ -60,58 +60,58 @@ export default function PricingCards({
   return (
     <>
       {err ? (
-        <p className="mt-6 font-mono text-[12px] text-flame" role="alert">
+        <p className="mb-4 text-center text-[13px] text-red-500" role="alert">
           {err}
         </p>
       ) : null}
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {tiers.map((tier, i) => {
           const featured = i === 1; // pro_plus — the recommended tier
           const current = isCurrentPlan(tier);
           return (
             <div
               key={tier.key}
-              className={`surface flex flex-col p-6 ${
-                current ? "ring-2 ring-flame" : featured ? "ring-1 ring-flame/40" : ""
-              }`}
+              className={`flex flex-col rounded-md border bg-[var(--c-bg)] p-6 ${
+                current || featured ? "border-[var(--c-accent)]" : "border-[var(--c-line)]"
+              } ${current ? "shadow-[0_0_0_1px_var(--c-accent)]" : ""}`}
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-display text-lg font-semibold">{tier.name}</h3>
+                <h3 className="text-lg font-semibold text-[var(--c-text)]">{tier.name}</h3>
                 {current ? (
-                  <span className="rounded-full bg-flame px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-white">
+                  <span className="rounded-[3px] bg-[var(--c-accent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
                     current
                   </span>
                 ) : featured ? (
-                  <span className="rounded-full bg-flame/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-flame">
+                  <span className="rounded-[3px] border border-[var(--c-accent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[var(--c-accent)]">
                     popular
                   </span>
                 ) : null}
               </div>
 
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-display text-3xl font-bold tracking-tightest">{formatPrice(tier.price_cents)}</span>
-                <span className="text-sm text-faint">/{tier.interval || "mo"}</span>
+                <span className="text-3xl font-bold tracking-tight text-[var(--c-text)]">{formatPrice(tier.price_cents)}</span>
+                <span className="text-sm text-[var(--c-text3)]">/{tier.interval || "mo"}</span>
               </div>
 
-              <dl className="mt-5 space-y-1.5 font-mono text-[12px] text-sub">
+              <dl className="mt-5 space-y-1.5 font-mono text-[12px] text-[var(--c-text2)]">
                 <div className="flex justify-between">
-                  <dt className="text-faint">input</dt>
+                  <dt className="text-[var(--c-text3)]">input</dt>
                   <dd className="tabular-nums">{formatTokens(tier.input_cap)}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-faint">output</dt>
+                  <dt className="text-[var(--c-text3)]">output</dt>
                   <dd className="tabular-nums">{formatTokens(tier.output_cap)}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-faint">turns</dt>
+                  <dt className="text-[var(--c-text3)]">turns</dt>
                   <dd className="tabular-nums">{(tier.turns ?? 0).toLocaleString()}</dd>
                 </div>
               </dl>
 
-              <ul className="mt-5 flex-1 space-y-2 text-[13px] text-sub">
+              <ul className="mt-5 flex-1 space-y-2 text-[13px] text-[var(--c-text2)]">
                 {(tier.features ?? []).map((f) => (
                   <li key={f} className="flex gap-2">
-                    <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-flame" />
+                    <span className="mt-1.5 h-1 w-1 flex-none rounded-full bg-[var(--c-accent)]" />
                     <span className="pretty">{f}</span>
                   </li>
                 ))}
@@ -122,7 +122,7 @@ export default function PricingCards({
                   type="button"
                   disabled
                   aria-disabled="true"
-                  className="mt-6 w-full cursor-default justify-center btn-ghost opacity-70"
+                  className="classic-button--quiet mt-6 w-full cursor-default opacity-70"
                 >
                   ✓ Current plan
                 </button>
@@ -130,7 +130,7 @@ export default function PricingCards({
                 <button
                   onClick={() => checkout(tier)}
                   disabled={busy === tier.key}
-                  className={`mt-6 w-full justify-center ${featured ? "btn-primary" : "btn-ghost"}`}
+                  className={`mt-6 w-full ${featured ? "classic-button" : "classic-button--quiet"}`}
                 >
                   {busy === tier.key ? "Starting…" : authed ? "Choose plan" : "Sign in to start"}
                 </button>

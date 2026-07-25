@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, navigateTo } from "../api";
 import { useSession } from "../auth";
-import LevelNav from "../components/LevelNav";
+import ClassicShell, { ChevronMark } from "../components/classic/ClassicShell";
 import EmailSignIn from "./EmailSignIn";
 import ProviderSignIn from "./ProviderSignIn";
 
@@ -12,6 +12,8 @@ const SIGNIN_ERRORS: Record<string, string> = {
   link_expired: "That sign-in link expired. Please try again from the editor.",
 };
 
+// The sign-in page, LevelCode Classic (atom.io-heritage): flat centered card under the
+// chevron mark. All auth flows unchanged — PKCE editor handoff, OAuth links, email code.
 export default function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -65,18 +67,17 @@ export default function LoginPage() {
 
   if (phase === "completing") {
     return (
-      <>
-        <LevelNav />
-        <main className="mx-auto flex min-h-[100svh] max-w-6xl flex-col items-center justify-center px-5 py-28">
-          <div className="surface w-full max-w-md p-8 text-center">
-            <div className="lineno mb-3">connecting</div>
-            <h1 className="font-display text-xl font-semibold tracking-tightest">Opening LevelCode…</h1>
-            <p className="mt-3 text-[14px] text-sub pretty">
-              Signing the editor into your account. You can return to LevelCode — this tab can be closed.
+      <ClassicShell>
+        <main className="mx-auto flex max-w-5xl flex-col items-center px-5 py-24">
+          <div className="w-full max-w-md rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-8 text-center">
+            <h1 className="text-xl font-semibold text-[var(--c-text)]">Opening LevelCode…</h1>
+            <p className="mt-3 text-[14px] pretty">
+              Signing the editor into your account. You can return to LevelCode — this tab can be
+              closed.
             </p>
           </div>
         </main>
-      </>
+      </ClassicShell>
     );
   }
 
@@ -84,58 +85,69 @@ export default function LoginPage() {
   // sign-in form never flashes before the redirect.
   if (phase !== "form") {
     return (
-      <>
-        <LevelNav />
-        <main className="mx-auto flex min-h-[100svh] max-w-6xl flex-col items-center justify-center px-5 py-28" />
-      </>
+      <ClassicShell>
+        <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col px-5 py-24" />
+      </ClassicShell>
     );
   }
 
   return (
-    <>
-      <LevelNav />
-      <main className="mx-auto flex min-h-[100svh] max-w-6xl flex-col items-center justify-center px-5 py-28">
+    <ClassicShell>
+      <main className="mx-auto flex max-w-5xl flex-col items-center px-5 py-16">
         <div className="w-full max-w-md">
-          <div className="lineno mb-4">01 · sign in</div>
-          <h1 className="font-display text-[clamp(2rem,4.5vw,2.8rem)] font-semibold leading-[1.04] tracking-tightest">
-            Welcome to <span className="pp">LevelCode</span> Cloud
-          </h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-sub pretty">
-            {fromEditor
-              ? "Sign in to connect the editor to your account. You’ll be sent back to LevelCode when you’re done."
-              : "Sign in to manage your plan, keys, and usage."}
-          </p>
+          <div className="text-center">
+            <div className="inline-block">
+              <ChevronMark />
+            </div>
+            <h1 className="mt-3 text-[28px] font-bold tracking-tight text-[var(--c-text)]">
+              Sign in to Level<span className="text-[var(--c-accent)]">Code</span>
+            </h1>
+            <p className="mt-2 text-[15px] pretty">
+              {fromEditor
+                ? "Connect the editor to your account — you'll be sent back to LevelCode when you're done."
+                : "Manage your plan, keys, and usage."}
+            </p>
+          </div>
 
-          <div className="surface mt-8 p-7">
+          <div className="mt-8 rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-7">
             {errorCode ? (
-              <div role="alert" className="mb-5 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-[13px] text-red-700">
+              <div
+                role="alert"
+                className="mb-5 rounded-[4px] border border-red-500/50 bg-red-500/10 px-4 py-3 text-[13px] text-red-500"
+              >
                 {SIGNIN_ERRORS[errorCode] ?? "Sign-in failed. Please try again."}
               </div>
             ) : null}
-            <ProviderSignIn redirectUri={editorHandoff?.redirectUri} codeChallenge={editorHandoff?.codeChallenge} />
+            <ProviderSignIn
+              redirectUri={editorHandoff?.redirectUri}
+              codeChallenge={editorHandoff?.codeChallenge}
+            />
 
-            <div className="my-5 flex items-center gap-3 text-faint" aria-hidden="true">
-              <span className="flex-1 border-t border-rule" />
-              <span className="font-mono text-[11px] uppercase tracking-widest">or</span>
-              <span className="flex-1 border-t border-rule" />
+            <div className="my-5 flex items-center gap-3 text-[var(--c-text3)]" aria-hidden="true">
+              <span className="flex-1 border-t border-[var(--c-line)]" />
+              <span className="text-[11px] font-semibold uppercase tracking-widest">or</span>
+              <span className="flex-1 border-t border-[var(--c-line)]" />
             </div>
 
-            <EmailSignIn redirectUri={editorHandoff?.redirectUri} codeChallenge={editorHandoff?.codeChallenge} />
+            <EmailSignIn
+              redirectUri={editorHandoff?.redirectUri}
+              codeChallenge={editorHandoff?.codeChallenge}
+            />
           </div>
 
-          <p className="mt-5 font-mono text-[12px] text-faint">
+          <p className="mt-5 text-center text-[13px] text-[var(--c-text3)]">
             By continuing you agree to the{" "}
-            <Link to="/terms" className="underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
-              terms
+            <Link to="/terms" className="text-[var(--c-accent)] hover:underline">
+              Terms of Use
             </Link>{" "}
             and{" "}
-            <Link to="/privacy" className="underline decoration-rule underline-offset-4 transition-colors hover:text-ink">
-              privacy policy
+            <Link to="/privacy" className="text-[var(--c-accent)] hover:underline">
+              Privacy Policy
             </Link>
             . Bring your own key — we never resell provider access.
           </p>
         </div>
       </main>
-    </>
+    </ClassicShell>
   );
 }

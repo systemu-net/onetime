@@ -46,7 +46,7 @@ function ProviderLink({
   return (
     <a
       href={oauthStartUrl(provider, redirectUri, codeChallenge)}
-      className="flex w-full items-center justify-center gap-2.5 rounded-full border border-rule bg-card px-6 py-3 text-[15px] font-medium text-ink transition-colors hover:border-ink"
+      className="classic-button--quiet w-full gap-2.5"
     >
       {children}
       {label}
