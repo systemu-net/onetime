@@ -11,13 +11,26 @@ import ClassicShell from "../components/classic/ClassicShell";
 // funnel). The caveats under the table are not decoration — without them the
 // numbers invite conclusions the data cannot support.
 
+// LOCAL calendar date as YYYY-MM-DD.
+//
+// Not toISOString().slice(0, 10): that formats in UTC, so anywhere east of UTC the
+// "today" it produces is yesterday for part of the day (and west of UTC, tomorrow).
+// These strings feed <input type="date"> values and its `max`, which are local
+// dates — a UTC string there both preselects the wrong day and can make the real
+// today unselectable.
+function localDate(d: Date): string {
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+}
+
 function isoDaysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
-  return d.toISOString().slice(0, 10);
+  return localDate(d);
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => localDate(new Date());
 
 export default function ReferralsPage() {
   const navigate = useNavigate();
