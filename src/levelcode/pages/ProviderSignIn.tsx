@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { API_BASE } from "../api";
+import { getAttribution } from "../attribution";
 
 // Social sign-in for the LevelCode Cloud login: Google + GitHub.
 //
@@ -62,6 +63,30 @@ function oauthStartUrl(provider: string, redirectUri?: string, codeChallenge?: s
     qs.set("redirect_uri", redirectUri);
     qs.set("code_challenge", codeChallenge);
   }
+  // First-touch campaign attribution. The email flow posts this in the verify body; OAuth is a top-level
+  // navigation with no body, so it rides the query string — oauth_start moves it straight into the session
+  // (like the CSRF `state`), and oauth_callback stamps it on the user IF this sign-in creates one. Without
+  // it every GitHub/Google signup is attributed to nothing, which quietly undercounts whichever channel
+  // sends the most developers.
+  //
+  // Only the fields the funnel actually uses are carried, as an explicit allowlist rather than the whole
+  // record. A query string ends up in browser history and server access logs, and `referrer` is the one
+  // attribution field that can itself be a third-party URL carrying its own query params — so it stays out
+  // of the URL entirely. Listing the fields (instead of deleting one) also means a field added to
+  // Attribution later cannot silently start appearing in logs.
+  const attribution = getAttribution();
+  if (attribution) {
+    qs.set(
+      "attribution",
+      JSON.stringify({
+        source: attribution.source,
+        params: attribution.params,
+        landing: attribution.landing,
+        ts: attribution.ts,
+      }),
+    );
+  }
+
   const q = qs.toString();
   return `${API_BASE}/ai/auth/oauth/${provider}${q ? `?${q}` : ""}`;
 }

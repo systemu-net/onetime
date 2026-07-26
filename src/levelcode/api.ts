@@ -196,3 +196,26 @@ export type AdminUser = {
   created_at: string;
 };
 export type AdminUsers = { total: number; limit: number; offset: number; users: AdminUser[] };
+
+/** One marketing channel (and the partner handle behind it) through the funnel. */
+export type ReferralRow = {
+  channel: string;
+  handle: string | null;
+  clicks: number;
+  signups: number;
+  paid: number;
+};
+export type ReferralFunnel = {
+  from: string;
+  to: string;
+  rows: ReferralRow[];
+  totals: { clicks: number; signups: number; paid: number };
+  /** Signups in range that carried no channel — organic, or attribution lost. */
+  unattributed_signups: number;
+  /**
+   * What the `paid` column actually measures. The schema has no "became paid at"
+   * timestamp, so it can only be a snapshot; the dashboard says so rather than
+   * letting it read as a conversion rate.
+   */
+  paid_basis: string;
+};
