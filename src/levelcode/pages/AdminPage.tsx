@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api, type AdminSummary, type AdminUsers } from "../api";
 import { useSession } from "../auth";
 import ClassicShell from "../components/classic/ClassicShell";
@@ -75,10 +75,22 @@ export default function AdminPage() {
   return (
     <ClassicShell>
       <main className="mx-auto max-w-6xl px-5 py-12">
-        <h1 className="text-[28px] font-bold tracking-tight text-[var(--c-text)] sm:text-[32px]">
-          System dashboard
-        </h1>
-        <p className="mt-2 text-[14px] text-[var(--c-text3)]">tokens burned · plans · geography · login health</p>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-[28px] font-bold tracking-tight text-[var(--c-text)] sm:text-[32px]">
+              System dashboard
+            </h1>
+            <p className="mt-2 text-[14px] text-[var(--c-text3)]">
+              tokens burned · plans · geography · login health
+            </p>
+          </div>
+          <Link
+            to="/admin/referrals"
+            className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]"
+          >
+            Referrals →
+          </Link>
+        </div>
 
         {error ? <div className="classic-card mt-8 p-6 text-[14px] text-red-500">{error}</div> : null}
 
