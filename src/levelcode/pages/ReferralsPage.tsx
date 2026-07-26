@@ -32,6 +32,29 @@ function isoDaysAgo(days: number): string {
 
 const today = () => localDate(new Date());
 
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Why the range is validated before fetching rather than left to the server:
+ *
+ * a `type="date"` input can be CLEARED (value becomes "") and, in most browsers,
+ * typed into directly — which bypasses min/max. Either produces a request the
+ * backend answers rather than rejects: a blank `from` silently falls back to its
+ * 30-day default, and an inverted range is clamped to a single day. The table
+ * would then show a range that does not match what the inputs say, which is worse
+ * than an error because it looks like data.
+ *
+ * ISO dates compare correctly as strings, so no Date parsing is needed.
+ */
+function rangeError(from: string, to: string): string | null {
+  if (!DATE_PATTERN.test(from) || !DATE_PATTERN.test(to)) {
+    return "Pick both a start and an end date.";
+  }
+  if (from > to) return "The start date is after the end date.";
+  if (to > today()) return "The end date is in the future.";
+  return null;
+}
+
 export default function ReferralsPage() {
   const navigate = useNavigate();
   const { loading: sessionLoading, profile } = useSession();
@@ -51,8 +74,15 @@ export default function ReferralsPage() {
     else if (!isAdmin) navigate("/account", { replace: true });
   }, [sessionLoading, profile, isAdmin, navigate]);
 
+  const invalidRange = rangeError(from, to);
+
   useEffect(() => {
     if (!isAdmin) return;
+    // Don't ask the API to interpret a range the user hasn't finished typing.
+    if (invalidRange) {
+      setLoading(false);
+      return;
+    }
     let alive = true;
     setLoading(true);
     setError(null);
@@ -71,7 +101,7 @@ export default function ReferralsPage() {
     return () => {
       alive = false;
     };
-  }, [isAdmin, from, to]);
+  }, [isAdmin, from, to, invalidRange]);
 
   if (sessionLoading || !isAdmin) {
     return (
@@ -101,6 +131,15 @@ export default function ReferralsPage() {
         </div>
 
         {error ? <div className="classic-card mt-8 p-6 text-[14px] text-red-500">{error}</div> : null}
+
+        {invalidRange ? (
+          <div
+            role="alert"
+            className="mt-8 rounded-md border border-[#d19a66]/40 bg-[#d19a66]/[0.1] px-4 py-3 text-[14px] text-[var(--c-text)]"
+          >
+            {invalidRange} Showing the last loaded range below.
+          </div>
+        ) : null}
 
         {/* Date range */}
         <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -133,6 +172,15 @@ export default function ReferralsPage() {
           <Stat label="signups" value={data?.totals.signups} />
           <Stat label="paid" value={data?.totals.paid} />
         </div>
+
+        {/* The range the SERVER actually used, echoed back. The inputs are what you
+            asked for; this is what is plotted — they can differ while a date is
+            mid-edit, and the difference should never be invisible. */}
+        {data ? (
+          <p className="mt-3 font-mono text-[12px] text-[var(--c-text3)]">
+            covering {data.from} → {data.to}
+          </p>
+        ) : null}
 
         {/* Funnel table */}
         <div className="classic-card mt-6 overflow-x-auto p-0">
