@@ -95,6 +95,11 @@ export default function ReferralsPage() {
       })
       .catch(() => {
         if (!alive) return;
+        // A failed load has no range to show, so drop any stale funnel — otherwise the error
+        // renders over the previous totals/table, which read as fresh data for the range now in
+        // the inputs. NOT cleared at fetch START: a *valid* refetch keeps the prior view until it
+        // resolves (no empty flash); only an outright failure blanks it.
+        setData(null);
         setError("Couldn’t load the referral funnel.");
         setLoading(false);
       });
@@ -137,7 +142,8 @@ export default function ReferralsPage() {
             role="alert"
             className="mt-8 rounded-md border border-[#d19a66]/40 bg-[#d19a66]/[0.1] px-4 py-3 text-[14px] text-[var(--c-text)]"
           >
-            {invalidRange} Showing the last loaded range below.
+            {invalidRange}
+            {data ? " Showing the last loaded range below." : null}
           </div>
         ) : null}
 
@@ -211,7 +217,7 @@ export default function ReferralsPage() {
                   </td>
                 </tr>
               ))}
-              {rows.length === 0 && !loading ? (
+              {data && rows.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={6} className="px-3 py-8 text-center text-[var(--c-text3)]">
                     No referral activity in this range.
