@@ -108,8 +108,21 @@ export default function AccountPage() {
             </h1>
             {profile.email ? <p className="mt-2 font-mono text-[13px] text-[var(--c-text3)]">{profile.email}</p> : null}
           </div>
-          <span className="rounded-[3px] border border-[var(--c-line)] bg-[var(--c-surface)] px-2.5 py-1 font-mono text-[12px] text-[var(--c-text2)]">
-            plan · {usage?.plan ?? profile.plan ?? "free"}
+          <span className="flex flex-wrap items-center gap-4">
+            {/* Admin-only shortcuts into the ops surfaces (also enforced server-side). */}
+            {profile.role === "admin" ? (
+              <>
+                <Link to="/admin" className="text-[13px] text-[var(--c-accent)] hover:underline">
+                  System dashboard →
+                </Link>
+                <Link to="/admin/referrals" className="text-[13px] text-[var(--c-accent)] hover:underline">
+                  Referrals →
+                </Link>
+              </>
+            ) : null}
+            <span className="rounded-[3px] border border-[var(--c-line)] bg-[var(--c-surface)] px-2.5 py-1 font-mono text-[12px] text-[var(--c-text2)]">
+              plan · {usage?.plan ?? profile.plan ?? "free"}
+            </span>
           </span>
         </div>
 
