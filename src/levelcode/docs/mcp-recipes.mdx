@@ -1,0 +1,308 @@
+# Server recipes
+
+> Working configurations for the servers people actually want: GitHub, the filesystem, image generation, and the hosted servers that need a bridge.
+
+Every block here goes in `levelcode.ai.mcp.servers`. If you haven't read [MCP servers](/docs/mcp) yet, start there — particularly [Trust and approval](/docs/mcp#trust-and-approval), because each of these is a process you're choosing to run.
+
+## Keep secrets out of settings.json
+
+Nearly every vendor README shows the API token inline:
+
+```json
+{ "env": { "SOME_API_TOKEN": "sk-live-…" } }
+```
+
+It's the shortest thing to document, not the right thing to do. That file is plaintext on disk, it's included in Settings Sync, and it lands in any screenshot of your settings.
+
+Two better options:
+
+<Steps>
+  <Step title="Fetch the secret at spawn time">
+    Point `command` at a small wrapper script that pulls the token from your keychain or credential helper and execs the real server. The token never exists in a file, and rotating it needs no config change. The [GitHub recipe](#github) below is a complete worked example.
+  </Step>
+  <Step title="Or inherit it from your environment">
+    LevelCode spawns servers with `process.env` inherited, so exporting the variable in your shell works — with one catch: **macOS GUI apps don't inherit your shell environment**. This only works if you launch LevelCode from a terminal. The wrapper works either way, which is why it's first.
+  </Step>
+</Steps>
+
+<Warning>
+  **A config that works everywhere else and fails here.** Several READMEs show this form for other editors:
+
+  ```json
+  { "command": "env SOME_TOKEN=abc npx", "args": ["-y", "some-server"] }
+  ```
+
+  LevelCode spawns with no shell, so that whole string is looked up as *one executable filename*. You get `ENOENT`, not a shell command. Use the `env` block instead — or a wrapper script.
+</Warning>
+
+## GitHub
+
+Read and write pull requests, issues, files and code search from the chat.
+
+GitHub's hosted server is Streamable HTTP, which LevelCode doesn't speak yet. The same server ships as a container that speaks stdio, which is a clean fit — and running it locally means you can solve the token problem properly.
+
+Save this as `~/.levelcode/mcp/github-mcp` and `chmod 755` it:
+
+```sh
+#!/bin/sh
+set -eu
+
+# Resolve a binary: an explicit override wins, then PATH, then the usual install
+# locations. PATH alone is not enough — a GUI-launched macOS app inherits a minimal
+# PATH with neither Homebrew prefix on it, which is the case this wrapper exists for.
+# /opt/homebrew is Apple Silicon, /usr/local is Intel.
+find_bin() {
+  if [ -n "${2:-}" ]; then printf '%s\n' "$2"; return 0; fi
+  command -v "$1" 2>/dev/null && return 0
+  for dir in /opt/homebrew/bin /usr/local/bin /usr/bin \
+             /Applications/Docker.app/Contents/Resources/bin; do
+    if [ -x "$dir/$1" ]; then printf '%s\n' "$dir/$1"; return 0; fi
+  done
+  return 1
+}
+
+GH=$(find_bin gh "${GH_BIN:-}") ||
+  { echo 'github-mcp: gh not found — install the GitHub CLI, or set GH_BIN' >&2; exit 78; }
+DOCKER=$(find_bin docker "${DOCKER_BIN:-}") ||
+  { echo 'github-mcp: docker not found — install Docker Desktop, or set DOCKER_BIN' >&2; exit 78; }
+
+# Every tool schema rides EVERY turn, so this is a context budget, not a preference.
+: "${GITHUB_TOOLSETS:=pull_requests,repos,issues,context}"
+export GITHUB_TOOLSETS
+
+GITHUB_PERSONAL_ACCESS_TOKEN=$("$GH" auth token 2>/dev/null) || GITHUB_PERSONAL_ACCESS_TOKEN=''
+if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
+  echo 'github-mcp: no GitHub token — run `gh auth login`' >&2
+  exit 78
+fi
+export GITHUB_PERSONAL_ACCESS_TOKEN
+
+# -i keeps stdin open: that IS the JSON-RPC channel. --rm leaves no dead containers.
+exec "$DOCKER" run -i --rm \
+  -e GITHUB_PERSONAL_ACCESS_TOKEN \
+  -e GITHUB_TOOLSETS \
+  ghcr.io/github/github-mcp-server
+```
+
+The settings entry then contains no secret at all:
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "github": { "command": "/Users/you/.levelcode/mcp/github-mcp", "args": [] }
+  }
+}
+```
+
+Requires Docker running and `gh auth login` done once. With the toolsets above you get 41 tools:
+
+| Ask for | Tool |
+| --- | --- |
+| Read a PR — diff, files, reviews, comments, checks | `github__pull_request_read` |
+| Create a PR | `github__create_pull_request` |
+| Update title, body, base, reviewers | `github__update_pull_request` |
+| **Close** a PR | `github__update_pull_request` with `state: "closed"` |
+| Review — approve, request changes, comment | `github__pull_request_review_write` |
+| Merge | `github__merge_pull_request` |
+| Files, commits, branches, issues, code search | 25 more across the enabled toolsets |
+
+### A sane policy
+
+Reads run silently; anything that changes state on GitHub keeps its card:
+
+```json
+{
+  "levelcode.ai.mcp.toolPolicy": {
+    "github__pull_request_read": "allow",
+    "github__list_pull_requests": "allow",
+    "github__get_file_contents": "allow",
+    "github__search_code": "allow",
+    "github__list_commits": "allow"
+  }
+}
+```
+
+<Warning>
+  No GitHub tool sets `destructiveHint`, so none of them hit the always-ask rule — the allow-list *can* grant every one, including `merge_pull_request` and `delete_file`. Don't use `"*": "allow"` here unless you're happy for an Autopilot run to merge a pull request.
+</Warning>
+
+Add `actions` to `GITHUB_TOOLSETS` for CI runs and logs, or `notifications`, `discussions`, `gists`, `security`, or `all`. Each addition costs context on every turn forever — check `/mcp` and the context popover afterwards.
+
+## Filesystem
+
+The reference server, and the one whose config trips people up:
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/notes"]
+    }
+  }
+}
+```
+
+If you add it through **Add a server…** instead, the argument line is quote-aware, so a path with spaces survives:
+
+```text
+-y @modelcontextprotocol/server-filesystem "/Users/you/My Documents"
+```
+
+<Note>
+  LevelCode's own agent already reads, searches and edits files in your workspace. This server is for directories *outside* it — a notes vault, a scratch directory, a sibling repo you haven't opened.
+</Note>
+
+## Image generation
+
+<Warning>
+  **Read this before choosing one.** A tool result reaches the agent as text. A server that returns an MCP `image` block — base64 bytes inline — produces `[image image/png omitted]` and nothing else. Pick a server that returns a **URL** or **writes a file and reports the path**. This matters more than model quality or price, and no vendor comparison mentions it, because for most clients it doesn't apply.
+</Warning>
+
+| Server | Returns | Key | Best for |
+| --- | --- | --- | --- |
+| **Replicate** (official) — `replicate-mcp` | URL | `REPLICATE_API_TOKEN` | The default. Whole catalog via one server |
+| **fal.ai** — `fal-ai-mcp-server` | URL | `FAL_KEY` | Speed. Strong throughput on FLUX |
+| **Recraft** — `@recraft-ai/mcp-recraft-server` | URL + file | `RECRAFT_API_KEY` | **Vectors.** True SVG output |
+| **EverArt** — `@modelcontextprotocol/server-everart` | URL | `EVERART_API_KEY` | Minimal, one tool |
+| **ComfyUI** (community) | varies | none | Local, free, private — verify the result shape |
+
+### Replicate
+
+The official server, covering Replicate's whole HTTP API rather than one model — so new models work the day they land.
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "replicate": {
+      "command": "npx",
+      "args": ["-y", "replicate-mcp"],
+      "env": { "REPLICATE_API_TOKEN": "r8_…" }
+    }
+  }
+}
+```
+
+Its tools are named `models.search`, `predictions.create` and so on. A dot is illegal in a tool name, so they arrive rewritten — and your allow-list must use the rewritten form or it silently never matches:
+
+```json
+{
+  "levelcode.ai.mcp.toolPolicy": {
+    "replicate__models_search": "allow",
+    "replicate__models_get": "allow",
+    "replicate__predictions_create": "ask"
+  }
+}
+```
+
+### Recraft — the one that does vectors
+
+Recraft generates **true SVG**, not a raster traced into paths, which makes it the only option here that produces an asset you can commit, diff and restyle with CSS. For icons and logos in a codebase that's a categorical difference, not a quality one.
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "recraft": {
+      "command": "npx",
+      "args": ["-y", "@recraft-ai/mcp-recraft-server@latest"],
+      "env": {
+        "RECRAFT_API_KEY": "…",
+        "IMAGE_STORAGE_DIRECTORY": "/Users/you/Pictures/recraft"
+      }
+    }
+  }
+}
+```
+
+Set `IMAGE_STORAGE_DIRECTORY`. It makes the server write files and report paths — exactly the shape that survives.
+
+<Warning>
+  **Generating costs money, and Autopilot doesn't ask twice.** Allow-listing a `generate_image` tool lets the agent call it as often as it decides to, and an agent iterating on a prompt can produce twenty images in a minute. Allow-list the free tools — search, list models, fetch a result — and leave everything that generates, upscales or edits on `ask`.
+</Warning>
+
+## Hosted servers
+
+Several vendors now recommend a hosted endpoint over a local package — GitHub, Replicate and Recraft among them. These speak Streamable HTTP, which LevelCode doesn't support yet. One bridge covers all of them:
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "replicate-remote": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.replicate.com/mcp"]
+    }
+  }
+}
+```
+
+`mcp-remote` is a stdio server that proxies to a remote one and handles the OAuth flow.
+
+| For | Against |
+| --- | --- |
+| Browser OAuth — no API token on disk | A second process in the chain to debug |
+| Always the vendor's current version | First run opens a browser, which surprises inside an editor |
+| Works today | Another dependency between you and the API |
+
+Rule of thumb: if the vendor ships a maintained local package, use it. Reach for the bridge when the package is deprecated or was never offered.
+
+## Vetting a community server
+
+Most MCP servers are one person's side project. A server entry is a command to execute, so adding one is a supply-chain decision:
+
+- **Read the source.** It's usually a few hundred lines.
+- **Pin the version** rather than using `@latest`, so a compromised release doesn't arrive silently.
+- **Prefer projects with a real commit history** over a package published once.
+- **Start with everything on `ask`** and watch what the tools actually do before allow-listing.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The server never starts and there's no error">
+    It's repo-defined and waiting for approval. Run `/mcp` — the row will say `needs approval`. Ask the agent to do something that needs the server and the consent card appears.
+  </Accordion>
+
+  <Accordion title="ENOENT on a command that works in my terminal">
+    Two causes. Either the config uses the `env FOO=1 npx` form, which needs a shell LevelCode doesn't use — put the variables in the `env` block instead. Or LevelCode was launched from the Dock and has a different `PATH` than your shell. Use an absolute path for `command`.
+  </Accordion>
+
+  <Accordion title="It works when I launch LevelCode from a terminal, but not from the Dock">
+    macOS GUI apps don't inherit your shell environment, so an exported API key isn't there. Use a wrapper script that fetches the secret itself — see [Keep secrets out of settings.json](#keep-secrets-out-of-settingsjson).
+  </Accordion>
+
+  <Accordion title="My toolPolicy entry is ignored">
+    The key is wrong. Names are namespaced `server__tool`, and characters that are illegal in a tool name are rewritten — a dot becomes an underscore. Run `/mcp` and copy the exact name it prints.
+  </Accordion>
+
+  <Accordion title="The agent says the image was omitted">
+    The server returned inline base64. There's nothing to configure — switch to a server that returns a URL or writes a file. See the table in [Image generation](#image-generation).
+  </Accordion>
+
+  <Accordion title="A result ends in “MCP result truncated”">
+    It exceeded 24,000 characters. Ask for a narrower query — a specific file rather than a whole tree. The cap protects the context window.
+  </Accordion>
+
+  <Accordion title="The handshake times out">
+    Spawn, `initialize` and `tools/list` share a 20-second budget. Cold starts are the usual cause — a first `npx` run downloading the package, or Docker pulling an image. Run the command once in a terminal to warm the cache, then retry.
+  </Accordion>
+
+  <Accordion title="A tool asks every time despite being allow-listed">
+    The server marks it with `destructiveHint`. That always asks and the policy cannot override it — which is the point.
+  </Accordion>
+
+  <Accordion title="“Ignored duplicate server”">
+    The same name is defined in your settings and in a repo's `.levelcode/mcp.json`. Yours wins, deliberately — a repo must not be able to redefine a server you already trust. Rename the repo's entry if you want both.
+  </Accordion>
+
+  <Accordion title="A row says “command changed — needs approval”">
+    You approved this repo-defined server before, and the repo has edited what it wants to run since. Read the new command line in the card before re-approving — this is exactly the case the approval gate exists to catch.
+  </Accordion>
+</AccordionGroup>
+
+<CardGroup>
+  <Card title="MCP servers" href="/docs/mcp">
+    How the protocol is wired, and the approval model these servers run under.
+  </Card>
+  <Card title="Troubleshooting" href="/docs/troubleshooting">
+    Everything else — first launch, providers and keys, the agent, updates.
+  </Card>
+</CardGroup>

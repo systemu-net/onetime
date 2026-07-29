@@ -126,26 +126,14 @@ With `levelcode.ai.skills.enabled` on (the default), the agent picks up bundled 
 
 ## MCP servers
 
-The agent can use [Model Context Protocol](https://modelcontextprotocol.io) servers for tools beyond the editor.
+The agent can use [Model Context Protocol](https://modelcontextprotocol.io) servers for tools beyond the editor — your issue tracker, a database, an image generator. Add one with **AI: Manage MCP Servers…**, and they appear in the agent's tool list alongside the built-ins.
 
-```json
-{
-  "levelcode.ai.mcp.servers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"]
-    }
-  },
-  "levelcode.ai.mcp.toolPolicy": { "filesystem__read_file": "allow" }
-}
-```
+Two properties matter here, because they're the ones that interact with everything above:
 
-Two deliberate safety properties:
+- **Nothing spawns from opening a repo.** A repo can define servers in `.levelcode/mcp.json`, but one of those never starts until you approve the exact command line it would run.
+- **Autopilot does not relax MCP.** Anything not explicitly allow-listed in `levelcode.ai.mcp.toolPolicy` still stops and asks, Autopilot or not. An MCP tool is third-party code.
 
-- Both settings are **user-scoped only**. A repo's committed `.vscode/settings.json` cannot add a server or allow a tool, so opening an untrusted repo can never make LevelCode spawn a process.
-- Anything not explicitly allow-listed in `toolPolicy` is **refused** — including under Autopilot. An MCP tool is third-party code, so Autopilot does not relax it.
-
-Use `"*": "allow"` to permit every tool from every configured server.
+[MCP servers](/docs/mcp) covers configuration, the approval model, and what a connected server costs you every turn.
 
 ## Limits that bound a run
 
