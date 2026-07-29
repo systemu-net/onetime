@@ -6,6 +6,8 @@ import Cloud from "./cloud.mdx";
 import Edit from "./edit.mdx";
 import Hackability from "./hackability.mdx";
 import ImportAndUpdates from "./import-and-updates.mdx";
+import Mcp from "./mcp.mdx";
+import McpRecipes from "./mcp-recipes.mdx";
 import Overview from "./overview.mdx";
 import PowerEditing from "./power-editing.mdx";
 import Providers from "./providers.mdx";
@@ -33,6 +35,8 @@ const PAGES: Record<string, React.ComponentType> = {
   edit: Edit,
   autocomplete: Autocomplete,
   providers: Providers,
+  mcp: Mcp,
+  "mcp-recipes": McpRecipes,
   "power-editing": PowerEditing,
   hackability: Hackability,
   "import-and-updates": ImportAndUpdates,

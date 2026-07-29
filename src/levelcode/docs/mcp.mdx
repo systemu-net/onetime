@@ -1,0 +1,218 @@
+# MCP servers
+
+> Give the agent tools LevelCode doesn't ship — read your issue tracker, query a database, generate an image — by connecting a Model Context Protocol server. Every one of them is a process on your machine, so the whole feature is built around deciding what to trust.
+
+[Model Context Protocol](https://modelcontextprotocol.io) is a standard way for a program to hand an AI agent a set of tools. A **server** publishes tools; LevelCode is the **client** that connects, reads the list, and offers them to the model alongside its built-ins.
+
+That's the whole idea. Everything interesting is in what it costs and what it's allowed to do.
+
+<Warning>
+  An MCP server entry is **a command LevelCode will run with your privileges** — not a URL, not a sandboxed plugin. `npx -y some-mcp-server` downloads and executes code from npm. Read [Trust and approval](#trust-and-approval) before pasting a config from a blog post.
+</Warning>
+
+## What LevelCode supports
+
+Knowing the boundary saves you debugging things that were never going to work.
+
+| Capability | Status | Notes |
+| --- | --- | --- |
+| **stdio transport** | Supported | LevelCode spawns the process and speaks JSON-RPC over its stdin/stdout |
+| **Tools** | Supported | `tools/list` and `tools/call`, namespaced and policy-gated |
+| **Streamable HTTP** | Not yet | Hosted servers need a bridge — see [Server recipes](/docs/mcp-recipes#hosted-servers) |
+| **Resources and prompts** | Not yet | A server may advertise them; LevelCode ignores them |
+| **Sampling** | No | A server driving your model is a deliberate omission |
+| **Inline image results** | Dropped | See [Results are text](#results-are-text) |
+
+Protocol revision `2025-11-25`.
+
+## Adding a server
+
+<Steps>
+  <Step title="Open the manager">
+    Run **AI: Manage MCP Servers…** from the Command Palette (<Kbd keys="shift+cmd+p" />), or type `/mcp` in the chat and click **Manage servers…** at the bottom of the list.
+  </Step>
+  <Step title="Add a server">
+    Choose **Add a server…** and give it three things:
+
+    - a **name** — short, used to namespace its tools as `name__tool`
+    - a **command** — the executable to run
+    - an **argument line** — space-separated, quote anything containing spaces
+
+    The argument line is quote-aware, which matters more than it sounds: `-y @modelcontextprotocol/server-filesystem "/Users/you/My Documents"` is one of the most common MCP configs there is, and a naive whitespace split turns that path into three broken arguments.
+  </Step>
+  <Step title="Allow the tools you want to run silently">
+    Everything defaults to asking. Add the tools you're happy to run unattended to `levelcode.ai.mcp.toolPolicy` — see [Trust and approval](#trust-and-approval).
+  </Step>
+</Steps>
+
+### Editing settings directly
+
+The wizard covers name, command and arguments. Anything else — an `env` block, in particular — goes in `settings.json`:
+
+```json
+{
+  "levelcode.ai.mcp.servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/code"]
+    }
+  }
+}
+```
+
+`levelcode.ai.mcp.servers` also accepts the `{ "mcpServers": { … } }` wrapper other clients use, so configs paste straight across.
+
+### Per-repo servers
+
+A repo can ship its own servers in `.levelcode/mcp.json`, same shape, so a team shares one config:
+
+```json
+{
+  "mcpServers": {
+    "db": { "command": "npx", "args": ["-y", "some-db-mcp"] }
+  }
+}
+```
+
+Everything in that file is **untrusted** — see below. It is the one place a server can arrive without you having typed it.
+
+## Trust and approval
+
+Four rules, and they exist because "add an MCP server" is a request to run arbitrary code, and because the text a server returns is read by a model that will act on it.
+
+### Where a server came from decides how it's treated
+
+| Defined in | Authored by | Consequence |
+| --- | --- | --- |
+| Your settings | You | Starts without asking. Wins any name collision — a repo can never redefine a server you defined |
+| `.levelcode/mcp.json` | Whoever wrote the repo | Attacker-controlled for any repo you clone. Cannot start until you approve the exact command line |
+
+Both settings are **application-scoped**, so a repo's committed `.vscode/settings.json` cannot add a server or allow a tool. Opening an untrusted repo can never, by itself, make LevelCode spawn a process. This is also why **Add a server…** writes your user settings and never the workspace tier — offering that choice would quietly undo the guarantee.
+
+### A repo server asks before it starts
+
+The first time the agent needs a repo-defined server, you get a card showing the **exact command, arguments and environment** that would be spawned. Nothing runs until you approve it.
+
+Approving stores a SHA-256 fingerprint of that launch, scoped to this workspace.
+
+<Note>
+  The fingerprint covers the whole launch, not just the server's name. If the repo later changes so much as one argument, the approval no longer matches and LevelCode says **`command changed — needs approval`** rather than folding it in with "never approved" — because getting something harmless approved and then swapping the command is exactly the attack the gate exists to stop.
+</Note>
+
+Approval is reversible: **Manage MCP servers… → Revoke trust**, per server or workspace-wide. Revoking doesn't kill a server already running in this session; it means the next run asks again.
+
+### Every tool call asks by default
+
+Not "asks for writes" — asks for everything. The only thing that grants silent execution is your explicit allow-list:
+
+```json
+{
+  "levelcode.ai.mcp.toolPolicy": {
+    "github__pull_request_read": "allow",
+    "github__merge_pull_request": "ask"
+  }
+}
+```
+
+Keys are the **namespaced** name, `server__tool`, exactly as it appears in the chat. `"*": "allow"` permits everything from every server.
+
+One rule outranks your allow-list: if a server marks a tool with `destructiveHint`, it always asks and the policy cannot override it.
+
+<Warning>
+  **Autopilot is not a bypass.** Autopilot lets the agent run its own built-in tools without stopping. It does not extend to MCP tools — a call that isn't explicitly allow-listed still prompts. An MCP tool is third-party code, so Autopilot does not relax it.
+</Warning>
+
+### Text from a server is untrusted input
+
+Tool descriptions and tool results are third-party strings that a model reads and acts on — the classic prompt-injection surface. There is no complete fix. LevelCode bounds descriptions and results (see [Limits](#limits)) and is explicit that bounding is mitigation, not a solution.
+
+The practical consequence: **be more careful allow-listing a tool whose output you haven't seen** than one you have.
+
+## Seeing what's connected
+
+Type `/mcp` in the chat.
+
+It lists **configured** servers, not running ones — deliberately, because the questions it exists to answer are *"why isn't my server being used?"* and *"what is this repo asking to run?"*, and a list of live processes answers neither.
+
+Each row shows:
+
+- **state** — `running`, `needs approval`, `command changed — needs approval`, or `not started`
+- **provenance** — your settings, or which repo file
+- the **literal command line** that runs
+- when connected, the **real tool names** with their allow-list state
+
+Those names come from the same code path the agent uses, so the list can't claim a tool is allowed while the agent refuses it. It's the reliable way to write `toolPolicy` keys — particularly for servers whose tools contain characters that get rewritten (see [Tool names](#tool-names)).
+
+### What it costs you every turn
+
+Every tool schema rides **every turn**. A server advertising sixty tools spends part of your context window on every message you send, whether or not you use it.
+
+The context-usage popover has an **MCP tools** segment carved out of the existing Tools slice, so the bar still sums correctly. It appears only when a server contributed a tool. Check it after adding a server — it's the standing rent, and it was invisible before.
+
+## Tool names
+
+MCP tools are exposed to the model as `server__tool`. This is a correctness gate, not cosmetics: providers require names matching `^[a-zA-Z0-9_-]{1,64}$`, and an illegal character fails the first agent turn with an opaque provider error that then poisons the rest of the conversation.
+
+So LevelCode sanitises, truncates stably at 64 characters, and never lets an MCP tool shadow a built-in.
+
+That rewriting is visible and it matters for your allow-list:
+
+```text
+models.search       →  replicate__models_search
+predictions.create  →  replicate__predictions_create
+```
+
+A `toolPolicy` key using the raw name silently never matches. Run `/mcp` once after connecting and copy the real names.
+
+## Results are text
+
+A tool result reaches the agent as a **string**. When a server returns an MCP `image` content block — base64 bytes inline, the obvious way to return a picture — LevelCode replaces it with a placeholder. The model never sees the image, and neither do you.
+
+| What the server returns | What the agent receives |
+| --- | --- |
+| `image` block, base64 | `[image image/png omitted — the transcript is text]` |
+| `text` block with a URL | the URL |
+| `structuredContent` | the JSON |
+| writes a file, reports the path | the path |
+
+<Tip>
+  If you're picking an image-generation server, this single criterion matters more than model quality or price — a server that only returns inline bytes produces nothing usable here. [Server recipes](/docs/mcp-recipes#image-generation) covers which ones return what.
+</Tip>
+
+## Limits
+
+Bounds exist because every schema rides every turn, and because a runaway server shouldn't be able to hang the agent or eat the context window.
+
+| Bound | Value | Why |
+| --- | --- | --- |
+| Servers | 20 | A config with 500 is a mistake, not a use case |
+| Tools per server | 64 | Every schema rides every turn |
+| Tool-name length | 64 | The stricter of Anthropic's 128 and OpenAI's 64 |
+| Tool description | 1,024 chars | Context cost, and the injection surface above |
+| Result | 24,000 chars | Truncated, not dropped |
+| Handshake | 20 s | Spawn, `initialize` and `tools/list` together |
+| One tool call | 60 s | A hung server must not hang the agent |
+
+Servers are killed on **New Chat** and on window close, so nothing is left orphaned.
+
+## Reference
+
+| Setting | Scope | Purpose |
+| --- | --- | --- |
+| `levelcode.ai.mcp.servers` | User only | Name → `{ command, args, env }` |
+| `levelcode.ai.mcp.toolPolicy` | User only | `server__tool` → `"allow"` \| `"ask"`; `"*"` matches all |
+| `.levelcode/mcp.json` | Repo | Per-workspace servers, gated by approval |
+
+| Command | Where |
+| --- | --- |
+| **AI: Manage MCP Servers…** | Command Palette |
+| `/mcp` | The chat input |
+
+<CardGroup>
+  <Card title="Server recipes" href="/docs/mcp-recipes">
+    Working configurations for GitHub, filesystem, image generation, and hosted servers.
+  </Card>
+  <Card title="Agent" href="/docs/agent">
+    The loop these tools plug into, and the approval model they inherit.
+  </Card>
+</CardGroup>

@@ -80,6 +80,23 @@ export const DOCS_NAV: DocGroup[] = [
     ],
   },
   {
+    group: "MCP",
+    items: [
+      {
+        title: "MCP servers",
+        href: "/docs/mcp",
+        blurb:
+          "Connect Model Context Protocol servers to give the agent tools LevelCode doesn't ship, and the approval model that governs them.",
+      },
+      {
+        title: "Server recipes",
+        href: "/docs/mcp-recipes",
+        blurb:
+          "Working configurations for GitHub, the filesystem, image generation, and hosted servers — plus how to keep API tokens out of settings.json.",
+      },
+    ],
+  },
+  {
     group: "The editor",
     items: [
       {
