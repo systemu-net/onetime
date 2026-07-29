@@ -153,7 +153,7 @@ The context-usage popover has an **MCP tools** segment carved out of the existin
 
 MCP tools are exposed to the model as `server__tool`. This is a correctness gate, not cosmetics: providers require names matching `^[a-zA-Z0-9_-]{1,64}$`, and an illegal character fails the first agent turn with an opaque provider error that then poisons the rest of the conversation.
 
-So LevelCode sanitises, truncates stably at 64 characters, and never lets an MCP tool shadow a built-in.
+So LevelCode sanitizes, truncates stably at 64 characters, and never lets an MCP tool shadow a built-in.
 
 That rewriting is visible and it matters for your allow-list:
 

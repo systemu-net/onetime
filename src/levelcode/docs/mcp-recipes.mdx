@@ -47,8 +47,24 @@ Save this as `~/.levelcode/mcp/github-mcp` and `chmod 755` it:
 #!/bin/sh
 set -eu
 
-GH=${GH_BIN:-/opt/homebrew/bin/gh}
-DOCKER=${DOCKER_BIN:-/usr/local/bin/docker}
+# Resolve a binary: an explicit override wins, then PATH, then the usual install
+# locations. PATH alone is not enough — a GUI-launched macOS app inherits a minimal
+# PATH with neither Homebrew prefix on it, which is the case this wrapper exists for.
+# /opt/homebrew is Apple Silicon, /usr/local is Intel.
+find_bin() {
+  if [ -n "${2:-}" ]; then printf '%s\n' "$2"; return 0; fi
+  command -v "$1" 2>/dev/null && return 0
+  for dir in /opt/homebrew/bin /usr/local/bin /usr/bin \
+             /Applications/Docker.app/Contents/Resources/bin; do
+    if [ -x "$dir/$1" ]; then printf '%s\n' "$dir/$1"; return 0; fi
+  done
+  return 1
+}
+
+GH=$(find_bin gh "${GH_BIN:-}") ||
+  { echo 'github-mcp: gh not found — install the GitHub CLI, or set GH_BIN' >&2; exit 78; }
+DOCKER=$(find_bin docker "${DOCKER_BIN:-}") ||
+  { echo 'github-mcp: docker not found — install Docker Desktop, or set DOCKER_BIN' >&2; exit 78; }
 
 # Every tool schema rides EVERY turn, so this is a context budget, not a preference.
 : "${GITHUB_TOOLSETS:=pull_requests,repos,issues,context}"
@@ -145,7 +161,7 @@ If you add it through **Add a server…** instead, the argument line is quote-aw
 
 | Server | Returns | Key | Best for |
 | --- | --- | --- | --- |
-| **Replicate** (official) — `replicate-mcp` | URL | `REPLICATE_API_TOKEN` | The default. Whole catalogue via one server |
+| **Replicate** (official) — `replicate-mcp` | URL | `REPLICATE_API_TOKEN` | The default. Whole catalog via one server |
 | **fal.ai** — `fal-ai-mcp-server` | URL | `FAL_KEY` | Speed. Strong throughput on FLUX |
 | **Recraft** — `@recraft-ai/mcp-recraft-server` | URL + file | `RECRAFT_API_KEY` | **Vectors.** True SVG output |
 | **EverArt** — `@modelcontextprotocol/server-everart` | URL | `EVERART_API_KEY` | Minimal, one tool |
