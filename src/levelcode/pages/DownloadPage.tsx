@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import LevelNav from "../components/LevelNav";
+// One implementation, shared with the landing page — which needs the same question answered
+// before it can decide whether a Download button is even a sensible primary action.
+import { detectMac, type Detected } from "../platform";
 
 // Direct links to the latest published macOS builds. GitHub's /releases/latest/download/<asset>
 // alias always 302s to the newest published (non-prerelease) asset of that exact name.
@@ -10,42 +13,6 @@ const DMG = {
   arm64: `${RELEASES}/download/LevelCode-arm64.dmg`,
   x64: `${RELEASES}/download/LevelCode-x64.dmg`,
 } as const;
-
-type Detected = "arm64" | "x64" | "unknown-mac" | "not-mac";
-
-// Best-effort client detection — layered, never blocking, and the UI always exposes both builds.
-async function detectMac(): Promise<Detected> {
-  const nav = navigator as Navigator & {
-    userAgentData?: { getHighEntropyValues?: (hints: string[]) => Promise<{ architecture?: string }> };
-  };
-  const ua = navigator.userAgent;
-  const isMac = /Mac/i.test(navigator.platform) || /Macintosh/.test(ua);
-  const isIpad = isMac && (navigator.maxTouchPoints ?? 0) > 1; // iPadOS reports "MacIntel"
-  if (!isMac || isIpad) return "not-mac";
-
-  // 1) Chromium high-entropy hints (async; undefined in Safari/Firefox).
-  try {
-    const hi = await nav.userAgentData?.getHighEntropyValues?.(["architecture"]);
-    if (hi?.architecture === "arm") return "arm64";
-    if (hi?.architecture === "x86") return "x64";
-  } catch {
-    /* fall through */
-  }
-
-  // 2) WebGL renderer (works in Safari/Firefox/Chromium). Apple GPU ⇒ Apple Silicon.
-  try {
-    const canvas = document.createElement("canvas");
-    const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
-    const ext = gl?.getExtension("WEBGL_debug_renderer_info");
-    const r = ext && gl ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : "";
-    if (/apple/i.test(r)) return "arm64";
-    if (/intel|amd|radeon/i.test(r)) return "x64";
-  } catch {
-    /* fall through */
-  }
-
-  return "unknown-mac"; // default the CTA to Apple Silicon (every Mac since late-2020)
-}
 
 export default function DownloadPage() {
   const [detected, setDetected] = useState<Detected>("unknown-mac");

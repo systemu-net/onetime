@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AgentShowcase from "../components/AgentShowcase";
+import { useSession } from "../auth";
+import { isMacDevice } from "../platform";
 import ClassicShell from "../components/classic/ClassicShell";
 import SketchBuilder from "../components/level/SketchBuilder";
 
@@ -60,6 +62,11 @@ function useLatestVersion(): string {
 
 export default function LandingPage() {
   const version = useLatestVersion();
+  const { profile } = useSession();
+  // Read ONCE, synchronously, on the first render. The device does not change under the visitor, and
+  // computing it in state would mean rendering a Download button and replacing it a frame later —
+  // a primary call to action that moves under the reader's thumb.
+  const [isMac] = useState(isMacDevice);
   return (
     <ClassicShell strip>
 
@@ -107,32 +114,57 @@ export default function LandingPage() {
               </li>
               <li className="pt-1">
                 <span className="block font-semibold text-[var(--c-text)]">macOS</span>
-                <span className="text-[13px] text-[var(--c-text3)]">For Apple Silicon and Intel Macs</span>
+                <span className="text-[13px] text-[var(--c-text3)]">
+                  {isMac ? "For Apple Silicon and Intel Macs" : "LevelCode is a desktop editor for Apple Silicon and Intel Macs"}
+                </span>
               </li>
-              <li>
-                <a href={DMG_ARM} className="classic-button w-full" download>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden>
-                    <path d="M7.47 10.78a.75.75 0 0 0 1.06 0l3.75-3.75a.75.75 0 0 0-1.06-1.06L8.75 8.44V1.75a.75.75 0 0 0-1.5 0v6.69L4.78 5.97a.75.75 0 0 0-1.06 1.06l3.75 3.75ZM3.75 13a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
-                  </svg>
-                  Download
-                </a>
-              </li>
-              <li className="text-[13px] text-[var(--c-text3)]">
-                Intel Mac?{" "}
-                <a href={DMG_X64} className="text-[var(--c-accent)] hover:underline" download>
-                  Download x64
-                </a>
-                {" · "}
-                <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
-                  Other builds
-                </a>
-              </li>
+
+              {isMac ? (
+                <>
+                  <li>
+                    <a href={DMG_ARM} className="classic-button w-full" download>
+                      <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden>
+                        <path d="M7.47 10.78a.75.75 0 0 0 1.06 0l3.75-3.75a.75.75 0 0 0-1.06-1.06L8.75 8.44V1.75a.75.75 0 0 0-1.5 0v6.69L4.78 5.97a.75.75 0 0 0-1.06 1.06l3.75 3.75ZM3.75 13a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
+                      </svg>
+                      Download
+                    </a>
+                  </li>
+                  <li className="text-[13px] text-[var(--c-text3)]">
+                    Intel Mac?{" "}
+                    <a href={DMG_X64} className="text-[var(--c-accent)] hover:underline" download>
+                      Download x64
+                    </a>
+                    {" · "}
+                    <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
+                      Other builds
+                    </a>
+                  </li>
+                </>
+              ) : (
+                <>
+                  {/* Not a Mac — so the download is not the action. Offer the thing that DOES work
+                      here: the account. Signed in, that is the dashboard; signed out, it is sign-in,
+                      which is also what someone arriving from a phone link most likely came to do. */}
+                  <li>
+                    <Link to={profile ? "/account" : "/login"} className="classic-button w-full">
+                      {profile ? "Your account" : "Sign in"}
+                    </Link>
+                  </li>
+                  <li className="text-[13px] text-[var(--c-text3)]">
+                    Open this page on your Mac to download, or see{" "}
+                    <a href={`${GITHUB}/releases`} className="text-[var(--c-accent)] hover:underline">
+                      all builds
+                    </a>
+                    .
+                  </li>
+                </>
+              )}
               <li className="text-[13px] text-[var(--c-text3)]">
                 Free and open source under the{" "}
                 <a href={`${GITHUB}/blob/HEAD/LICENSE`} className="text-[var(--c-accent)] hover:underline">
                   MIT license
                 </a>
-                . No account required.
+                .{isMac ? " No account required." : ""}
               </li>
             </ul>
           </header>
