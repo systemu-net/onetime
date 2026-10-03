@@ -106,8 +106,8 @@ export const DOCS_NAV: DocGroup[] = [
           "The Notepad++ pack: macros, column mode, line operations, encoding and line-ending control, big-file mode.",
       },
       {
-        title: "Hackability",
-        href: "/docs/hackability",
+        title: "Customization",
+        href: "/docs/customization",
         blurb: "The init script, package authoring with hot reload, keymap presets, and themes.",
       },
       {

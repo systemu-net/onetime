@@ -1,8 +1,8 @@
 # Overview
 
-> LevelCode is an AI-native, hackable code editor for macOS. It reads your codebase, edits across files, runs commands behind approval gates, and verifies its own work — on your own API key or on a metered plan.
+> LevelCode is an AI-native, open-source code editor for macOS. It reads your codebase, edits across files, runs commands behind approval gates, and verifies its own work — on your own API key or on a metered plan.
 
-LevelCode is a fork of [Code-OSS](https://github.com/microsoft/vscode), the MIT-licensed core behind VS Code. It keeps the editor you already know — the same Monaco engine, the same extension model, the same keybindings — and adds three things that fork doesn't have: a first-class AI layer that talks straight to whichever model provider you pick, the Notepad++ power-editing toolkit, and the old Atom "everything is hackable" layer.
+LevelCode is a fork of [Code-OSS](https://github.com/microsoft/vscode), the MIT-licensed core behind VS Code. It keeps the editor you already know — the same Monaco engine, the same extension model, the same keybindings — and adds three things that fork doesn't have: a first-class AI layer that talks straight to whichever model provider you pick, the Notepad++ power-editing toolkit, and a customization layer in the spirit of Atom — a startup script, package authoring with live reload, and keymap presets.
 
 It is macOS-only today, and it ships under the MIT license. It is not produced by, endorsed by, or affiliated with Microsoft.
 
@@ -99,10 +99,10 @@ See [Providers and models](/docs/providers) to pick a provider, and [Cloud and b
 
   </Accordion>
 
-  <Accordion title="Bend the editor at runtime">
+  <Accordion title="Customize the editor as it runs">
     A user init script at `~/.levelcode/init.js` runs at startup with an API for commands, status-bar items, and editor events. Scaffold a package and develop it with hot reload — save a file and it reloads into the running window, no restart. Keymap presets bring Atom or Notepad++ muscle memory over wholesale.
 
-    See [Hackability](/docs/hackability).
+    See [Customization](/docs/customization).
 
   </Accordion>
 </AccordionGroup>
