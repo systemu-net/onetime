@@ -2,11 +2,10 @@ import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { initials, useSession } from "../../auth";
 
-// The shared LevelCode Classic scaffolding (atom.io-heritage): theme state, the flat
-// top-bar, the optional heritage strip, and the octicon footer. Everything scoped
-// under `.classic` / `.classic--dark` (globals.css). Originally logged-out-only; per
-// owner direction the WHOLE app now uses it — landing, pricing, login, legal, and the
-// signed-in Account/Admin dashboard.
+// The shared LevelCode Classic scaffolding: theme state, the flat top-bar, and the
+// footer. Everything scoped under `.classic` / `.classic--dark` (globals.css).
+// Originally logged-out-only; per owner direction the WHOLE app now uses it — landing,
+// pricing, login, legal, and the signed-in Account/Admin dashboard.
 
 export const GITHUB = "https://github.com/levelcodeai/levelcode";
 
@@ -24,13 +23,7 @@ function initialTheme(): Theme {
   }
 }
 
-export default function ClassicShell({
-  children,
-  strip = false,
-}: {
-  children: ReactNode;
-  strip?: boolean;
-}) {
+export default function ClassicShell({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const toggleTheme = () =>
     setTheme((t) => {
@@ -49,15 +42,6 @@ export default function ClassicShell({
     >
       <ClassicNav theme={theme} onToggleTheme={toggleTheme} />
 
-      {strip ? (
-        <p className="border-b border-[var(--c-line)] bg-[var(--c-strip)] px-5 py-2 text-center text-[13px] text-[var(--c-text)]">
-          Atom was sunset on December 15, 2022.{" "}
-          <a href={`${GITHUB}#readme`} className="font-medium text-[var(--c-accent)] hover:underline">
-            LevelCode carries the hackable spirit forward →
-          </a>
-        </p>
-      ) : null}
-
       <div className="flex-1">{children}</div>
 
       <footer className="bg-[var(--c-surface)]">
@@ -72,6 +56,16 @@ export default function ClassicShell({
               <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/privacy">
                 Privacy
               </Link>
+            </li>
+            <li>
+              <Link className="text-[var(--c-text2)] hover:text-[var(--c-text)]" to="/docs">
+                Documentation
+              </Link>
+            </li>
+            <li>
+              <a className="text-[var(--c-text2)] hover:text-[var(--c-text)]" href={GITHUB}>
+                GitHub
+              </a>
             </li>
             <li>
               <a className="text-[var(--c-text2)] hover:text-[var(--c-text)]" href={`${GITHUB}/releases`}>
@@ -116,7 +110,7 @@ function ClassicNav({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () 
             </li>
             <li>
               <a href="https://open-vsx.org/" className="text-[14px] text-[var(--c-text2)] hover:text-[var(--c-text)]">
-                Packages
+                Extensions
               </a>
             </li>
             <li>

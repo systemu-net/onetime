@@ -288,10 +288,10 @@ body {
   }
 }
 
-/* ───────── LevelCode Classic — the atom.io-heritage LOGGED-OUT landing ─────────
-   Scoped to `.classic` so the signed-in dashboard (cream paper-and-ink) is
-   untouched. Colors are literal inside the page markup; only fonts + the
-   portal animation + the two buttons live here. */
+/* ───────── LevelCode Classic — the shared shell's theme ─────────
+   Scoped to `.classic` (ClassicShell): system fonts, the light/dark theme
+   variables, and the two buttons every page uses. The landing page's own
+   layer follows at the end of this file. */
 .classic {
   --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -305,7 +305,6 @@ body {
   --c-line: #e0e0e0;
   --c-accent: #5b3fd6;
   --c-accent-deep: #4527b8;
-  --c-strip: #efeafd;
   color-scheme: light;
 }
 
@@ -319,7 +318,6 @@ body {
   --c-line: #3e4451;
   --c-accent: #7d6bff;
   --c-accent-deep: #5b3fd6;
-  --c-strip: #2e2b45;
   color-scheme: dark;
 }
 
@@ -357,19 +355,6 @@ body {
   border-color: var(--c-accent);
 }
 
-.classic .portal-layer {
-  transform-origin: 50% 60%;
-  animation: portal-drift 7s ease-in-out infinite;
-}
-.classic .portal-layer:nth-child(2) { animation-delay: -1.4s; }
-.classic .portal-layer:nth-child(3) { animation-delay: -2.8s; }
-.classic .portal-layer:nth-child(4) { animation-delay: -4.2s; }
-.classic .portal-layer:nth-child(5) { animation-delay: -5.6s; }
-@keyframes portal-drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-6px) scale(1.02); }
-}
-
 /* Dark-mode legibility for the embedded cream-token demos, re-inked from the
    outside (no shared-component edits — light mode + dashboard untouched):
    the AgentShowcase caption/tab bar, and the SketchBuilder demo framed as a
@@ -401,4 +386,256 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-text3);
+}
+
+/* ───────── Landing page (/ai) ─────────
+   The landing reads as a product page for a professional tool: one idea per
+   section, large type, generous whitespace, and product surfaces shown on a
+   brand-gradient stage. Everything is scoped `.classic .lp-*`, so it follows
+   the shell's light/dark variables and nothing reaches the dashboard, pricing,
+   or docs. */
+.classic {
+  --lp-add: #1a7f37;
+  --lp-del: #cf222e;
+  --lp-pane: rgba(255, 255, 255, 0.96);
+  --lp-pane-line: rgba(255, 255, 255, 0.7);
+  --lp-well: #f3f3f6;
+  /* White on #5b3fd6 is 6.7:1. The dark theme's --c-accent (#7d6bff) is only
+     3.9:1 under white text, so the call to action keeps the deeper violet in
+     both themes rather than following --c-accent. */
+  --lp-cta: #5b3fd6;
+  --lp-cta-hover: #4527b8;
+  --lp-link: #5b3fd6;
+}
+.classic.classic--dark {
+  --lp-add: #57c273;
+  --lp-del: #f47067;
+  --lp-pane: rgba(33, 37, 43, 0.96);
+  --lp-pane-line: rgba(255, 255, 255, 0.08);
+  --lp-well: #1a1d23;
+  --lp-cta-hover: #6c52e6;
+  /* Small links are text, not controls: #7d6bff is 3.6:1 on the dark page, this is 5.9:1. */
+  --lp-link: #a99bff;
+}
+
+/* Type scale — tight tracking at display sizes; the system face does the rest. */
+.classic .lp-h1 {
+  font-size: clamp(2.5rem, 5.6vw, 4rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--c-text);
+}
+.classic .lp-h2 {
+  font-size: clamp(1.875rem, 3.8vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--c-text);
+}
+.classic .lp-h3 {
+  font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--c-text);
+}
+.classic .lp-lead {
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--c-text2);
+}
+.classic .lp-body {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--c-text2);
+}
+.classic .lp-link {
+  color: var(--lp-link);
+}
+.classic .lp-link:hover {
+  text-decoration: underline;
+}
+
+/* The page's one primary action, and its quiet companion. */
+.classic .lp-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--lp-cta);
+  padding: 0.85rem 1.75rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #fff;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+.classic .lp-cta:hover {
+  background: var(--lp-cta-hover);
+}
+.classic .lp-cta--quiet {
+  border-color: var(--c-line);
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+.classic .lp-cta--quiet:hover {
+  border-color: var(--c-accent);
+  background: var(--c-bg);
+}
+
+/* Hero: the app icon's own indigo-to-ice gradient, as a soft wash that fades
+   into the page before the first section. */
+.classic .lp-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.classic .lp-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58rem 26rem at 16% -7rem, rgba(91, 63, 214, 0.2), transparent 64%),
+    radial-gradient(52rem 26rem at 86% -6rem, rgba(95, 180, 255, 0.26), transparent 66%),
+    radial-gradient(38rem 20rem at 50% 2rem, rgba(125, 107, 255, 0.12), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent 100%);
+}
+.classic.classic--dark .lp-hero::before {
+  background:
+    radial-gradient(58rem 26rem at 16% -7rem, rgba(91, 63, 214, 0.42), transparent 64%),
+    radial-gradient(52rem 26rem at 86% -6rem, rgba(95, 180, 255, 0.24), transparent 66%),
+    radial-gradient(38rem 20rem at 50% 2rem, rgba(125, 107, 255, 0.2), transparent 70%);
+}
+/* The closing section mirrors the hero: the same wash, rising from the bottom edge. */
+.classic .lp-hero--closing::before {
+  transform: scaleY(-1);
+}
+.classic .lp-appicon {
+  border-radius: 22.5%;
+  box-shadow:
+    0 1px 2px rgba(10, 12, 22, 0.18),
+    0 20px 44px -18px rgba(91, 63, 214, 0.6);
+}
+
+.classic .lp-card {
+  border: 1px solid var(--c-line);
+  border-radius: 16px;
+  background: var(--c-bg);
+}
+
+/* The stage a product illustration sits on, and the pane that is the product. */
+.classic .lp-stage {
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  background:
+    radial-gradient(90% 80% at 0% 0%, rgba(168, 236, 255, 0.75), transparent 60%),
+    radial-gradient(90% 90% at 100% 100%, rgba(91, 63, 214, 0.55), transparent 62%),
+    linear-gradient(135deg, #b9c6ff 0%, #9d8bff 48%, #8fc8ff 100%);
+}
+.classic.classic--dark .lp-stage {
+  background:
+    radial-gradient(90% 80% at 0% 0%, rgba(95, 180, 255, 0.32), transparent 60%),
+    radial-gradient(90% 90% at 100% 100%, rgba(91, 63, 214, 0.6), transparent 62%),
+    linear-gradient(135deg, #2a2f52 0%, #3a3378 48%, #27466e 100%);
+}
+.classic .lp-pane {
+  border: 1px solid var(--lp-pane-line);
+  border-radius: 14px;
+  background: var(--lp-pane);
+  box-shadow:
+    0 1px 2px rgba(10, 12, 22, 0.08),
+    0 28px 60px -28px rgba(20, 16, 70, 0.55);
+  text-align: left;
+}
+
+/* Pieces of the editor's own UI, as drawn inside a pane. These are pictures of
+   controls (the illustration is aria-hidden), not controls. */
+.classic .lp-bubble {
+  border-radius: 12px;
+  background: var(--lp-well);
+  padding: 0.7rem 0.9rem;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--c-text);
+}
+.classic .lp-well {
+  border-radius: 8px;
+  background: var(--lp-well);
+  padding: 0.6rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--c-text);
+}
+.classic .lp-code {
+  border-radius: 5px;
+  background: var(--lp-well);
+  padding: 0.1rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.classic .lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--c-line);
+  border-radius: 7px;
+  background: var(--c-bg);
+  padding: 0.3rem 0.7rem;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--c-text);
+}
+.classic .lp-btn--primary {
+  border-color: transparent;
+  background: var(--lp-cta);
+  color: #fff;
+}
+.classic .lp-btn--sm {
+  padding: 0.15rem 0.5rem;
+  font-size: 12px;
+}
+.classic .lp-btn kbd {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  opacity: 0.7;
+}
+.classic .lp-group {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text3);
+}
+.classic .lp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+.classic .lp-row--on {
+  background: var(--lp-well);
+}
+.classic .lp-radio {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--c-text3);
+  border-radius: 999px;
+}
+.classic .lp-radio--on {
+  border: 4.5px solid var(--lp-cta);
 }
