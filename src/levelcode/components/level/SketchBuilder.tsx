@@ -103,13 +103,17 @@ const TEMPLATE_BADGE: Record<string, string> = {
 const NODE_W = 200;
 const PORT_Y = 44;
 
-export default function SketchBuilder() {
-  const [dropped, setDropped] = useState<Sketch | null>(null);
-  const [goal, setGoal] = useState("");
+// `preload` opens with the first template already placed, for a host page where the canvas is a
+// picture of the feature first and a toy second — an empty board asks the reader to do something
+// before it shows them anything. The palette still swaps templates, and Run still runs.
+export default function SketchBuilder({ preload = false }: { preload?: boolean }) {
+  const [dropped, setDropped] = useState<Sketch | null>(() => (preload ? TEMPLATES[0] : null));
+  const [goal, setGoal] = useState(() => (preload ? TEMPLATES[0].goal : ""));
   const [dragging, setDragging] = useState(false);
   const [over, setOver] = useState(false);
   const [running, setRunning] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const boardRef = useRef<HTMLDivElement | null>(null);
   const runTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const place = useCallback((s: Sketch) => {
@@ -139,6 +143,15 @@ export default function SketchBuilder() {
   }, [dropped]);
 
   useEffect(() => () => runTimers.current.forEach(clearTimeout), []);
+
+  // Where the board is height-capped (phones), open it on the first node rather than on the
+  // empty margin above it. A no-op on wide screens, where the board is not scrollable vertically.
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board || !dropped) return;
+    board.scrollLeft = 0;
+    board.scrollTop = Math.max(0, dropped.nodes[0].y + PORT_Y - board.clientHeight / 2);
+  }, [dropped]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -253,7 +266,9 @@ export default function SketchBuilder() {
         )}
 
         {dropped && (
-          <div className="relative z-10 w-full overflow-auto p-3">
+          // On a phone the board is as tall as its tallest template but only one node wide, which
+          // reads as an empty box; cap it there so the first nodes sit in view and the rest scrolls.
+          <div ref={boardRef} className="relative z-10 max-h-[420px] w-full overflow-auto p-3 md:max-h-none">
             <div className="relative" style={{ width: dropped.w, height: dropped.h }}>
               <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox={`0 0 ${dropped.w} ${dropped.h}`}>
                 {dropped.edges.map((edge, i) => {

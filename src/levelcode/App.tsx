@@ -1,4 +1,4 @@
-import { Route, Routes, useParams } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import AccountPage from "./pages/AccountPage";
 import AdminPage from "./pages/AdminPage";
 import DocsPage from "./pages/DocsPage";
@@ -38,8 +38,18 @@ export default function App() {
   );
 }
 
+// Doc pages that were renamed: old slug → current slug. A page getting a better name should
+// not break the links already out there — in search results, in release notes, in someone's
+// bookmarks — so the old address forwards, keeping any #section.
+const MOVED_DOCS: Record<string, string> = {
+  hackability: "customization",
+};
+
 /** Pulls the slug out of the URL so DocsPage stays a plain presentational component. */
 function DocsRoute() {
   const { slug } = useParams<{ slug: string }>();
+  const { hash } = useLocation();
+  const moved = slug ? MOVED_DOCS[slug] : undefined;
+  if (moved) return <Navigate to={`/docs/${moved}${hash}`} replace />;
   return <DocsPage slug={slug} />;
 }

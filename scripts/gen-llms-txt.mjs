@@ -22,7 +22,7 @@ const SITE = "https://levelcode.ai";
 
 const INTRO = `# LevelCode
 
-> LevelCode is an AI-native, hackable code editor for macOS, built on Code-OSS (MIT). It reads your codebase, edits across files, runs commands behind approval gates, and verifies its own work — using your own provider API key, a local model via Ollama, or a metered LevelCode Cloud plan.
+> LevelCode is an AI-native, open-source code editor for macOS, built on Code-OSS (MIT). It reads your codebase, edits across files, runs commands behind approval gates, and verifies its own work — using your own provider API key, a local model via Ollama, or a metered LevelCode Cloud plan.
 
 - macOS only. Apple Silicon and Intel.
 - Four AI systems share one provider configuration: Chat, Agent, Edit, and Autocomplete.

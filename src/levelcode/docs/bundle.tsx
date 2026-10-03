@@ -3,8 +3,8 @@ import Agent from "./agent.mdx";
 import Autocomplete from "./autocomplete.mdx";
 import Chat from "./chat.mdx";
 import Cloud from "./cloud.mdx";
+import Customization from "./customization.mdx";
 import Edit from "./edit.mdx";
-import Hackability from "./hackability.mdx";
 import ImportAndUpdates from "./import-and-updates.mdx";
 import Mcp from "./mcp.mdx";
 import McpRecipes from "./mcp-recipes.mdx";
@@ -38,7 +38,7 @@ const PAGES: Record<string, React.ComponentType> = {
   mcp: Mcp,
   "mcp-recipes": McpRecipes,
   "power-editing": PowerEditing,
-  hackability: Hackability,
+  customization: Customization,
   "import-and-updates": ImportAndUpdates,
   cloud: Cloud,
   troubleshooting: Troubleshooting,
