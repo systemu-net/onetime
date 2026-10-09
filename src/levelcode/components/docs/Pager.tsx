@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { docNeighbors } from "../../docs/nav";
+import { useWebEditor } from "../../useWebEditor";
 
 // Previous / next in sidebar order, so the docs can be read straight through.
 // Order comes from docs/nav.ts, which means adding a page in the middle re-links
@@ -7,7 +8,8 @@ import { docNeighbors } from "../../docs/nav";
 
 export default function Pager() {
   const { pathname } = useLocation();
-  const { prev, next } = docNeighbors(pathname);
+  const { enabled: webEditor } = useWebEditor();
+  const { prev, next } = docNeighbors(pathname, { webEditor });
   if (!prev && !next) return null;
 
   return (
