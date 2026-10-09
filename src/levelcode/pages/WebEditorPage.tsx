@@ -16,18 +16,25 @@ import { useWebEditor } from "../useWebEditor";
 //   - Other Chromium browsers (Brave, Arc, Opera): can they open a folder?
 //   - Minimum browser versions.
 //   - Phones and tablets: supported, or not?
-//   - Whether your own provider key (not the gateway) works in the browser edition.
-//   - How much a scratch workspace can hold, and what clearing site data does to it.
-//   - Whether Keep and Undo and checkpoints behave as they do in the Mac app.
+//   - How much a scratch workspace can hold (it is the browser's storage quota, which differs).
+//   - Whether checkpoints behave as they do in the Mac app. (Keep and Undo were run in a browser.)
 // ─────────────────────────────────────────────────────────────────────────────────────────────
 const FACTS = {
   lede: "The real LevelCode workbench, running in a browser tab. Explorer, editor tabs, themes, the chat panel and the agent are all there. Nothing to install.",
-  signIn: "Sign in with your LevelCode account. The gateway plan and usage are the same as in the Mac app.",
+  signIn:
+    "Sign in with your LevelCode account. The gateway plan and usage are the same as in the Mac app. The editor takes this tab to your account and back, and if you are already signed in there you come straight back.",
 
   works: [
     { title: "The workbench", body: "Explorer, editor tabs, themes and the chat panel." },
-    { title: "The agent", body: "It can read, search, create, edit and delete files in the open workspace." },
+    {
+      title: "The agent",
+      body: "It can read, search, create, edit and delete files in the open workspace. Its changes are applied at once and offered for Keep or Undo.",
+    },
     { title: "Your account", body: "The gateway plan and usage are the same as in the Mac app." },
+    {
+      title: "Your own key",
+      body: "Use a provider key of your own instead of the gateway. It is kept encrypted in this browser, and requests go from the browser to the provider, so the provider has to accept requests from a web page.",
+    },
     {
       title: "Your files",
       body: "Open a folder from your computer, or work in a scratch workspace saved in your browser.",
@@ -42,7 +49,7 @@ const FACTS = {
   },
   scratch: {
     title: "Use a scratch workspace",
-    body: "A workspace that is saved in your browser. It works in every modern browser, including Safari and Firefox.",
+    body: "A workspace that is saved in your browser. It works in every modern browser, including Safari and Firefox. Clearing the site's data in your browser removes it.",
   },
   // `folder` is true where the File System Access API is available. Every row can use a scratch workspace.
   browsers: [

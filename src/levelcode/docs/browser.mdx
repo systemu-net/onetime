@@ -22,9 +22,9 @@ The editor opens in the same tab.
 
 The browser edition uses your LevelCode account, the same one you use in the Mac app. The gateway plan and usage are the same as in the Mac app.
 
-Sign-in happens in a separate tab. If the sign-in tab does not close, go back to the editor tab.
+Opening the editor from this site signs you in. The editor takes the tab to your LevelCode account and back, in the same tab, so no second window opens. If you are already signed in to your account in this browser, you come straight back.
 
-If the sign-in tab does not open at all, see [Troubleshooting](#troubleshooting).
+You can also use a provider key of your own instead of the gateway. The key is kept encrypted in your browser, and requests go from your browser to the provider, so the provider has to accept requests from a web page.
 
 ## Where your files live
 
@@ -36,7 +36,7 @@ LevelCode uses the File System Access API, so edits go straight to the folder yo
 
 ### Use a scratch workspace
 
-A scratch workspace is saved in your browser. It works in every modern browser, including Safari and Firefox.
+A scratch workspace is saved in your browser. It works in every modern browser, including Safari and Firefox. Clearing the site's data in your browser removes it.
 
 <Note>
   Files stay in your browser or on your computer. [Privacy](#privacy) covers what goes to the model.
@@ -44,7 +44,7 @@ A scratch workspace is saved in your browser. It works in every modern browser, 
 
 ## What the agent can do here
 
-The agent can read, search, create, edit and delete files in the open workspace.
+The agent can read, search, create, edit and delete files in the open workspace. Its changes are applied at once and offered for Keep or Undo.
 
 It cannot run shell commands, and there is no terminal. Work that needs either one stays in the Mac app.
 
@@ -79,20 +79,14 @@ The text you send in chat and the files you ask LevelCode to read go to the mode
 ## Troubleshooting
 
 <AccordionGroup>
-  <Accordion title="The sign-in tab does not open">
-    Sign-in opens in a separate tab. If your browser blocks pop-ups, that tab never appears. Allow pop-ups for the editor's address, then start sign-in again.
-
-    {/* TODO(owner): confirm what a blocked pop-up looks like in the editor, and whether the editor offers a retry. */}
-  </Accordion>
-
-  <Accordion title="The sign-in tab does not close">
-    Go back to the editor tab.
+  <Accordion title="After signing in I am not back in the editor">
+    Signing in returns to the editor in the same tab. If you end on a page that says you are signed in, use **Open LevelCode in this tab** there: the editor finishes the sign-in when it opens. The sign-in is good for about two minutes.
   </Accordion>
 
   <Accordion title="I am asked to sign in again, or my workspace is missing">
-    The editor keeps your sign-in and your scratch workspace in your browser. Settings that block third-party cookies and site data, or that clear site data when you close the browser, can remove them. Allow site data for the editor's address, and keep it from being cleared when you quit the browser.
+    The editor keeps your sign-in and your scratch workspace in your browser's site storage (local storage and IndexedDB), not in cookies. Settings that block site data, or that clear it when you close the browser, remove them. Allow site data for the editor's address, and keep it from being cleared when you quit the browser.
 
-    {/* TODO(owner): confirm which storage the editor relies on (cookies, local storage, IndexedDB), and the setting names to give per browser. */}
+    {/* TODO(owner): the setting names to give per browser. */}
   </Accordion>
 
   <Accordion title="Safari private browsing">

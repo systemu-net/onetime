@@ -17,7 +17,12 @@ import { api } from "./api";
 export type WebEditor = {
   /** True only when the backend said so AND handed over an address that is safe to link to. */
   enabled: boolean;
-  /** Where "Open LevelCode" goes. Non-null whenever `enabled` is true. */
+  /**
+   * Where "Open LevelCode" goes. Non-null whenever `enabled` is true. It is the editor asked to sign
+   * this visitor in (`?signin=1`): an editor that is already signed in ignores the request, and one
+   * that is not takes the tab to the account site and back. The editor removes the parameter from the
+   * address as soon as it has read it.
+   */
   url: string | null;
   /** The request is still in flight. An entry point renders nothing while this is true. */
   loading: boolean;
@@ -53,12 +58,19 @@ function linkable(raw: unknown): string | null {
   return u.protocol === "http:" && thisMachine ? u.href : null;
 }
 
+/** The editor's address with the request to sign the visitor in. Any other query it already has is kept. */
+function withSignIn(href: string): string {
+  const u = new URL(href);
+  u.searchParams.set("signin", "1");
+  return u.href;
+}
+
 function parse(body: unknown): WebEditor {
   if (!body || typeof body !== "object") return OFF;
   const { enabled, url } = body as { enabled?: unknown; url?: unknown };
   const href = linkable(url);
   // `enabled` must be the boolean true, not merely truthy: "false" the string is truthy.
-  return enabled === true && href ? { enabled: true, url: href, loading: false } : OFF;
+  return enabled === true && href ? { enabled: true, url: withSignIn(href), loading: false } : OFF;
 }
 
 let snapshot: WebEditor = PENDING;
