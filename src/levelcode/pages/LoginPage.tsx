@@ -25,6 +25,8 @@ export default function LoginPage() {
   // lone (unbound) redirect_uri never reaches the backend.
   const editorHandoff = redirectUri && codeChallenge ? { redirectUri, codeChallenge } : null;
   const fromEditor = !!editorHandoff;
+  // The browser edition's callback is a page in this very tab; the desktop editor's is a deep link to an app.
+  const toBrowserEditor = !!editorHandoff && /^https?:\/\//i.test(editorHandoff.redirectUri);
 
   const { loading: sessionLoading, profile } = useSession();
   // idle: probing session / about to redirect · completing: minting an editor code · form: show sign-in.
@@ -72,8 +74,9 @@ export default function LoginPage() {
           <div className="w-full max-w-md rounded-md border border-[var(--c-line)] bg-[var(--c-surface)] p-8 text-center">
             <h1 className="text-xl font-semibold text-[var(--c-text)]">Opening LevelCode…</h1>
             <p className="mt-3 text-[14px] pretty">
-              Signing the editor into your account. You can return to LevelCode — this tab can be
-              closed.
+              {toBrowserEditor
+                ? "Signing the editor into your account. You are being sent back to LevelCode."
+                : "Signing the editor into your account. You can return to LevelCode — this tab can be closed."}
             </p>
           </div>
         </main>

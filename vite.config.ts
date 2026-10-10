@@ -21,7 +21,9 @@ function injectRuntimeEnv(): Plugin {
 // LevelCode Cloud SERVER endpoints (Rails). In prod Rails serves these directly; in
 // dev they're proxied to the backend (see server.proxy below). Everything ELSE
 // under /ai/* is a client route → the SPA shell.
-const AI_SERVER_PREFIXES = ["/ai/auth", "/ai/checkout", "/ai/billing", "/ai/signout", "/ai/csrf"];
+// /ai/authorize_editor is how an already-signed-in browser hands an editor its PKCE-bound code (the "Open in
+// browser" and "IDE" links); without it here the dev server answers that POST with the SPA shell.
+const AI_SERVER_PREFIXES = ["/ai/auth", "/ai/authorize_editor", "/ai/checkout", "/ai/billing", "/ai/signout", "/ai/csrf"];
 
 function isAiServerPath(url: string): boolean {
   return AI_SERVER_PREFIXES.some((p) => url === p || url.startsWith(`${p}/`) || url.startsWith(`${p}?`));

@@ -35,12 +35,18 @@ const INTRO = `# LevelCode
 // nav.ts is TypeScript, so it can't be imported from a plain node script without a
 // build step. Parsing the object literals keeps this dependency-free; the shapes
 // are fixed by the DocGroup/DocLink types next door.
+//
+// An item may end with `requiresWebEditor: true` (a page about the browser edition,
+// which the backend can switch off). That flag is what keeps the page out of this
+// index: llms.txt is a static file, so it cannot follow a runtime switch, and
+// listing a page for a feature that may be off would advertise it early.
 function parseNav(source) {
   const body = source.slice(source.indexOf("export const DOCS_NAV"));
   const groups = [];
 
   const groupRe = /group:\s*"((?:[^"\\]|\\.)*)"/g;
-  const itemRe = /\{\s*title:\s*"((?:[^"\\]|\\.)*)",\s*href:\s*"((?:[^"\\]|\\.)*)",\s*blurb:\s*\n?\s*"((?:[^"\\]|\\.)*)",?\s*\}/g;
+  const itemRe =
+    /\{\s*title:\s*"((?:[^"\\]|\\.)*)",\s*href:\s*"((?:[^"\\]|\\.)*)",\s*blurb:\s*\n?\s*"((?:[^"\\]|\\.)*)",?(?:\s*requiresWebEditor:\s*(true),?)?\s*\}/g;
 
   const marks = [...body.matchAll(groupRe)];
   for (let i = 0; i < marks.length; i++) {
@@ -51,13 +57,29 @@ function parseNav(source) {
       title: m[1],
       href: m[2],
       blurb: m[3].replace(/\\"/g, '"'),
+      gated: m[4] === "true",
     }));
     groups.push({ group: marks[i][1], items });
+  }
+
+  // The parser is a set of regexes over source text, so a page that stops matching (a new field,
+  // reordered keys) would silently drop out of the index. Count the hrefs instead of trusting it.
+  const declared = (body.match(/\bhref:\s*"/g) || []).length;
+  const parsed = groups.reduce((n, g) => n + g.items.length, 0);
+  if (declared !== parsed) {
+    console.error(
+      `gen-llms-txt: nav.ts declares ${declared} pages but ${parsed} parsed. An entry no longer matches the shape this script reads.`,
+    );
+    process.exit(1);
   }
   return groups;
 }
 
-const nav = parseNav(readFileSync(NAV, "utf8"));
+const parsedNav = parseNav(readFileSync(NAV, "utf8"));
+// Pages that need the browser edition are not in the index (see parseNav). A group left empty goes too.
+const nav = parsedNav
+  .map((g) => ({ ...g, items: g.items.filter((i) => !i.gated) }))
+  .filter((g) => g.items.length > 0);
 
 const total = nav.reduce((n, g) => n + g.items.length, 0);
 if (total === 0) {

@@ -1,0 +1,114 @@
+# LevelCode in your browser
+
+> The LevelCode workbench in a browser tab. Sign in with your account, open a folder or a scratch workspace, and work with the chat panel and the agent. Nothing to install.
+
+{/*
+  The facts on this page are the same ones as in pages/WebEditorPage.tsx (the FACTS block at the top
+  of that file). Change them together. Where a statement rests on something we have not confirmed,
+  a TODO(owner) comment sits right beside it. Nothing here is a claim beyond that list.
+*/}
+
+The browser edition is the real LevelCode workbench running in a tab. The explorer, editor tabs, themes, the chat panel and the agent are all there. You sign in with the same LevelCode account as the Mac app, and the gateway plan and usage are the same.
+
+A few things stay in the Mac app. The browser edition has no terminal, and the agent does not run shell commands. The [full list](#what-stays-in-the-mac-app) is below.
+
+## Open it
+
+Open [LevelCode in your browser](/web) and choose **Open LevelCode**. If you are signed in, **Open in browser** on your [account page](/account) goes to the same place.
+
+The editor opens in the same tab.
+
+## Sign in
+
+The browser edition uses your LevelCode account, the same one you use in the Mac app. The gateway plan and usage are the same as in the Mac app.
+
+Opening the editor from this site signs you in. The editor takes the tab to your LevelCode account and back, in the same tab, so no second window opens. If you are already signed in to your account in this browser, you come straight back.
+
+You can also use a provider key of your own instead of the gateway. The key is kept encrypted in your browser, and requests go from your browser to the provider, so the provider has to accept requests from a web page.
+
+## Where your files live
+
+There are two ways to work with files.
+
+### Open a folder from your computer
+
+LevelCode uses the File System Access API, so edits go straight to the folder you picked. This works in Chrome and Edge.
+
+### Use a scratch workspace
+
+A scratch workspace is saved in your browser. It works in every modern browser, including Safari and Firefox. Clearing the site's data in your browser removes it.
+
+<Note>
+  Files stay in your browser or on your computer. [Privacy](#privacy) covers what goes to the model.
+</Note>
+
+## What the agent can do here
+
+The agent can read, search, create, edit and delete files in the open workspace. Its changes are applied at once and offered for Keep or Undo.
+
+It cannot run shell commands, and there is no terminal. Work that needs either one stays in the Mac app.
+
+## What stays in the Mac app
+
+These are not in the browser edition.
+
+- The terminal
+- Running shell commands
+- MCP servers that start local processes
+- Installing extensions
+
+They stay in the Mac app. Get it from the [download page](/download), or see [Install and setup](/docs/setup).
+
+## Browser support
+
+| Browser | Open a folder | Scratch workspace |
+| --- | --- | --- |
+| Chrome | Yes | Yes |
+| Edge | Yes | Yes |
+| Safari | No | Yes |
+| Firefox | No | Yes |
+
+{/* TODO(owner): other Chromium browsers (Brave, Arc, Opera), minimum versions, and phones and tablets are not listed because we have not confirmed them. */}
+
+## Privacy
+
+Files stay in your browser or on your computer.
+
+The text you send in chat and the files you ask LevelCode to read go to the model through the LevelCode gateway, the same as in the Mac app. [Cloud and billing](/docs/cloud#privacy) explains how requests are routed on the gateway.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="After signing in I am not back in the editor">
+    Signing in returns to the editor in the same tab. If you end on a page that says you are signed in, use **Open LevelCode in this tab** there: the editor finishes the sign-in when it opens. The sign-in is good for about two minutes.
+  </Accordion>
+
+  <Accordion title="I am asked to sign in again, or my workspace is missing">
+    The editor keeps your sign-in and your scratch workspace in your browser's site storage (local storage and IndexedDB), not in cookies. Settings that block site data, or that clear it when you close the browser, remove them. Allow site data for the editor's address, and keep it from being cleared when you quit the browser.
+
+    {/* TODO(owner): the setting names to give per browser. */}
+  </Accordion>
+
+  <Accordion title="Safari private browsing">
+    A private window in Safari discards site data when you close it. A scratch workspace and your sign-in do not carry over to the next private window. Use a regular window to keep them.
+
+    {/* TODO(owner): confirm what the editor does in a private window: works and forgets, or refuses to start. */}
+  </Accordion>
+
+  <Accordion title="I cannot open a folder">
+    Opening a folder works in Chrome and Edge. In Safari and Firefox, use a scratch workspace.
+  </Accordion>
+
+  <Accordion title="The terminal or an extension is missing">
+    The terminal, running shell commands, MCP servers that start local processes and installing extensions stay in the Mac app.
+  </Accordion>
+</AccordionGroup>
+
+<CardGroup>
+  <Card title="Install and setup" href="/docs/setup">
+    Get the Mac app, for the terminal and everything else that stays there.
+  </Card>
+  <Card title="Cloud and billing" href="/docs/cloud">
+    Sign in, usage, and how requests are routed.
+  </Card>
+</CardGroup>

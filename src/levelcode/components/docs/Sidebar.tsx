@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { DOCS_NAV } from "../../docs/nav";
+import { visibleDocsNav } from "../../docs/nav";
+import { useWebEditor } from "../../useWebEditor";
 
 // The docs tree, in two shapes off one list: `MobileNav` is a full-bleed
 // disclosure that sits under the site nav on small screens, `Sidebar` is the
@@ -9,10 +10,12 @@ import { DOCS_NAV } from "../../docs/nav";
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const { pathname } = useLocation();
+  // Pages about the browser edition are listed only while the backend has it on (docs/nav.ts).
+  const { enabled: webEditor } = useWebEditor();
 
   return (
     <nav aria-label="Documentation" className="text-[14px]">
-      {DOCS_NAV.map((group) => (
+      {visibleDocsNav({ webEditor }).map((group) => (
         <div key={group.group} className="mb-6 last:mb-0">
           <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--c-text3)]">
             {group.group}

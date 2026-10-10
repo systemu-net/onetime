@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { initials, useSession } from "../auth";
+import { useWebEditor } from "../useWebEditor";
 
 const GITHUB = "https://github.com/levelcodeai/levelcode";
 // Bare launch deep-link (NO credential in the URL). The editor handles it: it focuses
@@ -12,6 +13,7 @@ const IDE_LAUNCH = "levelcode://levelcode.levelcode-ai/launch";
 // avatar when signed in, else a Sign-in link.
 export default function LevelNav() {
   const { profile } = useSession();
+  const webEditor = useWebEditor();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-rule bg-paper/85 backdrop-blur-md">
@@ -56,6 +58,19 @@ export default function LevelNav() {
               >
                 IDE <span aria-hidden="true">↗</span>
               </a>
+              {/* The same editor, in a tab, beside the one that is an app. Hidden under `sm` for want
+                  of room (the bar is already full there with the IDE chip); the download page, the
+                  only page that renders this nav, also carries a line for it in the page itself. */}
+              {webEditor.enabled && webEditor.url ? (
+                <a
+                  href={webEditor.url}
+                  title="Open LevelCode in your browser"
+                  aria-label="Open LevelCode in your browser"
+                  className="hidden items-center gap-1 rounded-full border border-rule bg-card px-3 py-1.5 text-sm text-sub transition-colors hover:border-ink hover:text-ink sm:inline-flex"
+                >
+                  Browser <span aria-hidden="true">↗</span>
+                </a>
+              ) : null}
               <Link
                 to="/account"
                 title="Account"
