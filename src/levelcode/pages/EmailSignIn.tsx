@@ -46,9 +46,10 @@ export default function EmailSignIn({
       });
       if (!d.redirect) throw new ApiError(422, "That code is invalid or has expired.");
 
-      // A path (/ai/account) → in-app navigation; anything else is the editor's custom-scheme
-      // deep-link (levelcode://…) — scheme-agnostic so it survives the editor's urlProtocol rename.
-      if (!d.redirect.startsWith("/")) {
+      // A path (/ai/account) → in-app navigation; an http(s) address is the browser edition's callback page
+      // (the tab simply goes there and the editor is back in it); anything else is the desktop editor's
+      // custom-scheme deep-link (levelcode://…) — scheme-agnostic so it survives the editor's urlProtocol rename.
+      if (!d.redirect.startsWith("/") && !/^https?:\/\//i.test(d.redirect)) {
         // Editor deep-link (custom scheme): navigating to it is a no-op if the
         // editor isn't installed on this device — arm a fallback so the button
         // doesn't freeze on "Verifying…". pagehide firing means the OS handler
