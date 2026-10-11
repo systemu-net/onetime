@@ -30,6 +30,10 @@ const FACTS = {
       title: "The agent",
       body: "It can read, search, create, edit and delete files in the open workspace. Its changes are applied at once and offered for Keep or Undo.",
     },
+    {
+      title: "A terminal for your files",
+      body: "LevelCode Shell is bash with about eighty built-in commands (grep, sed, awk, find, sort, jq, diff and more) over the files you have open. It does not run programs, so there is no Node, npm, git or Python in it. The agent runs its commands there too, and what they change is offered for Keep or Undo.",
+    },
     { title: "Your account", body: "The gateway plan and usage are the same as in the Mac app." },
     {
       title: "Your own key",
@@ -41,7 +45,12 @@ const FACTS = {
     },
   ],
 
-  staysInMacApp: ["Terminal", "Running shell commands", "MCP servers that start local processes", "Installing extensions"],
+  staysInMacApp: [
+    "Running programs: Node, npm, git, Python, test runners and builds",
+    "Background commands and dev servers",
+    "MCP servers that start local processes",
+    "Installing extensions",
+  ],
 
   folder: {
     title: "Open a folder from your computer",
