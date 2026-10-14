@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import LevelNav from "../components/LevelNav";
 // One implementation, shared with the landing page — which needs the same question answered
 // before it can decide whether a Download button is even a sensible primary action.
 import { detectMac, type Detected } from "../platform";
+import { useWebEditor } from "../useWebEditor";
 
 // Direct links to the latest published macOS builds. GitHub's /releases/latest/download/<asset>
 // alias always 302s to the newest published (non-prerelease) asset of that exact name.
@@ -16,6 +18,9 @@ const DMG = {
 
 export default function DownloadPage() {
   const [detected, setDetected] = useState<Detected>("unknown-mac");
+  // Whether there is a browser edition to point at. Nothing is drawn for it until the answer is in
+  // and is yes, so with the edition off this page is exactly what it was.
+  const webEditor = useWebEditor();
 
   useEffect(() => {
     let alive = true;
@@ -55,6 +60,18 @@ export default function DownloadPage() {
             Download for {primaryLabel} Mac
           </a>
           <p className="font-mono text-[12px] text-faint">Universal .dmg · latest release · macOS 12 Monterey or later</p>
+          {webEditor.enabled ? (
+            <p className="text-[15px] text-sub">
+              Or{" "}
+              <Link
+                to="/web"
+                className="text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:text-flame hover:decoration-flame"
+              >
+                open it in your browser
+              </Link>
+              .
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-10 lineno">all builds</div>

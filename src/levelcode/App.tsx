@@ -9,6 +9,7 @@ import PricingPage from "./pages/PricingPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import ReferralsPage from "./pages/ReferralsPage";
 import TermsPage from "./pages/TermsPage";
+import WebEditorPage from "./pages/WebEditorPage";
 
 // Client routes are relative to the /ai basename (set in main.tsx):
 //   /ai        → landing        /ai/login    → sign in
@@ -17,6 +18,8 @@ import TermsPage from "./pages/TermsPage";
 //   /ai/admin/referrals → referral funnel: clicks → signups → paid, per channel
 //   /ai/terms, /ai/privacy → legal (served publicly as levelcode.ai/terms, /privacy)
 //   /ai/download → macOS downloads (served publicly as levelcode.ai/download)
+//   /ai/web → LevelCode in your browser (served publicly as levelcode.ai/web). Says so itself
+//     when the backend has the edition switched off; see useWebEditor.
 //   /ai/docs, /ai/docs/:slug → documentation (served publicly as levelcode.ai/docs).
 //     This is the CANONICAL home of the LevelCode docs; levelcode.dev/docs redirects here.
 export default function App() {
@@ -31,6 +34,7 @@ export default function App() {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/download" element={<DownloadPage />} />
+      <Route path="/web" element={<WebEditorPage />} />
       <Route path="/docs" element={<DocsPage />} />
       <Route path="/docs/:slug" element={<DocsRoute />} />
       <Route path="*" element={<LandingPage />} />

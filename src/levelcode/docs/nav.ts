@@ -11,11 +11,18 @@
 //
 // `blurb` is a one-line summary written for BOTH humans (card subtitles) and
 // models (the llms.txt index) — make it say what the page actually answers.
+//
+// `requiresWebEditor` marks a page about something the backend can switch off (the
+// browser edition). While it is off the page is left out of the sidebar and the
+// pager at runtime, and out of public/llms.txt at build time, so it is exactly as
+// invisible as every other entry point to that feature. The page still answers at
+// its own address. Delete the flag to list it unconditionally.
 
 export type DocLink = {
   title: string;
   href: string;
   blurb: string;
+  requiresWebEditor?: boolean;
 };
 
 export type DocGroup = {
@@ -43,6 +50,13 @@ export const DOCS_NAV: DocGroup[] = [
         href: "/docs/setup",
         blurb:
           "Download and verify a build, run from source, and handle macOS first-launch prompts.",
+      },
+      {
+        title: "In your browser",
+        href: "/docs/browser",
+        blurb:
+          "Open LevelCode in a browser tab, choose a folder or a scratch workspace, and see what stays in the Mac app.",
+        requiresWebEditor: true,
       },
     ],
   },
@@ -142,15 +156,35 @@ export const DOCS_NAV: DocGroup[] = [
   },
 ];
 
-/** Flat list in sidebar order — used for prev/next and the llms.txt index. */
+/** Flat list in sidebar order, every page. Used to look a page up by its address. */
 export const DOCS_FLAT: DocLink[] = DOCS_NAV.flatMap((g) => g.items);
 
-/** The page before and after `href` in reading order, for the footer pager. */
-export function docNeighbors(href: string): { prev: DocLink | null; next: DocLink | null } {
-  const i = DOCS_FLAT.findIndex((d) => d.href === href);
+/** What the backend currently offers; pages marked `requiresWebEditor` need the first. */
+export type DocsAvailability = { webEditor: boolean };
+
+const listed = (d: DocLink, a: DocsAvailability) => !d.requiresWebEditor || a.webEditor;
+
+/** The tree as a reader should see it right now: gated pages out, and a group left empty out. */
+export function visibleDocsNav(a: DocsAvailability): DocGroup[] {
+  return DOCS_NAV.map((g) => ({ ...g, items: g.items.filter((d) => listed(d, a)) })).filter(
+    (g) => g.items.length > 0,
+  );
+}
+
+/**
+ * The page before and after `href` in reading order, for the footer pager. A gated page that is not
+ * listed neither appears as a neighbour nor has neighbours of its own: the pager steps through what
+ * the sidebar shows.
+ */
+export function docNeighbors(
+  href: string,
+  a: DocsAvailability = { webEditor: false },
+): { prev: DocLink | null; next: DocLink | null } {
+  const flat = DOCS_FLAT.filter((d) => listed(d, a));
+  const i = flat.findIndex((d) => d.href === href);
   if (i === -1) return { prev: null, next: null };
   return {
-    prev: i > 0 ? DOCS_FLAT[i - 1] : null,
-    next: i < DOCS_FLAT.length - 1 ? DOCS_FLAT[i + 1] : null,
+    prev: i > 0 ? flat[i - 1] : null,
+    next: i < flat.length - 1 ? flat[i + 1] : null,
   };
 }

@@ -5,12 +5,14 @@ import { useSession } from "../auth";
 import ClassicShell from "../components/classic/ClassicShell";
 import ContributionsHeatmap from "./ContributionsHeatmap";
 import { fmtCredits, fmtCreditAmount, toCredits, LOCALE } from "../credits";
+import { useWebEditor } from "../useWebEditor";
 
 // Usage dashboard (SPEC §8 / §3 GET /account/usage). Session-gated: redirects to
 // /ai/login when the Devise session probe comes back empty.
 export default function AccountPage() {
   const navigate = useNavigate();
   const { loading: sessionLoading, profile } = useSession();
+  const webEditor = useWebEditor();
   const [usage, setUsage] = useState<AccountUsage | null>(null);
   const [models, setModels] = useState<AccountModels | null>(null);
   const [activity, setActivity] = useState<Activity | null>(null);
@@ -109,6 +111,16 @@ export default function AccountPage() {
             {profile.email ? <p className="mt-2 font-mono text-[13px] text-[var(--c-text3)]">{profile.email}</p> : null}
           </div>
           <span className="flex flex-wrap items-center gap-4">
+            {/* Only when the browser edition is on: the same editor, opened in this tab. */}
+            {webEditor.enabled && webEditor.url ? (
+              <a
+                href={webEditor.url}
+                title="Open LevelCode in your browser"
+                className="text-[13px] text-[var(--c-accent)] hover:underline"
+              >
+                Open in browser →
+              </a>
+            ) : null}
             {/* Admin-only shortcuts into the ops surfaces (also enforced server-side). */}
             {profile.role === "admin" ? (
               <>

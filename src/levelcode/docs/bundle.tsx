@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Agent from "./agent.mdx";
 import Autocomplete from "./autocomplete.mdx";
+import Browser from "./browser.mdx";
 import Chat from "./chat.mdx";
 import Cloud from "./cloud.mdx";
 import Customization from "./customization.mdx";
@@ -30,6 +31,7 @@ const PAGES: Record<string, React.ComponentType> = {
   "": Overview,
   quickstart: Quickstart,
   setup: Setup,
+  browser: Browser,
   chat: Chat,
   agent: Agent,
   edit: Edit,
