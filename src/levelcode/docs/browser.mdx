@@ -10,7 +10,7 @@
 
 The browser edition is the real LevelCode workbench running in a tab. The explorer, editor tabs, themes, the chat panel and the agent are all there. You sign in with the same LevelCode account as the Mac app, and the gateway plan and usage are the same.
 
-A few things stay in the Mac app. The browser edition has no terminal, and the agent does not run shell commands. The [full list](#what-stays-in-the-mac-app) is below.
+The browser edition has a terminal, LevelCode Shell, that works on your files. It does not run programs, so a few things stay in the Mac app. The [full list](#what-stays-in-the-mac-app) is below.
 
 ## Open it
 
@@ -46,14 +46,24 @@ A scratch workspace is saved in your browser. It works in every modern browser, 
 
 The agent can read, search, create, edit and delete files in the open workspace. Its changes are applied at once and offered for Keep or Undo.
 
-It cannot run shell commands, and there is no terminal. Work that needs either one stays in the Mac app.
+It can also run commands in LevelCode Shell, the same terminal you can open yourself. See [LevelCode Shell](#levelcode-shell) below for what it does and does not do. Work that needs real programs stays in the Mac app.
+
+## LevelCode Shell
+
+LevelCode Shell is a terminal in the tab. It is bash (pipes, loops, functions, redirections) with about eighty built-in commands, such as `ls`, `cat`, `grep`, `sed`, `awk`, `find`, `sort`, `uniq`, `xargs`, `jq`, `diff` and `tree`. It works on the files of the open workspace.
+
+- **Open it** from the Command Palette with *LevelCode Shell: New Terminal*, or from the Terminal panel.
+- **It does not run programs.** There is no Node, npm, git, Python or compiler in it, and no network. `npm test` answers "command not found". Use it to read, search and reshape files: count TODOs, rename a batch of files, run a `sed` over several files, look at a JSON file with `jq`.
+- **The agent uses it too.** When the agent runs a command, it runs here. Files it changes are offered for Keep or Undo like any other edit. A command that would touch repository metadata or tool settings (`.git`, `.vscode`, `.github/workflows`, `AGENTS.md` and similar), a file that is not plain text, or a file you have unsaved changes in, is refused as a whole, and nothing from that command is applied.
+- **Stop it with Ctrl+C.** A command that is stopped, runs out of time or hits a limit changes nothing.
+- **The working folder and exported variables carry from one line to the next.** Functions and shell options do not.
 
 ## What stays in the Mac app
 
 These are not in the browser edition.
 
-- The terminal
-- Running shell commands
+- Running programs: Node, npm, git, Python, test runners and builds
+- Background commands and dev servers
 - MCP servers that start local processes
 - Installing extensions
 
@@ -99,14 +109,14 @@ The text you send in chat and the files you ask LevelCode to read go to the mode
     Opening a folder works in Chrome and Edge. In Safari and Firefox, use a scratch workspace.
   </Accordion>
 
-  <Accordion title="The terminal or an extension is missing">
-    The terminal, running shell commands, MCP servers that start local processes and installing extensions stay in the Mac app.
+  <Accordion title="A program or an extension is missing">
+    The terminal in the browser edition is LevelCode Shell, which does not run programs. `node`, `npm`, `git` and `python` are not in it, so a command that needs one answers "command not found". Running programs, background commands, MCP servers that start local processes and installing extensions stay in the Mac app.
   </Accordion>
 </AccordionGroup>
 
 <CardGroup>
   <Card title="Install and setup" href="/docs/setup">
-    Get the Mac app, for the terminal and everything else that stays there.
+    Get the Mac app, for real programs and everything else that stays there.
   </Card>
   <Card title="Cloud and billing" href="/docs/cloud">
     Sign in, usage, and how requests are routed.
