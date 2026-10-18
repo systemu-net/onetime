@@ -12,6 +12,7 @@
     "prebuild": "npm run gen:llms",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "node --test \"src/**/*.test.ts\"",
     "preview": "vite preview",
     "sync:thinly": "node scripts/sync-to-thinly.mjs",
     "build:thinly": "npm run build && npm run sync:thinly"
