@@ -1,7 +1,7 @@
 // node --test (npm test). `next`: which pages a sign-in may land on, and which it ignores.
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { NEXT_MAX, safeNext } from "./next.ts";
+import { NEXT_MAX, safeNext, signedInDestination, type WebEditorAnswer } from "./next.ts";
 
 describe("safeNext", () => {
   const accepted: Array<[string, string]> = [
@@ -107,4 +107,68 @@ describe("safeNext", () => {
       assert.equal(safeNext(raw), null);
     });
   }
+});
+
+describe("signedInDestination", () => {
+  const EDITOR_URL = "https://app.levelcode.example/?signin=1";
+  const ON: WebEditorAnswer = { enabled: true, url: EDITOR_URL, loading: false };
+  const OFF: WebEditorAnswer = { enabled: false, url: null, loading: false };
+  const LOADING: WebEditorAnswer = { enabled: false, url: null, loading: true };
+
+  test("an editor signing in wins over next and the browser edition", () => {
+    for (const webEditor of [ON, OFF, LOADING]) {
+      for (const next of [null, "/ai/pricing"]) {
+        assert.deepEqual(signedInDestination({ editorSigningIn: true, next, webEditor }), { kind: "editor" });
+      }
+    }
+  });
+
+  test("next wins over the browser edition, as a route under the /ai basename", () => {
+    for (const webEditor of [ON, OFF]) {
+      assert.deepEqual(signedInDestination({ editorSigningIn: false, next: "/ai/pricing?plan=pro", webEditor }), {
+        kind: "route",
+        to: "/pricing?plan=pro",
+      });
+    }
+  });
+
+  test("next does not wait for the browser edition's answer", () => {
+    assert.deepEqual(signedInDestination({ editorSigningIn: false, next: "/ai/account", webEditor: LOADING }), {
+      kind: "route",
+      to: "/account",
+    });
+  });
+
+  test("with no next, it waits for the browser edition's answer", () => {
+    assert.deepEqual(signedInDestination({ editorSigningIn: false, next: null, webEditor: LOADING }), { kind: "wait" });
+  });
+
+  test("with no next and the browser edition on, it is the editor's address as given", () => {
+    assert.deepEqual(signedInDestination({ editorSigningIn: false, next: null, webEditor: ON }), {
+      kind: "href",
+      to: EDITOR_URL,
+    });
+  });
+
+  test("with no next and the browser edition off, it is the account page", () => {
+    assert.deepEqual(signedInDestination({ editorSigningIn: false, next: null, webEditor: OFF }), {
+      kind: "route",
+      to: "/account",
+    });
+  });
+
+  test("enabled with no address counts as off", () => {
+    const webEditor = { enabled: true, url: null, loading: false };
+    assert.deepEqual(signedInDestination({ editorSigningIn: false, next: null, webEditor }), {
+      kind: "route",
+      to: "/account",
+    });
+  });
+
+  test("a next that is not valid counts as absent", () => {
+    for (const next of ["//evil.example", "https://evil.example/", "/ai/%2F%2Fevil", "/other"]) {
+      assert.deepEqual(signedInDestination({ editorSigningIn: false, next, webEditor: ON }), { kind: "href", to: EDITOR_URL }, next);
+      assert.deepEqual(signedInDestination({ editorSigningIn: false, next, webEditor: OFF }), { kind: "route", to: "/account" }, next);
+    }
+  });
 });

@@ -66,3 +66,39 @@ function isDotSegment(segment: string): boolean {
   const s = segment.replace(/%2e/gi, ".");
   return s === "." || s === "..";
 }
+
+export type WebEditorAnswer = { enabled: boolean; url: string | null; loading: boolean };
+
+export type SignedInDestination =
+  /** An editor is signing in: mint it a code (the login page's existing flow). */
+  | { kind: "editor" }
+  /** Not known yet: the browser edition's answer is still loading. */
+  | { kind: "wait" }
+  /** A page of this app, as a route relative to the /ai basename. */
+  | { kind: "route"; to: string }
+  /** The browser edition, on its own origin: a full-page navigation. */
+  | { kind: "href"; to: string };
+
+/**
+ * Where the login page sends a visitor who is ALREADY signed in, in the same order as a sign-in
+ * lands (see the top of this file). `webEditor` is useWebEditor's answer, which has already refused
+ * any address it would not link to.
+ */
+export function signedInDestination({
+  editorSigningIn,
+  next,
+  webEditor,
+}: {
+  editorSigningIn: boolean;
+  next: string | null;
+  webEditor: WebEditorAnswer;
+}): SignedInDestination {
+  if (editorSigningIn) return { kind: "editor" };
+
+  const page = safeNext(next);
+  if (page) return { kind: "route", to: page.slice(PREFIX.length - 1) };
+
+  if (webEditor.loading) return { kind: "wait" };
+  if (webEditor.enabled && webEditor.url) return { kind: "href", to: webEditor.url };
+  return { kind: "route", to: "/account" };
+}
