@@ -1,18 +1,23 @@
 import { useState } from "react";
 import { api, ApiError, navigateTo } from "../api";
 import { getAttribution } from "../attribution";
+import { verifyBody } from "../signInRequests";
 
 // Passwordless email + one-time-code sign-in (OpenRouter/Cursor style):
 //   1. enter email → POST /ai/auth/email        (Rails emails a 6-digit code)
-//   2. enter code  → POST /ai/auth/verify → { redirect }  (editor deep-link or /ai/account)
+//   2. enter code  → POST /ai/auth/verify → { redirect }
+//      (an editor signing in: its callback; otherwise where a web sign-in lands — see next.ts)
 // redirectUri + codeChallenge (from the editor) are threaded through so the
-// one-time handoff code is bound to the editor's PKCE verifier.
+// one-time handoff code is bound to the editor's PKCE verifier. `next` is the
+// page the visitor asked for; it is sent only on a web sign-in, and only when valid.
 export default function EmailSignIn({
   redirectUri,
   codeChallenge,
+  next,
 }: {
   redirectUri?: string;
   codeChallenge?: string;
+  next?: string | null;
 }) {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -40,15 +45,15 @@ export default function EmailSignIn({
     setError(null);
     try {
       const d = await api<{ redirect?: string }>("/ai/auth/verify", {
-        // attribution: first-touch campaign channel (null for organic sign-ins) so the backend can record
-        // which channel acquired a new account. Harmless if the backend doesn't consume it yet.
-        body: { email, code, redirect_uri: redirectUri, code_challenge: codeChallenge, attribution: getAttribution() },
+        body: verifyBody(email, code, { redirectUri, codeChallenge, next }, getAttribution()),
       });
       if (!d.redirect) throw new ApiError(422, "That code is invalid or has expired.");
 
-      // A path (/ai/account) → in-app navigation; an http(s) address is the browser edition's callback page
-      // (the tab simply goes there and the editor is back in it); anything else is the desktop editor's
-      // custom-scheme deep-link (levelcode://…) — scheme-agnostic so it survives the editor's urlProtocol rename.
+      // A path is a page of this site (`next`, or /ai/account). An http(s) address is the browser edition, on
+      // its own origin: its callback page when it is the editor signing in, or the editor itself (`?signin=1`)
+      // after a web sign-in while the edition is on. Either way the tab simply goes there. Anything else is the
+      // desktop editor's custom-scheme deep-link (levelcode://…) — scheme-agnostic so it survives the editor's
+      // urlProtocol rename.
       if (!d.redirect.startsWith("/") && !/^https?:\/\//i.test(d.redirect)) {
         // Editor deep-link (custom scheme): navigating to it is a no-op if the
         // editor isn't installed on this device — arm a fallback so the button
@@ -63,7 +68,7 @@ export default function EmailSignIn({
         return;
       }
 
-      navigateTo(d.redirect); // web: full-page nav to /ai/account (session cookie now set)
+      navigateTo(d.redirect); // a page of this site or the browser edition: full-page nav (session cookie now set)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "That code is invalid or has expired.");
       setBusy(false);

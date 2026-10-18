@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { API_BASE } from "../api";
 import { getAttribution } from "../attribution";
+import { oauthStartUrl, type SignInContext } from "../signInRequests";
 
 // Social sign-in for the LevelCode Cloud login: Google + GitHub.
 //
@@ -10,21 +11,16 @@ import { getAttribution } from "../attribution";
 // to open in a new tab, works without JS.
 //
 // The editor's redirect_uri + code_challenge are a PKCE PAIR, forwarded only when BOTH are present (see
-// oauthStartUrl) so a partial handoff never reaches the backend. Both providers share the exact same
-// oauth_start/oauth_callback path — the callback dispatches on the stashed provider.
-export default function ProviderSignIn({
-  redirectUri,
-  codeChallenge,
-}: {
-  redirectUri?: string;
-  codeChallenge?: string;
-}) {
+// oauthStartUrl in signInRequests.ts) so a partial handoff never reaches the backend. Both providers share
+// the exact same oauth_start/oauth_callback path — the callback dispatches on the stashed provider.
+// `next`, the page the visitor asked for, rides the link only on a web sign-in and only when valid.
+export default function ProviderSignIn(context: SignInContext) {
   return (
     <div className="flex flex-col gap-3">
-      <ProviderLink provider="google" label="Continue with Google" redirectUri={redirectUri} codeChallenge={codeChallenge}>
+      <ProviderLink provider="google" label="Continue with Google" context={context}>
         <GoogleG />
       </ProviderLink>
-      <ProviderLink provider="github" label="Continue with GitHub" redirectUri={redirectUri} codeChallenge={codeChallenge}>
+      <ProviderLink provider="github" label="Continue with GitHub" context={context}>
         <GitHubMark />
       </ProviderLink>
     </div>
@@ -34,61 +30,23 @@ export default function ProviderSignIn({
 function ProviderLink({
   provider,
   label,
-  redirectUri,
-  codeChallenge,
+  context,
   children,
 }: {
   provider: string;
   label: string;
-  redirectUri?: string;
-  codeChallenge?: string;
+  context: SignInContext;
   children: ReactNode;
 }) {
   return (
     <a
-      href={oauthStartUrl(provider, redirectUri, codeChallenge)}
+      href={oauthStartUrl(API_BASE, provider, context, getAttribution())}
       className="classic-button--quiet w-full gap-2.5"
     >
       {children}
       {label}
     </a>
   );
-}
-
-function oauthStartUrl(provider: string, redirectUri?: string, codeChallenge?: string): string {
-  const qs = new URLSearchParams();
-  // Both or neither — a lone redirect_uri has no PKCE binding and must not be forwarded (defensive; the
-  // login page already pairs them, but this component shouldn't trust its caller to).
-  if (redirectUri && codeChallenge) {
-    qs.set("redirect_uri", redirectUri);
-    qs.set("code_challenge", codeChallenge);
-  }
-  // First-touch campaign attribution. The email flow posts this in the verify body; OAuth is a top-level
-  // navigation with no body, so it rides the query string — oauth_start moves it straight into the session
-  // (like the CSRF `state`), and oauth_callback stamps it on the user IF this sign-in creates one. Without
-  // it every GitHub/Google signup is attributed to nothing, which quietly undercounts whichever channel
-  // sends the most developers.
-  //
-  // Only the fields the funnel actually uses are carried, as an explicit allowlist rather than the whole
-  // record. A query string ends up in browser history and server access logs, and `referrer` is the one
-  // attribution field that can itself be a third-party URL carrying its own query params — so it stays out
-  // of the URL entirely. Listing the fields (instead of deleting one) also means a field added to
-  // Attribution later cannot silently start appearing in logs.
-  const attribution = getAttribution();
-  if (attribution) {
-    qs.set(
-      "attribution",
-      JSON.stringify({
-        source: attribution.source,
-        params: attribution.params,
-        landing: attribution.landing,
-        ts: attribution.ts,
-      }),
-    );
-  }
-
-  const q = qs.toString();
-  return `${API_BASE}/ai/auth/oauth/${provider}${q ? `?${q}` : ""}`;
 }
 
 function GoogleG() {

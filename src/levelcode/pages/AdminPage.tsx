@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, type AdminSummary, type AdminUsers } from "../api";
 import { useSession } from "../auth";
 import ClassicShell from "../components/classic/ClassicShell";
+import { currentPage, loginRoute } from "../next";
 
 type SortKey = "input" | "output" | "requests" | "cost" | "auth_attempts" | "auth_failures" | "last_seen" | "email" | "plan";
 
@@ -25,7 +26,7 @@ export default function AdminPage() {
   // Non-admins (or signed-out) never see this surface.
   useEffect(() => {
     if (sessionLoading) return;
-    if (!profile) navigate("/login", { replace: true });
+    if (!profile) navigate(loginRoute(currentPage()), { replace: true });
     else if (!isAdmin) navigate("/account", { replace: true });
   }, [sessionLoading, profile, isAdmin, navigate]);
 

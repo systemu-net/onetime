@@ -3,6 +3,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, navigateTo } from "../api";
 import { useSession } from "../auth";
 import ClassicShell, { ChevronMark } from "../components/classic/ClassicShell";
+import { safeNext, signedInDestination } from "../next";
+import { useWebEditor } from "../useWebEditor";
 import EmailSignIn from "./EmailSignIn";
 import ProviderSignIn from "./ProviderSignIn";
 
@@ -27,10 +29,20 @@ export default function LoginPage() {
   const fromEditor = !!editorHandoff;
   // The browser edition's callback is a page in this very tab; the desktop editor's is a deep link to an app.
   const toBrowserEditor = !!editorHandoff && /^https?:\/\//i.test(editorHandoff.redirectUri);
+  // The page of this site the visitor asked for before being sent here (an auth-gated page, a checkout).
+  // Anything that is not a valid one is treated as absent, and an editor signing in ignores it.
+  const next = safeNext(params.get("next"));
 
   const { loading: sessionLoading, profile } = useSession();
+  const webEditor = useWebEditor();
   // idle: probing session / about to redirect · completing: minting an editor code · form: show sign-in.
   const [phase, setPhase] = useState<"idle" | "completing" | "form">("idle");
+
+  // Where a visitor who is already signed in goes (see next.ts). Taken apart into plain values for the
+  // effect below: while an editor is signing in they never change, so the code it mints is minted once.
+  const destination = signedInDestination({ editorSigningIn: fromEditor, next, webEditor });
+  const destinationKind = destination.kind;
+  const destinationTo = "to" in destination ? destination.to : null;
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -63,9 +75,13 @@ export default function LoginPage() {
       };
     }
 
-    // Signed in on a plain web visit → the login page is pointless; go straight to the dashboard.
-    navigate("/account", { replace: true });
-  }, [sessionLoading, profile, redirectUri, codeChallenge, navigate]);
+    // Signed in on a plain web visit → the login page is pointless. Go to the page they asked for, else to
+    // the browser edition when it is on, else to the dashboard. The browser edition is another origin: a
+    // full-page navigation that replaces this page, so Back does not land here and bounce again. Until its
+    // answer is in ("wait"), the blank frame stays.
+    if (destinationKind === "route" && destinationTo) navigate(destinationTo, { replace: true });
+    else if (destinationKind === "href" && destinationTo) window.location.replace(destinationTo);
+  }, [sessionLoading, profile, redirectUri, codeChallenge, destinationKind, destinationTo, navigate]);
 
   if (phase === "completing") {
     return (
@@ -85,8 +101,10 @@ export default function LoginPage() {
   }
 
   // Idle — probing the session, or redirecting an already-signed-in user — keep a blank frame so the
-  // sign-in form never flashes before the redirect.
-  if (phase !== "form") {
+  // sign-in form never flashes before the redirect. The form also waits for the browser edition's answer
+  // when the line under its heading depends on it (no editor signing in, no `next`).
+  const landingKnown = fromEditor || !!next || !webEditor.loading;
+  if (phase !== "form" || !landingKnown) {
     return (
       <ClassicShell>
         <main className="mx-auto flex min-h-[60vh] max-w-5xl flex-col px-5 py-24" />
@@ -108,7 +126,9 @@ export default function LoginPage() {
             <p className="mt-2 text-[15px] pretty">
               {fromEditor
                 ? "Connect the editor to your account — you'll be sent back to LevelCode when you're done."
-                : "Manage your plan, keys, and usage."}
+                : !next && webEditor.enabled
+                  ? "LevelCode opens in this tab when you're done."
+                  : "Manage your plan, keys, and usage."}
             </p>
           </div>
 
@@ -124,6 +144,7 @@ export default function LoginPage() {
             <ProviderSignIn
               redirectUri={editorHandoff?.redirectUri}
               codeChallenge={editorHandoff?.codeChallenge}
+              next={next}
             />
 
             <div className="my-5 flex items-center gap-3 text-[var(--c-text3)]" aria-hidden="true">
@@ -135,6 +156,7 @@ export default function LoginPage() {
             <EmailSignIn
               redirectUri={editorHandoff?.redirectUri}
               codeChallenge={editorHandoff?.codeChallenge}
+              next={next}
             />
           </div>
 

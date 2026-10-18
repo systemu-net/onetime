@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, type ReferralFunnel } from "../api";
 import { useSession } from "../auth";
 import ClassicShell from "../components/classic/ClassicShell";
+import { currentPage, loginRoute } from "../next";
 
 // Admin-only referral funnel: clicks -> signups -> paid, per marketing channel.
 //
@@ -70,7 +71,7 @@ export default function ReferralsPage() {
   // Non-admins (or signed-out) never see this surface. Enforced server-side too.
   useEffect(() => {
     if (sessionLoading) return;
-    if (!profile) navigate("/login", { replace: true });
+    if (!profile) navigate(loginRoute(currentPage()), { replace: true });
     else if (!isAdmin) navigate("/account", { replace: true });
   }, [sessionLoading, profile, isAdmin, navigate]);
 
