@@ -52,6 +52,29 @@ describe("oauthStartUrl", () => {
     });
     assert.equal(oauthStartUrl("", "github", {}, ATTRIBUTION).includes("linkedin.example"), false);
   });
+
+  test("a valid next rides a web sign-in", () => {
+    const q = query(oauthStartUrl("", "github", { next: "/ai/pricing?plan=pro" }, null));
+    assert.equal(q.get("next"), "/ai/pricing?plan=pro");
+  });
+
+  test("a next that is not valid is left out", () => {
+    for (const next of ["//evil.example", "/ai//x", "https://evil.example/ai/", "/ai/%2F%2Fevil", "/other/path", ""]) {
+      assert.equal(query(oauthStartUrl("", "github", { next }, null)).has("next"), false, next);
+    }
+  });
+
+  test("an editor signing in never carries next", () => {
+    const q = query(oauthStartUrl("", "github", { ...EDITOR, next: "/ai/account" }, null));
+    assert.equal(q.has("next"), false);
+    assert.equal(q.get("redirect_uri"), EDITOR.redirectUri);
+  });
+
+  test("half an editor pair is a web sign-in, so next rides it", () => {
+    const q = query(oauthStartUrl("", "github", { redirectUri: EDITOR.redirectUri, next: "/ai/account" }, null));
+    assert.equal(q.get("next"), "/ai/account");
+    assert.equal(q.has("redirect_uri"), false);
+  });
 });
 
 describe("verifyBody", () => {
@@ -69,5 +92,19 @@ describe("verifyBody", () => {
     assert.equal(body.redirect_uri, EDITOR.redirectUri);
     assert.equal(body.code_challenge, EDITOR.codeChallenge);
     assert.equal(body.attribution, null);
+  });
+
+  test("a valid next is sent on a web sign-in", () => {
+    assert.equal(verifyBody("a@example.test", "123456", { next: "/ai/account" }, null).next, "/ai/account");
+  });
+
+  test("a next that is not valid is left out", () => {
+    for (const next of ["//evil.example", "/ai//x", "javascript:alert(1)", "/ai/%2F%2Fevil", "/ai/account#x", null, undefined]) {
+      assert.equal("next" in verifyBody("a@example.test", "123456", { next }, null), false, String(next));
+    }
+  });
+
+  test("an editor signing in never sends next", () => {
+    assert.equal("next" in verifyBody("a@example.test", "123456", { ...EDITOR, next: "/ai/account" }, null), false);
   });
 });

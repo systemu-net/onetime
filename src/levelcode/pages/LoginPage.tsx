@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, navigateTo } from "../api";
 import { useSession } from "../auth";
 import ClassicShell, { ChevronMark } from "../components/classic/ClassicShell";
+import { safeNext } from "../next";
 import EmailSignIn from "./EmailSignIn";
 import ProviderSignIn from "./ProviderSignIn";
 
@@ -27,6 +28,9 @@ export default function LoginPage() {
   const fromEditor = !!editorHandoff;
   // The browser edition's callback is a page in this very tab; the desktop editor's is a deep link to an app.
   const toBrowserEditor = !!editorHandoff && /^https?:\/\//i.test(editorHandoff.redirectUri);
+  // The page of this site the visitor asked for before being sent here (an auth-gated page, a checkout).
+  // Anything that is not a valid one is treated as absent, and an editor signing in ignores it.
+  const next = safeNext(params.get("next"));
 
   const { loading: sessionLoading, profile } = useSession();
   // idle: probing session / about to redirect · completing: minting an editor code · form: show sign-in.
@@ -124,6 +128,7 @@ export default function LoginPage() {
             <ProviderSignIn
               redirectUri={editorHandoff?.redirectUri}
               codeChallenge={editorHandoff?.codeChallenge}
+              next={next}
             />
 
             <div className="my-5 flex items-center gap-3 text-[var(--c-text3)]" aria-hidden="true">
@@ -135,6 +140,7 @@ export default function LoginPage() {
             <EmailSignIn
               redirectUri={editorHandoff?.redirectUri}
               codeChallenge={editorHandoff?.codeChallenge}
+              next={next}
             />
           </div>
 

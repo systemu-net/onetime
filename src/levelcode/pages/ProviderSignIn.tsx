@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { API_BASE } from "../api";
 import { getAttribution } from "../attribution";
-import { oauthStartUrl } from "../signInRequests";
+import { oauthStartUrl, type SignInContext } from "../signInRequests";
 
 // Social sign-in for the LevelCode Cloud login: Google + GitHub.
 //
@@ -13,19 +13,14 @@ import { oauthStartUrl } from "../signInRequests";
 // The editor's redirect_uri + code_challenge are a PKCE PAIR, forwarded only when BOTH are present (see
 // oauthStartUrl in signInRequests.ts) so a partial handoff never reaches the backend. Both providers share
 // the exact same oauth_start/oauth_callback path — the callback dispatches on the stashed provider.
-export default function ProviderSignIn({
-  redirectUri,
-  codeChallenge,
-}: {
-  redirectUri?: string;
-  codeChallenge?: string;
-}) {
+// `next`, the page the visitor asked for, rides the link only on a web sign-in and only when valid.
+export default function ProviderSignIn(context: SignInContext) {
   return (
     <div className="flex flex-col gap-3">
-      <ProviderLink provider="google" label="Continue with Google" redirectUri={redirectUri} codeChallenge={codeChallenge}>
+      <ProviderLink provider="google" label="Continue with Google" context={context}>
         <GoogleG />
       </ProviderLink>
-      <ProviderLink provider="github" label="Continue with GitHub" redirectUri={redirectUri} codeChallenge={codeChallenge}>
+      <ProviderLink provider="github" label="Continue with GitHub" context={context}>
         <GitHubMark />
       </ProviderLink>
     </div>
@@ -35,19 +30,17 @@ export default function ProviderSignIn({
 function ProviderLink({
   provider,
   label,
-  redirectUri,
-  codeChallenge,
+  context,
   children,
 }: {
   provider: string;
   label: string;
-  redirectUri?: string;
-  codeChallenge?: string;
+  context: SignInContext;
   children: ReactNode;
 }) {
   return (
     <a
-      href={oauthStartUrl(API_BASE, provider, { redirectUri, codeChallenge }, getAttribution())}
+      href={oauthStartUrl(API_BASE, provider, context, getAttribution())}
       className="classic-button--quiet w-full gap-2.5"
     >
       {children}
