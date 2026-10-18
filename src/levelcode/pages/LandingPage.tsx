@@ -206,7 +206,7 @@ export default function LandingPage() {
                 {isMac ? (
                   <PrimaryAction isMac profile={profile} fullWidth />
                 ) : (
-                  // Signing in does not get anyone the editor, so on a device that cannot run it
+                  // Signing in does not install the editor, so on a device that cannot run the Mac app
                   // this card points at how to get started rather than repeating the hero's action.
                   <Link to="/docs/quickstart" className="lp-cta lp-cta--quiet w-full">
                     Read the quickstart

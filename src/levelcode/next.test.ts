@@ -1,7 +1,7 @@
 // node --test (npm test). `next`: which pages a sign-in may land on, and which it ignores.
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { NEXT_MAX, safeNext, signedInDestination, type WebEditorAnswer } from "./next.ts";
+import { loginRoute, NEXT_MAX, safeNext, signedInDestination, type WebEditorAnswer } from "./next.ts";
 
 describe("safeNext", () => {
   const accepted: Array<[string, string]> = [
@@ -107,6 +107,30 @@ describe("safeNext", () => {
       assert.equal(safeNext(raw), null);
     });
   }
+});
+
+describe("loginRoute", () => {
+  /** The `next` the login page will read from a route loginRoute built. */
+  const nextOf = (route: string) => new URL(route, "https://levelcode.ai/ai/").searchParams.get("next");
+
+  test("a plain sign-in carries no next", () => {
+    assert.equal(loginRoute(), "/login");
+    assert.equal(loginRoute(null), "/login");
+  });
+
+  test("a page comes back to the login page exactly as it went in", () => {
+    for (const page of ["/ai/account", "/ai/pricing?plan=pro", "/ai/admin/referrals", "/ai/account?checkout=changed&x=1"]) {
+      const route = loginRoute(page);
+      assert.ok(route.startsWith("/login?next="), route);
+      assert.equal(nextOf(route), page);
+    }
+  });
+
+  test("a page that is not a valid next is dropped", () => {
+    for (const page of ["/ai/", "/ai//x", "/ai/%2F%2Fevil", "/ai/account#billing", "/web", ""]) {
+      assert.equal(loginRoute(page), "/login", page);
+    }
+  });
 });
 
 describe("signedInDestination", () => {

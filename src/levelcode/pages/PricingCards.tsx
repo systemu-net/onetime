@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError, navigateTo, type PricingTier } from "../api";
+import { currentPage, loginRoute } from "../next";
 
 // 4-card grid. Checkout goes through /ai/checkout (CSRF-protected, session-authed).
 // tier.key IS the Stripe lookup_key (server truth) — send it verbatim. The server
@@ -32,7 +33,9 @@ export default function PricingCards({
   async function checkout(tier: PricingTier) {
     setErr(null);
     if (!authed) {
-      navigate("/login");
+      // Sign in, then back to these plans to choose one. Nothing is bought on the way back: the visitor
+      // presses the button again (a link must never be able to start a checkout or a plan change).
+      navigate(loginRoute(currentPage()));
       return;
     }
     setBusy(tier.key);

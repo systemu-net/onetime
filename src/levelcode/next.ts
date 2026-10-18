@@ -67,6 +67,21 @@ function isDotSegment(segment: string): boolean {
   return s === "." || s === "..";
 }
 
+/** The page the visitor is on now, as a `next` would name it (`/ai/account?checkout=changed`). */
+export function currentPage(): string {
+  return window.location.pathname + window.location.search;
+}
+
+/**
+ * The sign-in page's route (relative to the router's /ai basename), bringing the visitor back to
+ * `page` afterwards. A `page` that is not a valid `next` is dropped, and the visitor lands wherever
+ * any sign-in does. Leave `page` out for a plain "Sign in".
+ */
+export function loginRoute(page?: string | null): string {
+  const next = safeNext(page);
+  return next ? `/login?${new URLSearchParams({ next })}` : "/login";
+}
+
 export type WebEditorAnswer = { enabled: boolean; url: string | null; loading: boolean };
 
 export type SignedInDestination =

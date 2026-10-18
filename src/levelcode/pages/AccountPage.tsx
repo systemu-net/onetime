@@ -5,10 +5,12 @@ import { useSession } from "../auth";
 import ClassicShell from "../components/classic/ClassicShell";
 import ContributionsHeatmap from "./ContributionsHeatmap";
 import { fmtCredits, fmtCreditAmount, toCredits, LOCALE } from "../credits";
+import { currentPage, loginRoute } from "../next";
 import { useWebEditor } from "../useWebEditor";
 
 // Usage dashboard (SPEC §8 / §3 GET /account/usage). Session-gated: redirects to
-// /ai/login when the Devise session probe comes back empty.
+// /ai/login when the Devise session probe comes back empty, with `next` naming this
+// page so the sign-in comes back here.
 export default function AccountPage() {
   const navigate = useNavigate();
   const { loading: sessionLoading, profile } = useSession();
@@ -20,7 +22,7 @@ export default function AccountPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionLoading && !profile) navigate("/login", { replace: true });
+    if (!sessionLoading && !profile) navigate(loginRoute(currentPage()), { replace: true });
   }, [sessionLoading, profile, navigate]);
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function AccountPage() {
     } catch {
       /* ignore — clear locally regardless */
     }
-    navigate("/login", { replace: true });
+    navigate("/login", { replace: true }); // a plain sign-in page: no `next` back to the account just left
   }
 
   // While the session resolves (or is absent, pre-redirect), keep the frame.
