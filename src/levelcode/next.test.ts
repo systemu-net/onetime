@@ -17,6 +17,8 @@ describe("safeNext", () => {
     ["/ai/pricing?next=/ai/account", "a single slash inside the query"],
     ["/ai/%252F%252Fevil.example", "double-encoded: a literal path under /ai/; nothing after /ai/ can make it start //"],
     ["/ai/" + "a".repeat(NEXT_MAX - 4), "exactly the longest"],
+    ["/ai/csrfx", "a name that starts like an endpoint's is not that endpoint"],
+    ["/ai/docs/auth", "an endpoint's name further down is a page's"],
   ];
   for (const [raw, why] of accepted) {
     test(`takes ${JSON.stringify(raw.length > 40 ? raw.slice(0, 40) + "…" : raw)}: ${why}`, () => {
@@ -74,10 +76,22 @@ describe("safeNext", () => {
     ["/ai/%2E%2E/account", "an encoded parent segment, upper case"],
     ["/ai/.%2e/account", "half encoded"],
     ["/ai/%2e/account", "an encoded current segment"],
-    // The server's own endpoints: not pages
+    // The server's own endpoints: not pages — in every spelling its router answers
     ["/ai/auth/handoff?code=x", "the editor's account hand-off"],
     ["/ai/auth/oauth/github", "an OAuth start"],
     ["/ai/csrf", "the CSRF token endpoint"],
+    ["/ai/csrf.json", "the endpoint with a format suffix (Rails routes take one)"],
+    ["/ai/csrf/", "the endpoint with a trailing slash"],
+    ["/ai/csrf?x=1", "the endpoint with a query"],
+    ["/ai/%63srf", "the endpoint with an encoded letter"],
+    ["/ai/CSRF", "the endpoint in capitals"],
+    ["/ai/auth.json/handoff", "auth with a format suffix"],
+    ["/ai/%61uth/handoff?code=x", "auth with an encoded letter"],
+    ["/ai/checkout%A9", "an endpoint's name before an escape that does not decode"],
+    ["/ai/authorize_editor", "a POST endpoint"],
+    ["/ai/checkout", "a POST endpoint"],
+    ["/ai/billing", "a POST endpoint"],
+    ["/ai/signout", "a POST endpoint"],
     // Fragments
     ["/ai/account#billing", "a fragment"],
     ["/ai/account#", "an empty fragment"],
