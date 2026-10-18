@@ -74,6 +74,10 @@ describe("safeNext", () => {
     ["/ai/%2E%2E/account", "an encoded parent segment, upper case"],
     ["/ai/.%2e/account", "half encoded"],
     ["/ai/%2e/account", "an encoded current segment"],
+    // The server's own endpoints: not pages
+    ["/ai/auth/handoff?code=x", "the editor's account hand-off"],
+    ["/ai/auth/oauth/github", "an OAuth start"],
+    ["/ai/csrf", "the CSRF token endpoint"],
     // Fragments
     ["/ai/account#billing", "a fragment"],
     ["/ai/account#", "an empty fragment"],

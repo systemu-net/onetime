@@ -35,7 +35,8 @@ const ENCODED_SEPARATOR = /%2f|%5c/i;
  *   - a character RFC 3986 does not allow unescaped (`<`, `"`, `|`, non-ASCII, …) or a broken `%` escape;
  *   - a percent-encoded slash or backslash (`%2F`, `%5C`, any case);
  *   - a dot segment, plain or percent-encoded (`/ai/../x`, `/ai/%2e%2e/x`): a browser resolves both,
- *     and the page would no longer be the one under /ai/ that was checked.
+ *     and the page would no longer be the one under /ai/ that was checked;
+ *   - the server's own endpoints, /ai/auth/… and /ai/csrf: they are not pages (the backend refuses them too).
  * A double-encoded value such as `/ai/%252F` is accepted: it is a literal path under /ai/, and since
  * the value must begin with the literal `/ai/`, no decoding of what follows can make it start `//`.
  */
@@ -48,6 +49,7 @@ export function safeNext(raw: unknown): string | null {
 
   const path = raw.split("?", 1)[0];
   if (path.split("/").some((segment) => isDotSegment(segment))) return null;
+  if (path.startsWith("/ai/auth/") || path === "/ai/csrf") return null;
 
   // The contract's own words: parsed against this site, it stays on this site, under /ai/. The rules above
   // already make that so (a literal /ai/ prefix, no //, backslash or dot segment); this guards them.
